@@ -2,7 +2,7 @@
   "name": "InstaLanding.ai",
   "url": "https://instalanding.ai",
   "license": "MIT",
-  "count": 20,
+  "count": 23,
   "pages": [
     {
       "slug": "radiating-rings-hero-page",
@@ -1210,6 +1210,149 @@
       },
       "liveDemo": "https://instalanding.ai/demos/marquee-wall.html",
       "page": "https://instalanding.ai/prompt/skewed-marquee-wall"
+    },
+    {
+      "slug": "aurora-borealis",
+      "title": "Aurora Borealis",
+      "description": "Three blurred, screen-blended gradient ribbons drift and skew over near-black, like northern lights in blush, cream, and rose",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "dark-mode hero backgrounds",
+        "creative portfolio pages",
+        "ambient section backdrops"
+      ],
+      "style": [
+        "dark",
+        "gradient",
+        "ambient",
+        "glow",
+        "atmospheric",
+        "css-animation"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [
+          "Space Grotesk"
+        ],
+        "features": [
+          "css-animation",
+          "screen-blend",
+          "reduced-motion"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Aurora Borealis — Forever Components",
+          "href": "https://forevercomponents.com/components/backgrounds/aurora-borealis/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "pages/aurora-borealis/index.html",
+        "prompt": "pages/aurora-borealis/PROMPT.md",
+        "preview": "pages/aurora-borealis/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/backgrounds/aurora-borealis/"
+    },
+    {
+      "slug": "boids-flocking",
+      "title": "Boids Flocking",
+      "description": "Up to 60 lime-green triangular boids flock with alignment, cohesion, and separation, fleeing the cursor on a dark canvas",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "ambient hero backgrounds",
+        "generative art demos",
+        "organic crowd motion"
+      ],
+      "style": [
+        "dark",
+        "canvas",
+        "particles",
+        "simulation",
+        "pointer-interactive"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas-2d",
+          "pointer-events",
+          "reduced-motion",
+          "light-theme-tokens"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Boids Flocking — Forever Components",
+          "href": "https://forevercomponents.com/components/particles-physics/boids-flocking/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "pages/boids-flocking/index.html",
+        "prompt": "pages/boids-flocking/PROMPT.md",
+        "preview": "pages/boids-flocking/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/particles-physics/boids-flocking/"
+    },
+    {
+      "slug": "vapor-condense",
+      "title": "Vapor Condense",
+      "description": "300 teal particles drift as a glowing haze, then condense into the crisp word VAPOR via cosine easing, then dissolve back",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "dark-mode hero headlines",
+        "brand reveals",
+        "loading sequences"
+      ],
+      "style": [
+        "dark",
+        "kinetic-type",
+        "particles",
+        "canvas",
+        "generative"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas-2d",
+          "keyboard-activation",
+          "reduced-motion",
+          "light-theme-tokens"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Vapor Condense — Forever Components",
+          "href": "https://forevercomponents.com/components/kinetic-type/vapor-condense/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "pages/vapor-condense/index.html",
+        "prompt": "pages/vapor-condense/PROMPT.md",
+        "preview": "pages/vapor-condense/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/kinetic-type/vapor-condense/"
     }
   ]
 }
