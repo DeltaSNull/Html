@@ -1,0 +1,174 @@
+<!doctype html>
+<!--
+  INSTALANDING.AI · Boids Flocking
+  slug     boids-flocking
+  page     https://forevercomponents.com/components/particles-physics/boids-flocking/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    :root custom properties (dark defaults; [data-theme="light"] overrides): --c08-bg,
+            --c08-cap / --c08-cap-o (caption), --c08-fade (per-frame trail wash, must match bg),
+            --c08-s / --c08-l (boid hsl saturation/lightness)
+  sections  stage — full-viewport demo; the flocking canvas (#c08-canvas)
+  scripts   one inline IIFE: boids simulation (alignment/cohesion/separation + cursor flee),
+            DPR-aware canvas sizing, theme hook (?theme= / forever:theme postMessage),
+            visibilitychange pause, prefers-reduced-motion single static frame,
+            demo-v1 preview lifecycle (window.__foreverPreview)
+  assets    none: canvas-drawn triangles, ui-monospace caption
+
+  ADAPTING
+  - Safe to edit: boid count cap (Math.min(60, ...)), max speed (maxS=2.6), hue range
+    (h: 90+Math.random()*60), flee radius (pd<90), trail fade alpha (0.28), neighbor radius
+    (R=34), theme tokens. The forever-agent-meta JSON in <head> lists everything.
+  - Keep intact: DPR-aware sizing, visibilitychange pause/play, reduced-motion guard,
+    toroidal wrap-around boundary, the theme hook, and the demo-v1 preview lifecycle.
+  - O(n^2) neighbor search: keep the count cap near 60 on low-end mobile.
+  - The canvas paints its own background every frame via --c08-fade; if you re-theme,
+    the fade wash must match the new background or trails smear the wrong color.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="forever-preview-lifecycle" content="demo-v1">
+<meta name="description" content="A swarm of lime-green triangular boids flocks with alignment, cohesion and separation, fleeing the cursor on a dark canvas.">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Boids Flocking</title>
+<script>
+/* theme hook: the canvas loads the tile with ?theme=light|dark (or stamps data-theme on <html>).
+Runs before first paint — no dark flash. Standalone default stays dark. */
+(function(){var t=new URLSearchParams(location.search).get('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);})();
+</script>
+<style>
+/* theme tokens — dark values are the defaults (solid-dark-bg contract);
+the light re-theme is the [data-theme="light"] block. --c08-fade is the per-frame
+trail wash (must match the page bg) and --c08-s/--c08-l the boid hsl(). */
+:root{
+--c08-bg:#0a0e0a;--c08-cap:#a3e635;--c08-cap-o:.5;
+--c08-fade:rgba(10,14,10,0.28);--c08-s:80;--c08-l:62;
+}
+:root[data-theme="light"]{
+--c08-bg:#eff3ee;--c08-cap:#50780f;--c08-cap-o:.6;
+--c08-fade:rgba(239,243,238,0.28);--c08-s:65;--c08-l:28;
+}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--c08-bg)}
+#c08-canvas{display:block;width:100%;height:100%}
+.cap{position:fixed;right:8px;bottom:7px;font:600 10px/1 ui-monospace,Menlo,monospace;
+color:var(--c08-cap);opacity:var(--c08-cap-o);letter-spacing:.08em;text-transform:uppercase;user-select:none}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+"file":"infinite/particles-physics/08-boids-flocking.html",
+"title":"Boids Flocking",
+"description":"Up to 60 lime-green triangular boids flock using alignment, cohesion, and separation rules; they flee the cursor on a dark canvas with motion-trail fade.",
+"useWhen":"Ambient hero backgrounds, generative art demos, or any dark-theme context needing organic crowd motion.",
+"avoidWhen":"Light backgrounds (hardcoded dark fill). Low-end mobile — O(n²) neighbor loop scales poorly above ~60 boids.",
+"agentPrompt":"Change boid color to electric blue (set h to 200 and adjust hsl saturation), increase max speed from maxS=2.6 to 3.5, and raise boid count cap from 60 to 100. Theme: dark tokens live in :root, the light variant in :root[data-theme=\"light\"]; ?theme=light or a {type:'forever:theme'} postMessage switches at runtime.",
+"editableAreas":[
+"boid count cap (Math.min(60, ...))",
+"max speed (maxS=2.6)",
+"hue range (h: 90+Math.random()*60)",
+"flee radius from pointer (pd<90)",
+"trail fade opacity (rgba alpha 0.28)",
+"neighbor radius (R=34)",
+"theme tokens (:root dark defaults + [data-theme=light] overrides)"
+],
+"preserveElements":[
+"DPR-aware canvas sizing",
+"visibilitychange pause/play",
+"prefers-reduced-motion guard (single static frame)",
+"toroidal wrap-around boundary",
+"theme hook (?theme= bootstrap + forever:theme message listener + theme tokens)",
+"demo-v1 preview lifecycle: initialize demoEnabled from window.__foreverPreview and stop attract work on the window forever:interactive event; retain manual feedback, settling, cleanup and explicit sessions"
+],
+"knownLimitations":[
+"O(n²) neighbor search — scales poorly above ~80 boids on low-end devices",
+"No reduced-motion fallback beyond a single static step (boids still drawn but don't animate)",
+"Light re-theme via the [data-theme=light] token block; catalog bg/accent describe the dark default",
+"State remains local to each mounted instance; format/theme remount preserves takeover, not component values."
+],
+"tier":"curated",
+"labels":[
+"mobile-ready",
+"accessible",
+"copy-paste-safe",
+"minimal-deps",
+"animation-heavy",
+"light-ready"
+],
+"tags":[
+"boids",
+"flocking",
+"particles",
+"canvas",
+"simulation",
+"pointer",
+"swarm"
+]
+}
+</script>
+</head>
+<body>
+<div data-section="stage">
+<canvas id="c08-canvas" class="c08-root"></canvas>
+<div class="cap">Boids Flocking</div>
+</div>
+<script>
+(function(){
+let demoEnabled=window.__foreverPreview?.demoEnabled!==false,sessionActive=false,takenOver=window.__foreverPreview?.interactive===true;
+function stopDemo(){if(!takenOver){sessionActive=false;takenOver=true;}demoEnabled=false;}
+addEventListener('forever:interactive',stopDemo);
+document.addEventListener('pointerdown',stopDemo,{capture:true});document.addEventListener('click',stopDemo,{capture:true});document.addEventListener('keydown',e=>{if(e.key!=='Tab')stopDemo();},{capture:true});
+
+const cv=document.getElementById('c08-canvas'),x=cv.getContext('2d');
+let W,H,DPR,b=[],reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const root=document.documentElement;
+let FADE='rgba(10,14,10,0.28)',BS=80,BL=62;   // trail wash + boid hsl saturation/lightness
+function syncTheme(){const cs=getComputedStyle(root);
+FADE=cs.getPropertyValue('--c08-fade').trim();
+BS=parseFloat(cs.getPropertyValue('--c08-s'));BL=parseFloat(cs.getPropertyValue('--c08-l'));}
+// live re-theme: the canvas broadcasts {type:'forever:theme',theme:'light'|'dark'}
+addEventListener('message',e=>{const d=e.data;
+if(d&&d.type==='forever:theme'&&(d.theme==='light'||d.theme==='dark')){root.setAttribute('data-theme',d.theme);syncTheme();}});
+syncTheme();
+function size(){DPR=Math.min(2,devicePixelRatio||1);W=cv.clientWidth;H=cv.clientHeight;
+cv.width=W*DPR;cv.height=H*DPR;x.setTransform(DPR,0,0,DPR,0,0);init();}
+function init(){b=[];const n=Math.min(60,Math.round(W*H/4200));
+for(let i=0;i<n;i++)b.push({x:Math.random()*W,y:Math.random()*H,
+vx:(Math.random()-0.5)*2,vy:(Math.random()-0.5)*2,h:90+Math.random()*60});}
+addEventListener('resize',size);size();
+let pointer={x:-999,y:-999,flee:false};
+cv.addEventListener('pointermove',e=>{const r=cv.getBoundingClientRect();pointer.x=e.clientX-r.left;pointer.y=e.clientY-r.top;});
+cv.addEventListener('pointerleave',()=>{pointer.x=-999;pointer.y=-999;});
+const R=34,Rs=18,maxS=2.6;
+function step(){
+x.fillStyle=FADE;x.fillRect(0,0,W,H);
+for(const o of b){
+let ax=0,ay=0,cx=0,cy=0,sx=0,sy=0,n=0;
+for(const p of b){if(p===o)continue;const dx=p.x-o.x,dy=p.y-o.y,d=Math.hypot(dx,dy);
+if(d<R){ax+=p.vx;ay+=p.vy;cx+=p.x;cy+=p.y;n++;if(d<Rs&&d>0){sx-=dx/d;sy-=dy/d;}}}
+if(n){o.vx+=((ax/n)-o.vx)*0.04;o.vy+=((ay/n)-o.vy)*0.04;
+o.vx+=((cx/n)-o.x)*0.0009;o.vy+=((cy/n)-o.y)*0.0009;}
+o.vx+=sx*0.05;o.vy+=sy*0.05;
+const pdx=o.x-pointer.x,pdy=o.y-pointer.y,pd=Math.hypot(pdx,pdy);
+if(pd<90&&pd>0){o.vx+=pdx/pd*0.5;o.vy+=pdy/pd*0.5;}
+const sp=Math.hypot(o.vx,o.vy);if(sp>maxS){o.vx*=maxS/sp;o.vy*=maxS/sp;}
+o.x+=o.vx;o.y+=o.vy;
+if(o.x<0)o.x+=W;if(o.x>W)o.x-=W;if(o.y<0)o.y+=H;if(o.y>H)o.y-=H;
+const a=Math.atan2(o.vy,o.vx);
+x.save();x.translate(o.x,o.y);x.rotate(a);
+x.fillStyle='hsl('+o.h+','+BS+'%,'+BL+'%)';
+x.beginPath();x.moveTo(5,0);x.lineTo(-3,3);x.lineTo(-3,-3);x.closePath();x.fill();
+x.restore();
+}
+}
+let raf=0;function loop(){raf=0;if(document.hidden)return;step();if(!reduce&&(demoEnabled||(sessionActive)))play();}
+function play(){if(!raf&&!document.hidden){if(reduce){step();return;}raf=requestAnimationFrame(loop);}}
+function stop(){cancelAnimationFrame(raf);raf=0;}
+document.addEventListener('visibilitychange',()=>document.hidden?stop():play());
+['pointerdown','pointermove','pointerleave','click'].forEach(type=>cv.addEventListener(type,()=>{sessionActive=true;play();}));
+play();
+})();
+</script>
+</body>
+</html>

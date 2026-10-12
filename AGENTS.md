@@ -1,26 +1,31 @@
 # AGENTS.md
 
-Instructions for coding agents using this repository to build or restyle a landing page.
+Instructions for coding agents using this repository to build or restyle a landing page, or to reuse a component.
 
 ## What is here
 
-`pages/<slug>/` holds one complete landing page per folder:
+`pages/<slug>/` holds one complete landing page per folder; `components/<slug>/` holds one
+self-contained component (a single animated asset, not a full page) per folder. Both use the
+same folder layout:
 
 - `index.html` — the reference build. One file, every asset inlined, opens from disk, no build step.
 - `PROMPT.md` — the one-shot brief it was built from: stack, design values as numbers, structure,
   and the things that break.
-- `README.md` — what the page is best for, its style, sections, stack and credits.
+- `README.md` — what the page or component is best for, its style, sections, stack and credits.
 
-`index.json` lists all of them with the same metadata. Read it first; it is small.
+`index.json` lists all of them with the same metadata: landing pages under `pages`, components
+under `components`, with per-kind counts in `counts`. Read it first; it is small.
 
 ## The loop
 
-1. **Choose.** Match the user's request against `bestFor` and `style` in `index.json`. Shortlist two
-   or three and read their `README.md` files, not their HTML.
+1. **Choose.** Match the user's request against `bestFor` and `style` in `index.json`, looking in
+   both `pages` and `components`. Shortlist two or three and read their `README.md` files,
+   not their HTML.
 2. **Decide how to use it.**
    - The user has a framework (React, Vue, Svelte, Astro, …): build from `PROMPT.md` in that
      framework. This gives cleaner code than translating a 100 KB file.
    - The user wants this exact page, fast: copy `index.html` and adapt it.
+   - The user wants a component: lift it by its `data-section` attribute (see below).
 3. **Before editing an `index.html`,** read its header comment (the first ~30 lines). It maps the
    design tokens (`:root` custom properties), the `data-section` names in order, what each script
    does, and lists what breaks when edited naively.

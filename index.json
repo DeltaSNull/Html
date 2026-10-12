@@ -2,7 +2,10 @@
   "name": "InstaLanding.ai",
   "url": "https://instalanding.ai",
   "license": "MIT",
-  "count": 23,
+  "counts": {
+    "pages": 20,
+    "components": 3
+  },
   "pages": [
     {
       "slug": "radiating-rings-hero-page",
@@ -409,7 +412,7 @@
       },
       "credits": [
         {
-          "label": "Animated Button — Uiverse",
+          "label": "Animated Button \u2014 Uiverse",
           "href": "https://uiverse.io/",
           "note": "The morphing pill the button set is adapted from, by ryota1231"
         }
@@ -777,7 +780,7 @@
       },
       "credits": [
         {
-          "label": "Uiverse — fancy button by cssbuttons-io",
+          "label": "Uiverse \u2014 fancy button by cssbuttons-io",
           "href": "https://uiverse.io/",
           "note": "The broken-frame button the page's buttons and cards are built from."
         }
@@ -1025,7 +1028,7 @@
       },
       "credits": [
         {
-          "label": "Fire Button — Rive Marketplace",
+          "label": "Fire Button \u2014 Rive Marketplace",
           "href": "https://rive.app/marketplace/3703-7734-fire-button/",
           "note": "The community .riv the first version of this component was built around; the flame here is drawn in code instead"
         }
@@ -1147,7 +1150,7 @@
       },
       "credits": [
         {
-          "label": "Uiverse — generate button by dexter-st",
+          "label": "Uiverse \u2014 generate button by dexter-st",
           "href": "https://uiverse.io/",
           "note": "The glossy button the page's accent and lighting are built from."
         }
@@ -1210,7 +1213,9 @@
       },
       "liveDemo": "https://instalanding.ai/demos/marquee-wall.html",
       "page": "https://instalanding.ai/prompt/skewed-marquee-wall"
-    },
+    }
+  ],
+  "components": [
     {
       "slug": "aurora-borealis",
       "title": "Aurora Borealis",
@@ -1248,15 +1253,15 @@
       },
       "credits": [
         {
-          "label": "Aurora Borealis — Forever Components",
+          "label": "Aurora Borealis \u2014 Forever Components",
           "href": "https://forevercomponents.com/components/backgrounds/aurora-borealis/",
           "note": "The component this demo is adapted from."
         }
       ],
       "files": {
-        "html": "pages/aurora-borealis/index.html",
-        "prompt": "pages/aurora-borealis/PROMPT.md",
-        "preview": "pages/aurora-borealis/preview.jpg"
+        "html": "components/aurora-borealis/index.html",
+        "prompt": "components/aurora-borealis/PROMPT.md",
+        "preview": "components/aurora-borealis/preview.jpg"
       },
       "page": "https://forevercomponents.com/components/backgrounds/aurora-borealis/"
     },
@@ -1295,15 +1300,15 @@
       },
       "credits": [
         {
-          "label": "Boids Flocking — Forever Components",
+          "label": "Boids Flocking \u2014 Forever Components",
           "href": "https://forevercomponents.com/components/particles-physics/boids-flocking/",
           "note": "The component this demo is adapted from."
         }
       ],
       "files": {
-        "html": "pages/boids-flocking/index.html",
-        "prompt": "pages/boids-flocking/PROMPT.md",
-        "preview": "pages/boids-flocking/preview.jpg"
+        "html": "components/boids-flocking/index.html",
+        "prompt": "components/boids-flocking/PROMPT.md",
+        "preview": "components/boids-flocking/preview.jpg"
       },
       "page": "https://forevercomponents.com/components/particles-physics/boids-flocking/"
     },
@@ -1342,15 +1347,15 @@
       },
       "credits": [
         {
-          "label": "Vapor Condense — Forever Components",
+          "label": "Vapor Condense \u2014 Forever Components",
           "href": "https://forevercomponents.com/components/kinetic-type/vapor-condense/",
           "note": "The component this demo is adapted from."
         }
       ],
       "files": {
-        "html": "pages/vapor-condense/index.html",
-        "prompt": "pages/vapor-condense/PROMPT.md",
-        "preview": "pages/vapor-condense/preview.jpg"
+        "html": "components/vapor-condense/index.html",
+        "prompt": "components/vapor-condense/PROMPT.md",
+        "preview": "components/vapor-condense/preview.jpg"
       },
       "page": "https://forevercomponents.com/components/kinetic-type/vapor-condense/"
     }
