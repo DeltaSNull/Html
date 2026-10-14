@@ -4,7 +4,7 @@
   "license": "MIT",
   "counts": {
     "pages": 20,
-    "components": 3
+    "components": 9
   },
   "pages": [
     {
@@ -412,7 +412,7 @@
       },
       "credits": [
         {
-          "label": "Animated Button \u2014 Uiverse",
+          "label": "Animated Button — Uiverse",
           "href": "https://uiverse.io/",
           "note": "The morphing pill the button set is adapted from, by ryota1231"
         }
@@ -780,7 +780,7 @@
       },
       "credits": [
         {
-          "label": "Uiverse \u2014 fancy button by cssbuttons-io",
+          "label": "Uiverse — fancy button by cssbuttons-io",
           "href": "https://uiverse.io/",
           "note": "The broken-frame button the page's buttons and cards are built from."
         }
@@ -1028,7 +1028,7 @@
       },
       "credits": [
         {
-          "label": "Fire Button \u2014 Rive Marketplace",
+          "label": "Fire Button — Rive Marketplace",
           "href": "https://rive.app/marketplace/3703-7734-fire-button/",
           "note": "The community .riv the first version of this component was built around; the flame here is drawn in code instead"
         }
@@ -1150,7 +1150,7 @@
       },
       "credits": [
         {
-          "label": "Uiverse \u2014 generate button by dexter-st",
+          "label": "Uiverse — generate button by dexter-st",
           "href": "https://uiverse.io/",
           "note": "The glossy button the page's accent and lighting are built from."
         }
@@ -1253,7 +1253,7 @@
       },
       "credits": [
         {
-          "label": "Aurora Borealis \u2014 Forever Components",
+          "label": "Aurora Borealis — Forever Components",
           "href": "https://forevercomponents.com/components/backgrounds/aurora-borealis/",
           "note": "The component this demo is adapted from."
         }
@@ -1300,7 +1300,7 @@
       },
       "credits": [
         {
-          "label": "Boids Flocking \u2014 Forever Components",
+          "label": "Boids Flocking — Forever Components",
           "href": "https://forevercomponents.com/components/particles-physics/boids-flocking/",
           "note": "The component this demo is adapted from."
         }
@@ -1347,7 +1347,7 @@
       },
       "credits": [
         {
-          "label": "Vapor Condense \u2014 Forever Components",
+          "label": "Vapor Condense — Forever Components",
           "href": "https://forevercomponents.com/components/kinetic-type/vapor-condense/",
           "note": "The component this demo is adapted from."
         }
@@ -1358,6 +1358,293 @@
         "preview": "components/vapor-condense/preview.jpg"
       },
       "page": "https://forevercomponents.com/components/kinetic-type/vapor-condense/"
+    },
+    {
+      "slug": "magnetic-button",
+      "title": "Magnetic Button",
+      "description": "Dark pill button drifts in an idle orbital float; cursor proximity pulls it magnetically with a label inner-parallax and emerald-to-copper glow on hover",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "cta buttons on dark hero sections",
+        "landing pages where tactile interactivity signals quality"
+      ],
+      "style": [
+        "dark",
+        "button",
+        "magnetic",
+        "hover-glow",
+        "pointer-interactive"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [
+          "Space Grotesk"
+        ],
+        "features": [
+          "pointer-events",
+          "raf-animation",
+          "reduced-motion",
+          "light-ready"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Magnetic Button — Forever Components",
+          "href": "https://forevercomponents.com/components/buttons/magnetic-button/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/magnetic-button/index.html",
+        "prompt": "components/magnetic-button/PROMPT.md",
+        "preview": "components/magnetic-button/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/buttons/magnetic-button/"
+    },
+    {
+      "slug": "perlin-flow-field",
+      "title": "Perlin Flow-Field",
+      "description": "100 peach-gold particles stream along a value-noise flow field on dark charcoal, deflecting around the cursor with motion-trail fade",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "dark-mode hero backgrounds",
+        "generative art demos",
+        "ambient looping canvases"
+      ],
+      "style": [
+        "dark",
+        "canvas",
+        "particles",
+        "generative",
+        "noise",
+        "pointer-interactive"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas-2d",
+          "pointer-events",
+          "reduced-motion",
+          "light-ready"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Perlin Flow-Field — Forever Components",
+          "href": "https://forevercomponents.com/components/generative-geometry/flow-field/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/perlin-flow-field/index.html",
+        "prompt": "components/perlin-flow-field/PROMPT.md",
+        "preview": "components/perlin-flow-field/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/generative-geometry/flow-field/"
+    },
+    {
+      "slug": "black-hole-accretion-swirl",
+      "title": "Black-hole Accretion Swirl",
+      "description": "110 heat-colored particles spiral inward across a tilted accretion disk toward a glowing event horizon; pointer movement boosts swirl speed",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "dark-mode hero backgrounds",
+        "space / sci-fi themes",
+        "ambient loading screens"
+      ],
+      "style": [
+        "dark",
+        "canvas",
+        "particles",
+        "spiral",
+        "space",
+        "pointer-interactive"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas-2d",
+          "pointer-events",
+          "reduced-motion"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Black-hole Accretion Swirl — Forever Components",
+          "href": "https://forevercomponents.com/components/cosmic-space/black-hole-accretion-swirl/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/black-hole-accretion-swirl/index.html",
+        "prompt": "components/black-hole-accretion-swirl/PROMPT.md",
+        "preview": "components/black-hole-accretion-swirl/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/cosmic-space/black-hole-accretion-swirl/"
+    },
+    {
+      "slug": "scramble-decode",
+      "title": "Scramble Decode",
+      "description": "Gold monospace text resolves from scrambling glyphs left-to-right with a tracking caret, holds with micro-flickers, then re-scrambles through a 6-phrase loop",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "terminal-style hero text reveals",
+        "loading screens",
+        "hacker-aesthetic landing sections"
+      ],
+      "style": [
+        "dark",
+        "typography",
+        "glitch",
+        "canvas",
+        "loop",
+        "monospace"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas-2d",
+          "reduced-motion",
+          "light-ready"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Scramble Decode — Forever Components",
+          "href": "https://forevercomponents.com/components/text-effects/scramble-decode/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/scramble-decode/index.html",
+        "prompt": "components/scramble-decode/PROMPT.md",
+        "preview": "components/scramble-decode/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/text-effects/scramble-decode/"
+    },
+    {
+      "slug": "slime-mold-network",
+      "title": "Slime Mold Network",
+      "description": "Up to 6000 agents simulate Physarum slime-mold behavior, self-organizing into glowing purple radial veins on a dark canvas; the cursor attracts nearby agents",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "dark-mode hero backgrounds",
+        "generative art demos",
+        "science or biology themed sections"
+      ],
+      "style": [
+        "dark",
+        "canvas",
+        "particles",
+        "simulation",
+        "generative",
+        "organic",
+        "pointer-interactive"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas-2d",
+          "pointer-events",
+          "reduced-motion",
+          "light-ready"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Slime Mold Network — Forever Components",
+          "href": "https://forevercomponents.com/components/organic-nature/slime-mold-network/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/slime-mold-network/index.html",
+        "prompt": "components/slime-mold-network/PROMPT.md",
+        "preview": "components/slime-mold-network/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/organic-nature/slime-mold-network/"
+    },
+    {
+      "slug": "plasma-sine-field",
+      "title": "Plasma Sine Field",
+      "description": "Demoscene plasma of five interfering sine waves rendered low-res and upscaled for a molten blur; the palette cycles through cyan, magenta, and violet",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "retro hero backgrounds",
+        "dark creative portfolios",
+        "ambient screensaver loops"
+      ],
+      "style": [
+        "dark",
+        "canvas",
+        "plasma",
+        "retro",
+        "generative",
+        "color-cycling",
+        "pointer-interactive"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas-2d",
+          "pointer-events",
+          "reduced-motion"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Plasma Sine Field — Forever Components",
+          "href": "https://forevercomponents.com/components/retro-glitch/plasma-sine-field/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/plasma-sine-field/index.html",
+        "prompt": "components/plasma-sine-field/PROMPT.md",
+        "preview": "components/plasma-sine-field/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/retro-glitch/plasma-sine-field/"
     }
   ]
 }
