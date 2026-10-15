@@ -4,7 +4,7 @@
   "license": "MIT",
   "counts": {
     "pages": 20,
-    "components": 9
+    "components": 12
   },
   "pages": [
     {
@@ -412,7 +412,7 @@
       },
       "credits": [
         {
-          "label": "Animated Button — Uiverse",
+          "label": "Animated Button \u2014 Uiverse",
           "href": "https://uiverse.io/",
           "note": "The morphing pill the button set is adapted from, by ryota1231"
         }
@@ -780,7 +780,7 @@
       },
       "credits": [
         {
-          "label": "Uiverse — fancy button by cssbuttons-io",
+          "label": "Uiverse \u2014 fancy button by cssbuttons-io",
           "href": "https://uiverse.io/",
           "note": "The broken-frame button the page's buttons and cards are built from."
         }
@@ -1028,7 +1028,7 @@
       },
       "credits": [
         {
-          "label": "Fire Button — Rive Marketplace",
+          "label": "Fire Button \u2014 Rive Marketplace",
           "href": "https://rive.app/marketplace/3703-7734-fire-button/",
           "note": "The community .riv the first version of this component was built around; the flame here is drawn in code instead"
         }
@@ -1150,7 +1150,7 @@
       },
       "credits": [
         {
-          "label": "Uiverse — generate button by dexter-st",
+          "label": "Uiverse \u2014 generate button by dexter-st",
           "href": "https://uiverse.io/",
           "note": "The glossy button the page's accent and lighting are built from."
         }
@@ -1253,7 +1253,7 @@
       },
       "credits": [
         {
-          "label": "Aurora Borealis — Forever Components",
+          "label": "Aurora Borealis \u2014 Forever Components",
           "href": "https://forevercomponents.com/components/backgrounds/aurora-borealis/",
           "note": "The component this demo is adapted from."
         }
@@ -1300,7 +1300,7 @@
       },
       "credits": [
         {
-          "label": "Boids Flocking — Forever Components",
+          "label": "Boids Flocking \u2014 Forever Components",
           "href": "https://forevercomponents.com/components/particles-physics/boids-flocking/",
           "note": "The component this demo is adapted from."
         }
@@ -1347,7 +1347,7 @@
       },
       "credits": [
         {
-          "label": "Vapor Condense — Forever Components",
+          "label": "Vapor Condense \u2014 Forever Components",
           "href": "https://forevercomponents.com/components/kinetic-type/vapor-condense/",
           "note": "The component this demo is adapted from."
         }
@@ -1395,7 +1395,7 @@
       },
       "credits": [
         {
-          "label": "Magnetic Button — Forever Components",
+          "label": "Magnetic Button \u2014 Forever Components",
           "href": "https://forevercomponents.com/components/buttons/magnetic-button/",
           "note": "The component this demo is adapted from."
         }
@@ -1443,7 +1443,7 @@
       },
       "credits": [
         {
-          "label": "Perlin Flow-Field — Forever Components",
+          "label": "Perlin Flow-Field \u2014 Forever Components",
           "href": "https://forevercomponents.com/components/generative-geometry/flow-field/",
           "note": "The component this demo is adapted from."
         }
@@ -1490,7 +1490,7 @@
       },
       "credits": [
         {
-          "label": "Black-hole Accretion Swirl — Forever Components",
+          "label": "Black-hole Accretion Swirl \u2014 Forever Components",
           "href": "https://forevercomponents.com/components/cosmic-space/black-hole-accretion-swirl/",
           "note": "The component this demo is adapted from."
         }
@@ -1537,7 +1537,7 @@
       },
       "credits": [
         {
-          "label": "Scramble Decode — Forever Components",
+          "label": "Scramble Decode \u2014 Forever Components",
           "href": "https://forevercomponents.com/components/text-effects/scramble-decode/",
           "note": "The component this demo is adapted from."
         }
@@ -1586,7 +1586,7 @@
       },
       "credits": [
         {
-          "label": "Slime Mold Network — Forever Components",
+          "label": "Slime Mold Network \u2014 Forever Components",
           "href": "https://forevercomponents.com/components/organic-nature/slime-mold-network/",
           "note": "The component this demo is adapted from."
         }
@@ -1634,7 +1634,7 @@
       },
       "credits": [
         {
-          "label": "Plasma Sine Field — Forever Components",
+          "label": "Plasma Sine Field \u2014 Forever Components",
           "href": "https://forevercomponents.com/components/retro-glitch/plasma-sine-field/",
           "note": "The component this demo is adapted from."
         }
@@ -1645,6 +1645,152 @@
         "preview": "components/plasma-sine-field/preview.jpg"
       },
       "page": "https://forevercomponents.com/components/retro-glitch/plasma-sine-field/"
+    },
+    {
+      "slug": "radial-spectrum",
+      "title": "Radial Spectrum",
+      "description": "96 cyan radial bars radiate from a bass-driven pulsing core around a slowly rotating ring; synthetic signal by default, live mic input on click",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "music/audio hero backgrounds",
+        "podcast or live-audio UIs",
+        "ambient screensavers"
+      ],
+      "style": [
+        "dark",
+        "canvas",
+        "audio",
+        "radial",
+        "visualizer",
+        "cyan glow"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas-2d",
+          "raf-loop",
+          "web-audio",
+          "reduced-motion"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Radial Spectrum \u2014 Forever Components",
+          "href": "https://forevercomponents.com/components/audio-visualizers/radial-spectrum/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/radial-spectrum/index.html",
+        "prompt": "components/radial-spectrum/PROMPT.md",
+        "preview": "components/radial-spectrum/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/audio-visualizers/radial-spectrum/"
+    },
+    {
+      "slug": "candlestick-ticker",
+      "title": "Candlestick Ticker",
+      "description": "22 green/red candlesticks scroll left continuously on procedurally generated OHLC data, with a dashed last-price line and a live price label",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "finance dashboards",
+        "trading UI mockups",
+        "ambient data-viz backgrounds for fintech"
+      ],
+      "style": [
+        "dark",
+        "canvas",
+        "data-viz",
+        "finance",
+        "scrolling"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas-2d",
+          "raf-loop",
+          "reduced-motion"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Candlestick Ticker \u2014 Forever Components",
+          "href": "https://forevercomponents.com/components/micro-dataviz/candlestick-ticker/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/candlestick-ticker/index.html",
+        "prompt": "components/candlestick-ticker/PROMPT.md",
+        "preview": "components/candlestick-ticker/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/micro-dataviz/candlestick-ticker/"
+    },
+    {
+      "slug": "tilt-parallax",
+      "title": "3D Tilt Parallax",
+      "description": "Dark card tilts in 3D toward the cursor while badge, orb and text layers float at distinct Z-depths; radial shine tracks the pointer",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "product cards",
+        "profile cards",
+        "hero feature panels"
+      ],
+      "style": [
+        "dark",
+        "3d",
+        "card",
+        "pointer",
+        "shine",
+        "depth"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [
+          "Space Grotesk",
+          "Inter"
+        ],
+        "features": [
+          "css-3d",
+          "pointer-parallax",
+          "theme-switch",
+          "reduced-motion",
+          "light-ready"
+        ]
+      },
+      "credits": [
+        {
+          "label": "3D Tilt Parallax \u2014 Forever Components",
+          "href": "https://forevercomponents.com/components/cards/tilt-parallax/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/tilt-parallax/index.html",
+        "prompt": "components/tilt-parallax/PROMPT.md",
+        "preview": "components/tilt-parallax/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/cards/tilt-parallax/"
     }
   ]
 }

@@ -1,0 +1,206 @@
+<!doctype html>
+<!--
+  INSTALANDING.AI · Candlestick Ticker
+  slug     candlestick-ticker
+  page     https://forevercomponents.com/components/micro-dataviz/candlestick-ticker/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    UP='#22c55e' / DN='#ef4444' (up/down candle colors); N=22 candles;
+            scroll speed acc/1100 threshold; price volatility (random spread *7);
+            canvas padding padL/padR as W fractions; ui-monospace type; dark
+            ground #0a0f0d hardcoded
+  sections  stage — full-viewport demo: 22 green/red candlesticks scrolling left
+            with grid, dashed last-price line, live price label chip, MDV·OHLC
+            prefix chip; caption (bottom-left)
+  scripts   one inline IIFE: random OHLC data generation (init/pushCandle),
+            DPR-aware canvas resize with setTransform, rAF scroll loop,
+            visibilitychange pause guard, prefers-reduced-motion freeze
+            (shift=0 branch), pointerdown resets the chart (init), demo-v1
+            preview lifecycle (window.__foreverPreview; forever:interactive /
+            keydown stop the attract loop), pagehide stop
+  assets    none: pure canvas 2D; system monospace fonts only
+
+  ADAPTING
+  - Safe to edit: candle count (N=22), scroll speed (acc/1100 threshold),
+    up/down colors (UP, DN), price volatility (random spread *7), label prefix
+    text, canvas padding (padL/padR). The
+    <script type="application/json" id="forever-agent-meta"> block lists editable
+    areas, elements to preserve, and known limitations — read it before changing
+    things.
+  - Keep intact: DPR-aware canvas resize, the visibilitychange pause guard, the
+    prefers-reduced-motion freeze branch, the IIFE wrapper.
+  - Background is hardcoded near-black (#0a0f0d); edit the body background to change.
+  - Prices are procedurally generated, normalized 0–100 — not real market data.
+  - Pointerdown resets the whole chart (init()); that is deliberate, not a bug.
+-->
+<html lang="en"><head><meta charset="utf-8">
+<meta name="description" content="Candlesticks scroll left; dashed last-price line with live label updates in real time.">
+<meta name="forever-preview-lifecycle" content="demo-v1">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Candlestick Ticker</title>
+<style>
+html,body{margin:0;height:100%;overflow:hidden}
+body{background:#0a0f0d;display:grid;place-items:center}
+#mdv03-c{display:block;width:100%;height:100%}
+.mdv03-stage{position:fixed;inset:0}
+.cap{position:fixed;left:10px;bottom:8px;font:600 10px/1 ui-monospace,Menlo,monospace;color:#9fb8ad;opacity:.45;letter-spacing:.08em;text-transform:uppercase;user-select:none}
+</style><script type="application/json" id="forever-agent-meta">
+{
+ "file": "infinite/micro-dataviz/03-candlestick-ticker.html",
+ "title": "Candlestick Ticker",
+ "description": "22 green/red candlesticks scroll left continuously, generating random OHLC data; a dashed last-price line with live label updates in real time.",
+ "useWhen": "Finance dashboards, trading UI mockups, ambient data-viz backgrounds for fintech products.",
+ "avoidWhen": "Contexts needing real data — all prices are procedurally generated. Not suitable where motion competes with dense text content.",
+ "agentPrompt": "Change UP color to '#00cfff' and DN color to '#ff9500', increase candle count to 30 (N=30), and slow scroll speed by changing 1100 to 1800. Theme: dark tokens live in :root, the light variant in :root[data-theme=\"light\"]; ?theme=light or a {type:'forever:theme'} postMessage switches at runtime.",
+ "agentPrompt2": "Keep the candlestick logic, colors and theme tokens unchanged; only replace the draw() candle renderer with a smooth area-line series of the same data.",
+ "editableAreas": [
+  "candle count (N=22)",
+  "scroll speed (acc/1100 threshold)",
+  "up/down colors (UP, DN constants)",
+  "price volatility (random spread *7)",
+  "label text (prefix)",
+  "canvas padding (padL/padR as W fraction)",
+  "theme tokens (:root dark defaults + [data-theme=light] overrides)"
+ ],
+ "preserveElements": [
+  "DPR-aware canvas resize",
+  "visibilitychange pause guard",
+  "prefers-reduced-motion freeze (shift=0 branch)",
+  "IIFE wrapper",
+  "theme hook (?theme= bootstrap + forever:theme message listener + theme tokens)"
+ ],
+ "knownLimitations": [
+  "Price scale is normalized 0–100 internally — not real market data",
+  "Pointerdown resets chart entirely (init()) which may surprise users expecting click-to-pause",
+  "Background color hardcoded to #0a0f0d in CSS",
+  "theme bootstrap checks URLSearchParams + postMessage; no MutationObserver on <html> class",
+  "no accessibility announcements for price updates",
+  "resize() is re-invoked on theme change; canvas internal size only resets on window resize"
+ ],
+ "tier": "curated",
+ "labels": [
+  "agent-ready",
+  "easy-to-modify",
+  "mobile-ready",
+  "accessible",
+  "copy-paste-safe",
+  "minimal-deps"
+ ],
+ "tags": [
+  "candlestick",
+  "stock",
+  "chart",
+  "finance",
+  "scrolling",
+  "canvas",
+  "data-viz"
+ ]
+}
+</script>
+</head><body>
+<div class="mdv03-stage" data-section="stage"><canvas id="mdv03-c" role="img" aria-label="Candlestick price ticker"></canvas></div>
+<div class="cap">Candlestick Ticker</div>
+<script>(function(){
+var cv=document.getElementById('mdv03-c'),x=cv.getContext('2d');
+var reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+var W=0,H=0,dpr=1;
+var N=22;                                   // candle count
+var UP='#22c55e',DN='#ef4444';              // up / down colors
+var data=[],shift=0,last=50;
+var acc=0,lastT=0,raf=0,running=false;
+var demoEnabled=window.__foreverPreview?window.__foreverPreview.demoEnabled!==false:true;
+
+function resize(){
+  dpr=Math.min(2,window.devicePixelRatio||1);
+  var w=Math.max(1,cv.clientWidth),h=Math.max(1,cv.clientHeight);
+  W=w;H=h;cv.width=w*dpr|0;cv.height=h*dpr|0;
+  x.setTransform(dpr,0,0,dpr,0,0);
+}
+window.addEventListener('resize',resize);resize();
+
+function rnd(a,b){return a+Math.random()*(b-a);}
+
+function init(){
+  data=[];var p=50;
+  for(var i=0;i<N+2;i++){
+    var o=p,drift=rnd(-7,7),c=o+drift;
+    var hi=Math.max(o,c)+rnd(0,4),lo=Math.min(o,c)-rnd(0,4);
+    data.push({o:o,h:hi,l:lo,c:c});
+    p=c;
+  }
+  last=data[data.length-1].c;shift=0;acc=0;lastT=0;
+}
+
+function pushCandle(){
+  var prev=data[data.length-1].c;
+  var o=prev,drift=rnd(-7,7),c=o+drift;
+  var hi=Math.max(o,c)+rnd(0,4),lo=Math.min(o,c)-rnd(0,4);
+  data.push({o:o,h:hi,l:lo,c:c});
+  if(data.length>N+2)data.shift();
+  last=c;
+}
+
+function frame(){
+  var padL=W*0.08,padR=W*0.14,padT=H*0.12,padB=H*0.18;
+  var iw=W-padL-padR,ih=H-padT-padB;
+  var cw=iw/N;
+  var y=function(v){return padT+ih-(v/100)*ih;};
+  x.clearRect(0,0,W,H);
+  // grid
+  x.strokeStyle='rgba(159,184,173,0.08)';x.lineWidth=1;
+  for(var g=0;g<=4;g++){var gy=padT+ih*g/4;x.beginPath();x.moveTo(padL,gy);x.lineTo(W-padR,gy);x.stroke();}
+  // candles
+  for(var i=0;i<data.length;i++){
+    var d=data[i],cxp=padL+cw*(i+0.5)-shift;
+    var up=d.c>=d.o,col=up?UP:DN;
+    var bw=Math.max(2,cw*0.55);
+    x.strokeStyle=col;x.fillStyle=col;x.lineWidth=Math.max(1,cw*0.12);
+    x.shadowColor='rgba(0,0,0,0.35)';x.shadowBlur=6;
+    x.beginPath();x.moveTo(cxp,y(d.h));x.lineTo(cxp,y(d.l));x.stroke();
+    var yo=y(d.o),yc=y(d.c);
+    x.shadowBlur=0;
+    x.fillRect(cxp-bw/2,Math.min(yo,yc),bw,Math.max(2,Math.abs(yc-yo)));
+  }
+  x.shadowBlur=0;
+  // last-price dashed line
+  var ly=y(last);
+  x.setLineDash([5,4]);x.strokeStyle='rgba(240,248,245,0.55)';x.lineWidth=1;
+  x.beginPath();x.moveTo(padL,ly);x.lineTo(W-padR,ly);x.stroke();x.setLineDash([]);
+  // live label
+  var label='₿ '+(42000+last*310).toFixed(0);
+  x.font='600 11px ui-monospace,Menlo,monospace';
+  var tw=x.measureText(label).width;
+  x.fillStyle='rgba(10,15,13,0.85)';
+  var lx=W-padR+6,lyy=ly-9;
+  x.fillRect(lx-4,lyy-2,tw+8,16);
+  x.strokeStyle='rgba(240,248,245,0.25)';x.strokeRect(lx-4,lyy-2,tw+8,16);
+  x.fillStyle='#f0f8f5';x.fillText(label,lx,lyy+10);
+  // prefix chip
+  x.fillStyle='rgba(159,184,173,0.5)';x.font='600 9px ui-monospace,Menlo,monospace';
+  x.fillText('MDV·OHLC',padL,padT-6);
+}
+
+function loop(t){
+  if(!running)return;
+  if(!demoEnabled){running=false;raf=0;return;}
+  var dt=Math.min(50,t-(lastT||t));lastT=t;
+  if(!reduce){acc+=dt;var step=acc/1100;
+    if(step>=1){var n=Math.floor(step);for(var k=0;k<n;k++)pushCandle();acc-=n*1100;shift=0;}
+    else shift=(acc/1100)* (W*0.08+ (W- (W*0.08+W*0.14))/N);
+  }
+  frame();raf=requestAnimationFrame(loop);
+}
+function start(){if(!running&&!reduce&&demoEnabled){running=true;lastT=0;raf=requestAnimationFrame(loop);}}
+function stop(){running=false;if(raf)cancelAnimationFrame(raf);raf=0;}
+function stopDemo(){demoEnabled=false;stop();}
+window.addEventListener('forever:interactive',stopDemo);
+document.addEventListener('pointerdown',function(){init();if(!reduce)start();},{capture:true});
+document.addEventListener('keydown',function(e){if(e.key!=='Tab'&&!e.metaKey&&!e.ctrlKey&&!e.altKey)stopDemo();},{capture:true});
+function vis(){if(document.hidden)stop();else if(demoEnabled)start();}
+document.addEventListener('visibilitychange',vis);
+window.addEventListener('pagehide',stop,{once:true});
+
+init();frame();start();
+})();</script>
+</body></html>

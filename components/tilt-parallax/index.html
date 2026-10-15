@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<!--
+  INSTALANDING.AI · 3D Tilt Parallax
+  slug     tilt-parallax
+  page     https://forevercomponents.com/components/cards/tilt-parallax/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    :root custom properties (dark defaults; [data-theme="light"]
+            overrides): --bg-800 / --bg-surface / --text-0 / --text-2,
+            --accent-iris / --accent-cyan / --accent-magenta,
+            --grad-iris-cyan, --border-mid, --r-md / --r-pill, --glow-cyan,
+            --shadow-lift, --font-display (Space Grotesk) / --font-body (Inter),
+            --ease-out-soft, --dur-base; effect params --c01-rx/--c01-ry,
+            --c01-mx/--c01-my, --c01-shine
+  sections  stage — full-viewport demo, perspective 1100px; the card (.c01-tilt)
+            with badge / orb / bar / title / sub layers at distinct Z-depths,
+            plate with pointer-tracking radial shine; caption (bottom-left)
+  scripts   theme hook before first paint (?theme=light|dark; a
+            {type:'forever:theme'} postMessage switches at runtime); one inline
+            IIFE: pointermove/pointerdown tilt toward cursor (max 14deg) with
+            fast-transition .c01-tilt--live class, idle auto-rotate rAF loop
+            until first deliberate input, keyboard arrow-key tilt, prefers-
+            reduced-motion guard, visibilitychange stop/start, demo-v1 preview
+            lifecycle (window.__foreverPreview; forever:interactive /
+            pointerdown / click / keydown stop the attract loop and never resume)
+  assets    Google Fonts stylesheet (Space Grotesk + Inter); everything else
+            pure CSS
+
+  ADAPTING
+  - Safe to edit: max tilt angle (max=14), auto-rotate speed (t+=0.012), accent
+    colors (--accent-iris, --accent-cyan, --accent-magenta), layer Z-depth
+    translateZ values, shine opacity and spread (rgba 0.28, 45%), theme tokens.
+    The <script type="application/json" id="forever-agent-meta"> block lists
+    editable areas, elements to preserve, and known limitations — read it before
+    changing things.
+  - Keep intact: the IIFE wrapper, the prefers-reduced-motion guard, the
+    visibilitychange stop/start, the c01-tilt--live class for fast transition
+    on hover, the theme hook, and the demo-v1 preview lifecycle.
+  - Dark is the standalone default; ?theme=light or the forever:theme message
+    switches to the light token set. Light-ready, but the demo opens dark.
+  - Card size is vmin-based; it can read small on landscape mobile viewports.
+-->
+<html lang="en">
+<head>
+<meta name="forever-preview-lifecycle" content="demo-v1">
+<meta charset="UTF-8">
+<meta name="description" content="Dark card that tilts in 3D toward the cursor while badge, orb and text layers float at distinct Z-depths. A radial shine tracks the pointer; auto-rotates until first deliberate input.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>3D Tilt Parallax</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+<script>
+/* theme hook: the canvas loads the tile with ?theme=light|dark (or stamps data-theme on <html>).
+   Runs before first paint — no dark flash. Standalone default stays dark. */
+(function(){var t=new URLSearchParams(location.search).get('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);})();
+</script>
+
+<style>
+/* theme tokens — dark values are the defaults (solid-dark-bg contract);
+   the light re-theme is the [data-theme="light"] block */
+:root{
+  --bg-800:#0d0f16; --bg-surface:#1c2030;
+  --text-0:#f4f6fb; --text-2:#8a91a8;
+  --accent-iris:#E8B0B5; --accent-cyan:#D8C197; --accent-magenta:#BCA9AB;
+  --grad-iris-cyan:linear-gradient(120deg,var(--accent-iris),var(--accent-cyan));
+  --border-mid:rgba(255,255,255,0.12); --r-md:14px; --r-pill:999px;
+  --glow-cyan:0 0 32px -6px rgba(216,193,151,0.5);
+  --shadow-lift:0 18px 50px -24px rgba(0,0,0,0.9);
+  --font-display:"Space Grotesk",system-ui,sans-serif;
+  --font-body:"Inter",system-ui,sans-serif;
+  --ease-out-soft:cubic-bezier(0.22,1,0.36,1); --ease-linear:linear; --dur-base:280ms;
+  --c01-page-a:#12141d; --c01-page-b:#08090d;
+  --c01-plate-glow:rgba(232,176,181,0.35);
+  --c01-orb-fade:rgba(188,169,171,0.1); --c01-orb-glow:rgba(188,169,171,0.6);
+  --c01-bar:rgba(255,255,255,0.14);
+}
+:root[data-theme="light"]{
+  --bg-800:#eef0f5; --bg-surface:#ffffff;
+  --text-0:#1b2130; --text-2:#666e89;
+  --accent-iris:#c73d4a; --accent-cyan:#896b33; --accent-magenta:#a18789;
+  --border-mid:rgba(20,24,38,0.12);
+  --glow-cyan:0 0 24px -6px rgba(137,107,51,0.35);
+  --shadow-lift:0 18px 40px -24px rgba(20,24,38,0.28);
+  --c01-page-a:#eef1f6; --c01-page-b:#f2f4f8;
+  --c01-plate-glow:rgba(199,61,74,0.14);
+  --c01-orb-fade:rgba(161,135,137,0.08); --c01-orb-glow:rgba(161,135,137,0.4);
+  --c01-bar:rgba(20,24,38,0.14);
+}
+
+*,*::before,*::after{box-sizing:border-box;}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--c01-page-b);}
+html,body{background:radial-gradient(80% 70% at 50% 30%,var(--c01-page-a),var(--c01-page-b));
+  font-family:var(--font-body);}
+#c01-stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  perspective:1100px;}
+.c01-tilt{position:relative;width:46vmin;height:59vmin;max-width:230px;max-height:296px;
+  border-radius:var(--r-md);transform-style:preserve-3d;
+  transform:rotateX(var(--c01-rx,0deg)) rotateY(var(--c01-ry,0deg));
+  transition:transform var(--dur-base) var(--ease-out-soft);cursor:pointer;}
+.c01-tilt.c01-tilt--live{transition:transform 90ms var(--ease-linear);}
+.c01-tilt__plate{position:absolute;inset:0;border-radius:var(--r-md);
+  background:radial-gradient(120% 120% at 30% 20%,var(--c01-plate-glow),transparent 55%),
+  linear-gradient(160deg,var(--bg-surface),var(--bg-800));
+  border:1px solid var(--border-mid);box-shadow:var(--shadow-lift);overflow:hidden;}
+.c01-tilt__shine{position:absolute;inset:0;
+  background:radial-gradient(circle at var(--c01-mx,50%) var(--c01-my,50%),
+  rgba(255,255,255,0.28),transparent 45%);
+  opacity:var(--c01-shine,0);transition:opacity var(--dur-base) var(--ease-out-soft);
+  mix-blend-mode:screen;}
+.c01-tilt__layer{position:absolute;transform-style:preserve-3d;}
+.c01-tilt__badge{top:18px;left:18px;width:38px;height:38px;border-radius:11px;
+  background:var(--grad-iris-cyan);box-shadow:var(--glow-cyan);transform:translateZ(60px);}
+.c01-tilt__orb{top:60px;right:24px;width:56px;height:56px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,var(--accent-magenta),var(--c01-orb-fade));
+  box-shadow:0 0 24px -2px var(--c01-orb-glow);transform:translateZ(95px);}
+.c01-tilt__bar{left:22px;right:22px;bottom:64px;height:8px;border-radius:var(--r-pill);
+  background:var(--c01-bar);transform:translateZ(40px);}
+.c01-tilt__title{left:22px;bottom:28px;font-family:var(--font-display);font-size:15px;
+  font-weight:600;color:var(--text-0);letter-spacing:-0.01em;transform:translateZ(55px);}
+.c01-tilt__sub{left:22px;bottom:14px;font-size:12px;color:var(--text-2);
+  transform:translateZ(45px);}
+.cap{position:fixed;left:10px;bottom:8px;color:var(--accent-iris);opacity:.4;
+  font-family:var(--font-body);font-size:11px;letter-spacing:.08em;text-transform:uppercase;}
+@media (prefers-reduced-motion:reduce){.c01-tilt{transition-duration:.001ms;}}
+.c01-tilt:focus-visible{outline:2px solid var(--text-0);outline-offset:4px;}
+</style>
+
+<script type="application/json" id="forever-agent-meta">
+{
+ "file": "infinite/cards/01-tilt-parallax.html",
+ "title": "3D Tilt Parallax",
+ "description": "Dark card tilts in 3D toward the cursor; badge, orb, and text layers float at distinct Z-depths. A radial shine tracks the pointer; auto-rotates until first deliberate input.",
+ "useWhen": "Product cards, profile cards, hero feature panels — anywhere a premium tactile feel rewards hover interaction.",
+ "avoidWhen": "Touch-only mobile UIs where pointermove is absent; content-dense layouts where 3D tilt distracts from surrounding text.",
+ "agentPrompt": "Adjust the existing palette tokens and effect parameters while preserving manual control. First deliberate input stops idle demo work while manual feedback finishes. Keep demo-v1 lifecycle marker, __foreverPreview.demoEnabled initialization and forever:interactive handler. Preserve reduced motion, visibility suspension and theme switching.",
+ "editableAreas": [
+  "max tilt angle (max=14)",
+  "auto-rotate speed (t+=0.012)",
+  "accent colors (--accent-iris, --accent-cyan, --accent-magenta)",
+  "layer Z-depth translateZ values",
+  "shine opacity and spread (rgba 0.28, 45%)",
+  "theme tokens (:root dark defaults + [data-theme=light] overrides)"
+ ],
+ "preserveElements": [
+  "IIFE wrapper",
+  "prefers-reduced-motion guard",
+  "visibilitychange stop/start",
+  "c01-tilt--live class for fast transition on hover",
+  "theme hook (?theme= bootstrap + forever:theme message listener + theme tokens)",
+  "sticky demo-v1 preview lifecycle; stop attract work, retain manual feedback and settling",
+  "pointer/touch takeover, keyboard access and visibility suspension",
+  "demo-v1 preview lifecycle: initialize demoEnabled from window.__foreverPreview and stop attract work on the window forever:interactive event; retain manual feedback, settling, cleanup and explicit sessions"
+ ],
+ "knownLimitations": [
+  "Shine effect uses CSS custom properties — requires modern browser; no fallback for IE/older Safari",
+  "Card size is vmin-based so may appear small on landscape mobile viewports",
+  "Control state is local to each mount; format changes preserve preview takeover but create a fresh source instance.",
+  "State remains local to each mounted instance; format/theme remount preserves takeover, not component values."
+ ],
+ "tier": "curated",
+ "labels": [
+  "agent-ready",
+  "easy-to-modify",
+  "mobile-ready",
+  "accessible",
+  "copy-paste-safe",
+  "minimal-deps",
+  "light-ready"
+ ],
+ "tags": [
+  "card",
+  "tilt",
+  "parallax",
+  "3d",
+  "pointer",
+  "shine",
+  "depth"
+ ]
+}
+</script>
+</head>
+<body>
+<div id="c01-stage" data-section="stage">
+  <div class="c01-tilt" tabindex="0" aria-label="3D tilt parallax card">
+    <div class="c01-tilt__plate"><div class="c01-tilt__shine"></div></div>
+    <div class="c01-tilt__layer c01-tilt__badge"></div>
+    <div class="c01-tilt__layer c01-tilt__orb"></div>
+    <div class="c01-tilt__layer c01-tilt__bar"></div>
+    <div class="c01-tilt__layer c01-tilt__title">Parallax</div>
+    <div class="c01-tilt__layer c01-tilt__sub">Layered along Z</div>
+  </div>
+</div>
+<div class="cap">3D Tilt Parallax</div>
+
+<script>
+(function(){
+"use strict";
+var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+var card=document.querySelector(".c01-tilt");
+var max=14, hovering=false, raf=0, t=0;
+function apply(px,py){
+card.style.setProperty("--c01-ry",((px-0.5)*max*2).toFixed(2)+"deg");
+card.style.setProperty("--c01-rx",((0.5-py)*max*2).toFixed(2)+"deg");
+card.style.setProperty("--c01-mx",(px*100).toFixed(1)+"%");
+card.style.setProperty("--c01-my",(py*100).toFixed(1)+"%");
+}
+function point(e){
+hovering=true;
+var r=card.getBoundingClientRect();
+card.classList.add("c01-tilt--live");
+card.style.setProperty("--c01-shine","1");
+apply((e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height);
+}
+card.addEventListener("pointermove",point);
+card.addEventListener("pointerdown",point);
+card.addEventListener("pointerleave",function(){
+hovering=false;card.classList.remove("c01-tilt--live");
+card.style.setProperty("--c01-shine","0");
+});
+var demoEnabled=window.__foreverPreview?.demoEnabled!==false;
+function stopDemo(){demoEnabled=false;stop();}
+addEventListener("forever:interactive",stopDemo);
+document.addEventListener("pointerdown",stopDemo,{capture:true});
+document.addEventListener("click",stopDemo,{capture:true});
+var px=.5,py=.5;
+card.addEventListener("keydown",function(e){
+if(!/^Arrow(Left|Right|Up|Down)$/.test(e.key))return;e.preventDefault();stopDemo();
+px=Math.max(0,Math.min(1,px+(e.key==="ArrowRight"?.08:e.key==="ArrowLeft"?-.08:0)));
+py=Math.max(0,Math.min(1,py+(e.key==="ArrowDown"?.08:e.key==="ArrowUp"?-.08:0)));apply(px,py);
+});
+function loop(){
+if(!demoEnabled||document.hidden)return;
+t+=0.012;
+if(!hovering){
+var px=0.5+Math.sin(t)*0.32, py=0.5+Math.cos(t*0.8)*0.28;
+apply(px,py);}
+raf=requestAnimationFrame(loop);
+}
+function start(){if(!raf&&!reduce&&demoEnabled&&!document.hidden)loop();}
+function stop(){cancelAnimationFrame(raf);raf=0;}
+document.addEventListener("visibilitychange",function(){document.hidden?stop():start();});
+// live re-theme: the canvas broadcasts {type:'forever:theme', theme:'light'|'dark'}
+addEventListener("message",function(e){
+var d=e.data;
+if(d&&d.type==="forever:theme"&&(d.theme==="light"||d.theme==="dark"))document.documentElement.setAttribute("data-theme",d.theme);});
+apply(.5,.5);if(!reduce)start();
+})();
+</script>
+</body>
+</html>
