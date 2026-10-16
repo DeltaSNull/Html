@@ -1,0 +1,245 @@
+<!doctype html>
+<!--
+  INSTALANDING.AI · Phantom Polytope
+  slug     phantom-polytope
+  page     https://forevercomponents.com/components/css-3d/phantom-polytope/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    :root custom properties: --pp-bg (ground), --pp-fade (trail fade),
+            --pp-blend (composite mode), --pp-edge-a / --pp-edge-b (edge gradient RGB),
+            --pp-node (vertex color), --pp-ea (edge alpha), --cf12-cap / --cf12-cap-o (caption)
+  sections  stage — full-viewport canvas demo (canvas#cf12-c); the 4D tesseract wireframe
+  scripts   one inline IIFE: 4D→3D→2D perspective projection render loop; pointer/click
+            speed boost; visibilitychange pause/resume; reduced-motion static frame;
+            theme hook (?theme= / forever:theme postMessage); demo-v1 preview lifecycle
+  assets    none: pure canvas 2D, no external assets
+
+  ADAPTING
+  - Safe to edit: base rotation speed (t += 0.012), rotation plane speeds
+    (0.31 / 0.23 / 0.17 / 0.27), perspective distances (wd=2.4, dd=3.2), edge glow
+    color (strokeStyle RGB formula), pointer boost cap, theme tokens. The
+    <script type="application/json" id="forever-agent-meta"> block lists editable areas,
+    elements to preserve, and known limitations — read it before changing things.
+  - Keep intact: the IIFE wrapper, DPR-aware canvas sizing, the visibilitychange
+    pause/resume, the reduced-motion static-frame guard, the theme hook, and the
+    demo-v1 preview lifecycle.
+  - Background is hardcoded (#1B1E1A); repoint --pp-bg (and ctx.fillStyle) for light themes.
+  - No aria semantics on the canvas; add a role/label if it needs to be announced.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="A glowing sage-green 4D tesseract wireframe rotating and turning through itself on canvas, speeding up on interaction.">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Phantom Polytope</title>
+<script>
+/* theme hook: the canvas loads the tile with ?theme=light|dark (or stamps data-theme on <html>).
+Runs before first paint — no dark flash. Standalone default stays dark. */
+(function(){ var t= new URLSearchParams(location.search).get('theme'); if (t=== 'light' ||t=== 'dark' )document.documentElement.setAttribute('data-theme' ,t);})();
+</script>
+<meta name="forever-preview-lifecycle" content="demo-v1">
+<style>
+/* theme tokens — dark values are the defaults (solid-dark-bg contract);
+the light re-theme is the [ data-theme = "light" ] block. The canvas draws with
+--pp-edge-a/-b (outer/inner edge RGB), --pp-node and --pp-blend: dark stacks
+the wireframe additively on black, light draws it as ink on paper. */
+:root{
+--pp-bg:#1B1E1A; --pp-fade:rgba(27 , 30 , 26 , 0.30); --pp-blend:lighter;
+--pp-edge-a: 140 , 210 , 110 ; --pp-edge-b: 230 , 210 , 170 ; --pp-node: 224 , 235 , 219 ;
+--pp-ea: 1 ; --cf12-cap:#B1CCA4; --cf12-cap-o:.36 ;
+}
+:root[ data-theme = "light" ]{
+--pp-bg:#f1f4ee; --pp-fade:rgba(241 , 244 , 238 , 0.30); --pp-blend:source-over;
+--pp-edge-a: 85 , 121 , 68 ; --pp-edge-b: 26 , 62 , 24 ; --pp-node: 40 , 74 , 32 ;
+--pp-ea: 1.25 ; --cf12-cap:# 557944 ; --cf12-cap-o:.5 ;
+}
+html,body{margin: 0 ;height: 100 %;overflow:hidden;background: var(--pp-bg);}
+#cf12-c{display:block;width: 100 %;height: 100 %;}
+.cap{position:fixed;left:8px;bottom:7px;font: 600 10px/ 1.2 ui-monospace,SFMono-Regular,Menlo,monospace;
+letter-spacing:.14em;color: var(--cf12-cap);opacity: var(--cf12-cap-o);text-transform:uppercase;
+pointer-events:none;user-select:none;}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+"file" : "infinite/css-3d/12-phantom-polytope.html" ,
+"title" : "Phantom Polytope" ,
+"description" : "Glowing sage-green tesseract rotates through itself via dual perspective projection; edges glow hotter by 4D depth. Pointer/click boosts speed." ,
+"useWhen" : "Dark-theme hero backgrounds, math/generative-art showcases, sci-fi or cosmic aesthetic sections needing ambient depth." ,
+"avoidWhen" : "Light backgrounds (hardcoded dark canvas). Contexts needing legible text overlays or strict reduced-motion compliance." ,
+"agentPrompt" : "Change glow to warm amber: set the fixed green channel from 210 to 190, raise the red coefficient base from 140 to 200, then slow base speed from 0.012 to 0.007. Theme: dark tokens live in :root, the light variant in :root[data-theme=\"light\"]; ?theme=light or a {type:'forever:theme'} postMessage switches at runtime." ,
+"editableAreas" : [
+"base rotation speed (t += 0.012)" ,
+"rotation plane speeds (0.31, 0.23, 0.17, 0.27)" ,
+"perspective distances (wd=2.4, dd=3.2)" ,
+"edge glow color (strokeStyle RGB formula)" ,
+"pointer boost cap (Math.min(boost+0.5, 3))" ,
+"theme tokens (:root dark defaults + [data-theme=light] overrides)"
+],
+"preserveElements" : [
+"IIFE wrapper" ,
+"DPR-aware canvas sizing" ,
+"visibilitychange pause/resume" ,
+"reduced-motion static frame guard" ,
+"theme hook (?theme= bootstrap + forever:theme message listener + theme tokens)" ,
+"demo-v1 preview lifecycle: initialize demoEnabled from window.__foreverPreview and stop attract work on the window forever:interactive event; retain manual feedback, settling, cleanup and explicit sessions"
+],
+"knownLimitations" : [
+"Reduced-motion renders only a single static frame — no fallback animation" ,
+"Background hardcoded (#1B1E1A) — must edit both CSS and ctx.fillStyle to retheme" ,
+"No aria semantics on canvas element" ,
+"State remains local to each mounted instance; format/theme remount preserves takeover, not component values."
+],
+"tier" : "curated" ,
+"labels" : [
+"mobile-ready" ,
+"accessible" ,
+"copy-paste-safe" ,
+"minimal-deps" ,
+"animation-heavy" ,
+"light-ready"
+],
+"tags" : [
+"tesseract" ,
+"4d" ,
+"wireframe" ,
+"canvas" ,
+"perspective" ,
+"rotation" ,
+"generative" ,
+"cosmic"
+]
+}
+</script>
+</head>
+<body>
+<canvas id="cf12-c" class="cf12-root" data-section="stage"></canvas>
+<div class="cap">Phantom Polytope</div>
+<script>
+(function(){
+const cv=document.getElementById('cf12-c'),ctx=cv.getContext('2d');
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let demo=window.__foreverPreview?.demoEnabled!== false , interactionUntil= 0 ;
+function takeover(){demo= false ;interactionUntil=performance.now()+ 1100 ; if (!document.hidden)start();}
+window.addEventListener('forever:interactive' ,takeover);
+document.addEventListener('pointerdown' ,takeover,{capture: true ,once: true });
+document.addEventListener('keydown' ,e=>{ if (['Enter' , ' ' , 'ArrowLeft' , 'ArrowRight' , 'ArrowUp' , 'ArrowDown' ].includes(e.key))takeover();},{capture: true ,once: true });
+document.addEventListener('pointermove' ,()=>{ if (!demo){interactionUntil=performance.now()+ 1100 ; if (!document.hidden)start();}},{passive: true });
+let W,H,DPR,cx,cy,S;
+function size(){
+DPR=Math.min(devicePixelRatio|| 1 , 2 );
+W=cv.clientWidth;H=cv.clientHeight;
+cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR, 0 , 0 ,DPR, 0 , 0 );
+cx=W/ 2 ;cy=H/ 2 ;S=Math.min(W,H);
+}
+addEventListener('resize' ,size);size();
+
+// colours the canvas draws with are read from the CSS tokens once per theme,
+// never per frame. edgeA/edgeB are the outer/inner ends of the edge ramp.
+const root=document.documentElement, C={};
+const trip=v=>v.trim().split(',').map(Number);
+function syncTheme(){
+const cs=getComputedStyle(root);
+C.solid=cs.getPropertyValue('--pp-bg').trim();
+C.fade =cs.getPropertyValue('--pp-fade').trim();
+C.blend=cs.getPropertyValue('--pp-blend').trim();
+C.A=trip(cs.getPropertyValue('--pp-edge-a'));
+C.B=trip(cs.getPropertyValue('--pp-edge-b'));
+C.node=cs.getPropertyValue('--pp-node').trim();
+C.ea=parseFloat(cs.getPropertyValue('--pp-ea'))|| 1 ;
+}
+// live re-theme: the canvas broadcasts {type: 'forever:theme' , theme: 'light' | 'dark' }
+addEventListener('message' ,e=>{ const d=e.data;
+if (d && d.type=== 'forever:theme' && (d.theme=== 'light' ||d.theme=== 'dark' )){
+root.setAttribute('data-theme' ,d.theme); syncTheme();
+// reduced motion draws one static frame and stops, so repaint it by hand
+if (reduce||!demo){ctx.fillStyle=C.solid;ctx.fillRect( 0 , 0 ,W,H);frame();}
+} });
+syncTheme();
+
+// 16 vertices of the tesseract: all (+/- 1 )^ 4
+const V=[];
+for (let i= 0 ;i< 16 ;i++) V.push([(i& 1 ? 1 :- 1 ),(i& 2 ? 1 :- 1 ),(i& 4 ? 1 :- 1 ),(i& 8 ? 1 :- 1 )]);
+// edges: pairs differing in exactly one coordinate
+const E=[];
+for (let a= 0 ;a< 16 ;a++) for (let b=a+ 1 ;b< 16 ;b++){
+let d= 0 ; for (let k= 0 ;k< 4 ;k++) if (V[a][k]!==V[b][k]) d++;
+if (d=== 1 ) E.push([a,b]);
+}
+
+function rot(p,i,j,ang){
+const c=Math.cos(ang),s=Math.sin(ang);
+const a=p[i],b=p[j];
+p[i]=a*c-b*s;p[j]=a*s+b*c;
+}
+
+let t= 0 ,boost= 0 ;
+cv.addEventListener('pointermove' ,()=>{boost=Math.min(boost+ 0.5 , 3 );});
+cv.addEventListener('click' ,()=>{boost= 4 ;});
+
+function project(tt){
+const pts=[];
+for (let k= 0 ;k< 16 ;k++){
+const p=[V[k][ 0 ],V[k][ 1 ],V[k][ 2 ],V[k][ 3 ]];
+// 4D rotations — the XW/YW planes drive the inner-cube turn-through
+rot(p, 0 , 3 ,tt* 0.31 );      // XW
+rot(p, 1 , 3 ,tt* 0.23 );      // YW
+rot(p, 2 , 3 ,tt* 0.17 );      // ZW
+// 4D->3D perspective: w pulls vertices near/far through the 4th axis
+const wd= 2.4 , w4= 1 /(wd-p[ 3 ]);
+let x=p[ 0 ]*w4, y=p[ 1 ]*w4, z=p[ 2 ]*w4;
+// 3D rotation for readable depth
+const cz=Math.cos(tt* 0.27 ),sz=Math.sin(tt* 0.27 );
+let X=x*cz-z*sz, Z=x*sz+z*cz, Y=y;
+const cy2=Math.cos( 0.5 ),sy2=Math.sin( 0.5 );
+let Y2=Y*cy2-Z*sy2, Z2=Y*sy2+Z*cy2;
+// 3D->2D perspective
+const dd= 3.2 , w3= 1 /(dd-Z2);
+pts.push({
+x:cx+X*w3*S* 0.62 ,
+y:cy+Y2*w3*S* 0.62 ,
+depth:w3, w4:w4
+});
+}
+return pts;
+}
+
+function frame(){
+if (!reduce){ if (demo)t+= 0.012 *( 1 +boost); boost*= 0.95 ; }
+ctx.fillStyle=C.fade;ctx.fillRect( 0 , 0 ,W,H);
+ctx.globalCompositeOperation=C.blend;
+const pts=project(t);
+// depth range for shading
+let dmin=1e9,dmax=-1e9;
+pts.forEach(p=>{dmin=Math.min(dmin,p.depth);dmax=Math.max(dmax,p.depth);});
+const lw=Math.max(S/ 420 , 1 );
+E.forEach(([a,b])=>{
+const p=pts[a],q=pts[b];
+const dep=((p.depth+q.depth)/ 2 -dmin)/(dmax-dmin+1e-6 );
+// inner (high w4) edges glow hotter
+const inner=((p.w4+q.w4)/ 2 - 0.28 )/ 0.55 ;
+const hue= 0.42 +dep* 0.4 +Math.max( 0 ,inner)* 0.25 ;
+const A=C.A,B=C.B;
+ctx.strokeStyle= 'rgba(' +Math.round(A[ 0 ]+(B[ 0 ]-A[ 0 ])*inner)+ ',' +Math.round(A[ 1 ]+(B[ 1 ]-A[ 1 ])*dep)+ ',' +Math.round(A[ 2 ]+(B[ 2 ]-A[ 2 ])*dep)+ ',' +Math.min( 1 ,( 0.18 +dep* 0.6 )*C.ea)+ ')' ;
+ctx.lineWidth=lw*( 0.7 +dep* 1.4 +Math.max( 0 ,inner)* 0.6 );
+ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.stroke();
+});
+// vertex nodes
+pts.forEach(p=>{
+const dep=(p.depth-dmin)/(dmax-dmin+1e-6 );
+ctx.fillStyle= 'rgba(' +C.node+ ',' +( 0.25 +dep* 0.7 )+ ')' ;
+ctx.beginPath();ctx.arc(p.x,p.y,( 0.8 +dep* 2.4 )*lw, 0 ,Math.PI* 2 );ctx.fill();
+});
+ctx.globalCompositeOperation= 'source-over' ;
+if (!reduce&&(demo||performance.now()< interactionUntil ))raf=requestAnimationFrame(frame); else raf= 0 ;
+}
+let raf= 0 ;
+function start(){ if (!raf&&!reduce&&(demo||performance.now()< interactionUntil ))raf=requestAnimationFrame(frame);}
+function stop(){cancelAnimationFrame(raf);raf= 0 ;}
+document.addEventListener('visibilitychange' ,()=>{document.hidden?stop():start();});
+if (reduce||!demo){ctx.fillStyle=C.solid;ctx.fillRect( 0 , 0 ,W,H);t= 0.9 ;frame();} else start();
+})();
+</script>
+</body>
+</html>

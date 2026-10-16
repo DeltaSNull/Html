@@ -1,0 +1,149 @@
+<!doctype html>
+<!--
+  INSTALANDING.AI · Liquid Toggle
+  slug     liquid-toggle
+  page     https://forevercomponents.com/components/inputs-switches/liquid-toggle/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    :root custom properties: --c01-bg (ground), --c01-cap / --c01-cap-o (caption),
+            --c01-track-off / --c01-track-on (track colors), --c01-knob-a / --c01-knob-b (knob gradient)
+  sections  stage — .c01-wrap: the SVG goo-filter toggle button
+  scripts   one inline IIFE: rAF liquid knob animation with trailing droplets; toggle state
+            with aria-pressed; auto-demo until first deliberate input; visibilitychange
+            suspension; theme hook (?theme= / forever:theme postMessage)
+  assets    none: inline SVG, system fonts
+
+  ADAPTING
+  - Safe to edit: accent/knob colors, phase step speed (0.012), track off/on colors,
+    droplet lag amount (0.18 / 0.30), theme tokens. The
+    <script type="application/json" id="forever-agent-meta"> block lists editable areas,
+    elements to preserve, and known limitations — read it before changing things.
+  - Keep intact: the SVG goo filter (feGaussianBlur + feColorMatrix), the IIFE wrapper,
+    the reduced-motion guard, the theme hook, native button semantics (aria-pressed),
+    visible focus, keyboard handlers, and the demo-v1 preview lifecycle.
+  - The goo filter (stdDeviation 6) is a real GPU cost — avoid in dense forms with many toggles.
+  - Boolean UI example: connect the on state to application data for production use.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="forever-preview-lifecycle" content="demo-v1">
+<meta name="description" content="Teal gooey SVG toggle whose knob slides with trailing liquid droplets while the track fades between off and on colors.">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Liquid Toggle</title>
+<script>
+/* theme hook: the canvas loads the tile with ?theme=light|dark (or stamps data-theme on <html>).
+Runs before first paint — no dark flash. Standalone default stays dark. */
+(function(){ var t= new URLSearchParams(location.search).get('theme'); if (t=== 'light' ||t=== 'dark' )document.documentElement.setAttribute('data-theme' ,t);})();
+</script>
+<style>
+:root{
+--c01-bg:#0d1117; --c01-cap:#3fe0c5; --c01-cap-o:.4 ;
+--c01-track-off:#1d2a33; --c01-track-on:#0e8f7a;
+--c01-knob-a:#eafff9; --c01-knob-b:#7df0db;
+}
+:root[ data-theme = "light" ]{
+--c01-bg:#f2f4f8; --c01-cap:#147c6b; --c01-cap-o:.5 ;
+--c01-track-off:#dde3e6; --c01-track-on:#0c7a68;
+--c01-knob-a:#ffffff; --c01-knob-b:#5fe0c4;
+}
+html,body{margin: 0 ;height: 100 %;overflow:hidden;background: var(--c01-bg);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.c01-wrap{height: 100 %;display:flex;align-items:center;justify-content:center}
+.c01-stage{width:min(62vmin,300px);aspect-ratio: 1 / 1 ;display:flex;align-items:center;justify-content:center}
+.c01-svg{width: 100 %;height:auto}
+.cap{position:fixed;left:10px;bottom:9px;font-size:11px;letter-spacing:.08em;color: var(--c01-cap);opacity: var(--c01-cap-o);text-transform:uppercase}
+.c01-track{transition:fill .5s}
+
+
+.c01-stage{padding: 0 ;border: 0 ;background:transparent;cursor:pointer;outline-offset:6px}
+
+.c01-stage:focus-visible{outline:2px solid var(--c01-cap)}
+
+@media(prefers-reduced-motion:reduce){.c01-track{transition:none}}
+
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+"file" : "infinite/inputs-switches/01-liquid-toggle.html" ,
+"title" : "Liquid Toggle" ,
+"description" : "SVG liquid toggle with a goo filter, trailing droplets and a native button. First deliberate input stops the idle demo; the chosen on/off state settles fully." ,
+"useWhen" : "Settings pages, dark-mode switches, any boolean UI control that benefits from tactile feel." ,
+"avoidWhen" : "Dense forms where the SVG goo filter adds excessive rendering cost." ,
+"agentPrompt" : "Adjust the liquid trail, track colors and smoothing in paint()/frame(). Keep the native button aria-pressed state synchronized with on. First input disables only the demo; manual liquid settling stays active. Theme: dark tokens live in :root; the [data-theme=\"light\"] block and forever:theme message switch palette." ,
+"editableAreas" : [
+"accent/knob color" ,
+"phase step speed (0.012)" ,
+"track off/on colors" ,
+"droplet lag amount (0.18 / 0.30)" ,
+"theme tokens (:root dark defaults + [data-theme=light] overrides)"
+] ,
+"preserveElements" : [
+"SVG goo filter (feGaussianBlur + feColorMatrix)" ,
+"IIFE wrapper" ,
+"reduced-motion guard" ,
+"theme hook (?theme= bootstrap + forever:theme message listener + theme tokens)" ,
+"native controls, visible focus and keyboard handlers" ,
+"sticky preview demo lifecycle (forever-preview-lifecycle demo-v1; __foreverPreview.demoEnabled; forever:interactive window event)" ,
+"visibilitychange suspension with manual settling retained" ,
+"demo-v1 preview lifecycle: initialize demoEnabled from window.__foreverPreview and stop attract work on the window forever:interactive event; retain manual feedback, settling, cleanup and explicit sessions"
+] ,
+"knownLimitations" : [
+"Boolean UI example; connect the on state to application data for production." ,
+"State remains local to each mounted instance; format/theme remount preserves takeover, not component values."
+] ,
+"tier" : "curated" ,
+"labels" : [
+"agent-ready" ,
+"easy-to-modify" ,
+"mobile-ready" ,
+"accessible" ,
+"copy-paste-safe" ,
+"light-ready"
+] ,
+"tags" : [
+"toggle" ,
+"gooey" ,
+"svg" ,
+"ui-control" ,
+"filter" ,
+"loop"
+]
+}
+</script>
+</head>
+<body>
+<div class="c01-wrap" data-section="stage"><button type="button" class="c01-stage" id="c01-toggle" aria-label="Liquid toggle" aria-pressed="false">
+<svg class="c01-svg" viewBox="0 0 200 110" aria-hidden="true">
+<defs><filter id="c01-goo"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b"/><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 24 -11" result="g"/><feBlend in="SourceGraphic" in2="g"/></filter><radialGradient id="c01-knob" cx="40%" cy="35%"><stop offset="0" stop-color="var(--c01-knob-a)"/><stop offset="1" stop-color="var(--c01-knob-b)"/></radialGradient></defs>
+<rect class="c01-track" x="6" y="22" width="188" height="66" rx="33" fill="var(--c01-track-off)"/>
+<g filter="url(#c01-goo)" fill="url(#c01-knob)"><circle id="c01-main" cx="55" cy="55" r="26"/><circle id="c01-d1" cx="55" cy="55" r="13"/><circle id="c01-d2" cx="55" cy="55" r="9"/></g>
+</svg></button></div><div class="cap" aria-hidden="true">Liquid Toggle</div>
+<script>
+(function(){
+const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+let demoEnabled=window.__foreverPreview?.demoEnabled!== false ,raf= 0 ;
+function stopDemo(){demoEnabled= false ;}
+addEventListener('forever:interactive' ,stopDemo);
+document.addEventListener('pointerdown' ,stopDemo,{capture: true });
+document.addEventListener('click' ,stopDemo,{capture: true });
+document.addEventListener('keydown' ,e=>{ if (e.key!== 'Tab' &&!e.metaKey&&!e.ctrlKey&&!e.altKey)stopDemo();},{capture: true });
+addEventListener('message' ,e=>{ const d=e.data; if (d?.type=== 'forever:theme' &&[ 'light' , 'dark' ].includes(d.theme)){document.documentElement.dataset.theme=d.theme;syncTheme();}});
+function wake(){ if (!document.hidden&&!raf)raf=requestAnimationFrame(frame);}
+document.addEventListener('visibilitychange' ,()=>{cancelAnimationFrame(raf);raf= 0 ; if (!document.hidden)wake();});
+const button=document.getElementById('c01-toggle'),main=document.getElementById('c01-main'),d1=document.getElementById('c01-d1'),d2=document.getElementById('c01-d2'),track=document.querySelector('.c01-track');
+let on= false ,p= 0 ,clock= 0 ;
+function syncTheme(){track.setAttribute('fill' ,on? 'var(--c01-track-on)' : 'var(--c01-track-off)' );}
+function paint(){ const x= 55 + 90 *p;main.setAttribute('cx' ,x);d1.setAttribute('cx' ,x- 16 *(on? 1 :- 1 )*Math.sin(p*Math.PI));d2.setAttribute('cx' ,x- 27 *(on? 1 :- 1 )*Math.sin(p*Math.PI));syncTheme();}
+function toggle(){on=!on;button.setAttribute('aria-pressed' ,on); if (reduce){p=on? 1 : 0 ;paint();} else wake();}
+button.addEventListener('click' ,toggle);
+function frame(){raf= 0 ; if (document.hidden) return ; if (demoEnabled&&!reduce&&++clock>= 100 ){clock= 0 ;toggle();}
+const target=on? 1 : 0 ;p=reduce?target:p+(target-p)*.085 ; if (Math.abs(target-p)<.0001 )p=target;paint();
+if ((demoEnabled&&!reduce)||p!==target)wake();
+}
+paint(); if (!reduce&&demoEnabled)wake();
+})();
+</script>
+</body>
+</html>
