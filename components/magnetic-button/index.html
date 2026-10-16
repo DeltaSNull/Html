@@ -1,0 +1,203 @@
+<!doctype html>
+<!--
+  INSTALANDING.AI · Magnetic Button
+  slug     magnetic-button
+  page     https://forevercomponents.com/components/buttons/magnetic-button/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    :root custom properties (dark defaults; [data-theme="light"] overrides):
+            --bg (ground), --glow-a / --glow-b (ambient page glows), --cap / --cap-o
+            (caption), --bg-surface / --text-0 (button colors), --border-mid /
+            --border-glow, --grad-iris-cyan (emerald #2BAB6B → copper #C08459 hover
+            gradient), --r-pill, --glow-iris (hover ring shadow), --ease-out-soft,
+            --font-display (Space Grotesk via Google Fonts), --dur-fast / --dur-base
+  sections  stage — full-viewport demo; the pill button (.c01-mag) with label
+            inner-parallax (.c01-mag__label), centered
+  scripts   theme hook before first paint (?theme=light|dark; a {type:'forever:theme'}
+            postMessage switches at runtime); one inline IIFE: pointermove magnetic
+            pull (strength = 0.4) with label inner-parallax, idle orbital drift rAF
+            loop when not hovered, prefers-reduced-motion guard, visibilitychange
+            stop/start, demo-v1 preview lifecycle (window.__foreverPreview;
+            forever:interactive / pointerdown / keydown takeover stops the attract
+            loop and never resumes)
+  assets    none: button, glows and caption are pure CSS; Google Fonts stylesheet
+
+  ADAPTING
+  - Safe to edit: pull strength (strength = 0.4), idle orbit amplitude (cos/sin
+    multipliers 14, 9, 5, 3) and orbit speed, gradient accent colors
+    (--grad-iris-cyan), button label text ('Hover me'), theme tokens. The
+    <script type="application/json" id="forever-agent-meta"> block lists editable areas,
+    elements to preserve, and known limitations — read it before changing things.
+  - Keep intact: the IIFE wrapper, the prefers-reduced-motion guard, the
+    visibilitychange stop/start loop, the label inner-parallax (separate transform
+    on .c01-mag__label), the theme hook, and the demo-v1 preview lifecycle.
+  - Known limitation: the CSS transition on transform fights the rAF loop when
+    exiting hover — visually fine, but two systems own transform during the settle.
+  - The autonomous drift ends at the first deliberate input (takeover) and never
+    resumes; manual hover magnetism keeps working.
+  - Theme: standalone defaults to dark; append ?theme=light or send a
+    {type:'forever:theme'} postMessage to preview the light variant.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="Dark pill button that magnetically drifts toward the cursor with a soft idle orbital float and emerald-to-copper glow on hover.">
+<meta name="forever-preview-lifecycle" content="demo-v1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Magnetic Button</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600&display=swap" rel="stylesheet">
+<script>
+/* theme hook: the canvas loads the tile with ?theme=light|dark (or stamps data-theme on <html>).
+   Runs before first paint — no dark flash. Standalone default stays dark. */
+(function(){var t=new URLSearchParams(location.search).get('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);})();
+</script>
+<style>
+  /* theme tokens — dark values are the defaults (solid-dark-bg contract);
+     the light re-theme is the [data-theme="light"] block */
+  :root{
+    --bg:#08090d; --glow-a:rgba(43,171,107,0.16); --glow-b:rgba(192,132,89,0.14); --cap:#fff; --cap-o:.28;
+    --bg-surface:#1c2030; --text-0:#f4f6fb;
+    --border-mid:rgba(255,255,255,0.12); --border-glow:rgba(43,171,107,0.45);
+    --grad-iris-cyan:linear-gradient(120deg,#2BAB6B,#C08459);
+    --r-pill:999px;
+    --glow-iris:0 0 0 1px var(--border-glow),0 8px 40px -8px rgba(43,171,107,0.45);
+    --ease-out-soft:cubic-bezier(0.22,1,0.36,1);
+    --font-display:"Space Grotesk",system-ui,sans-serif;
+    --dur-fast:160ms; --dur-base:280ms;
+  }
+  :root[data-theme="light"]{
+    --bg:#f2f4f8; --glow-a:rgba(43,171,107,0.18); --glow-b:rgba(192,132,89,0.16); --cap:#1b2130; --cap-o:.5;
+    --bg-surface:#ffffff; --text-0:#1b2130;
+    --border-mid:rgba(0,0,0,0.12); --border-glow:rgba(32,126,79,0.55);
+    --glow-iris:0 0 0 1px var(--border-glow),0 8px 40px -8px rgba(32,126,79,0.3);
+  }
+  html,body{margin:0;height:100%;overflow:hidden}
+  body{background:var(--bg);display:grid;place-items:center;
+    background-image:radial-gradient(60vw 40vw at 20% -10%,var(--glow-a),transparent 60%),radial-gradient(50vw 40vw at 90% 0%,var(--glow-b),transparent 55%);}
+  #c01-stage{position:fixed;inset:0;display:grid;place-items:center}
+
+  .c01-mag{
+    position:relative;border:0;cursor:pointer;padding:18px 34px;
+    font-family:var(--font-display);font-size:clamp(15px,4.5vw,18px);font-weight:600;letter-spacing:-0.01em;
+    color:var(--text-0);background:var(--bg-surface);border:1px solid var(--border-mid);border-radius:var(--r-pill);
+    transition:transform var(--dur-base) var(--ease-out-soft),border-color var(--dur-fast) var(--ease-out-soft),box-shadow var(--dur-base) var(--ease-out-soft);
+    will-change:transform;
+  }
+  .c01-mag::before{content:"";position:absolute;inset:0;border-radius:inherit;background:var(--grad-iris-cyan);opacity:0;transition:opacity var(--dur-base) var(--ease-out-soft);z-index:-1;}
+  .c01-mag:hover{border-color:var(--border-glow);box-shadow:var(--glow-iris);}
+  .c01-mag__label{display:inline-block;transition:transform var(--dur-base) var(--ease-out-soft);will-change:transform;}
+
+  .cap{position:fixed;left:8px;bottom:7px;font-size:10px;letter-spacing:.08em;color:var(--cap);opacity:var(--cap-o);text-transform:uppercase;font-family:var(--font-display)}
+  @media (prefers-reduced-motion:reduce){.c01-mag,.c01-mag__label{transition-duration:.001ms}}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+ "file": "infinite/buttons/01-magnetic-button.html",
+ "title": "Magnetic Button",
+ "description": "Dark pill button drifts in an idle orbital float; cursor proximity pulls it magnetically with a label inner-parallax and emerald-to-copper glow on hover. Autonomous preview ends at first deliberate input and never resumes.",
+ "useWhen": "CTA buttons on dark hero sections or landing pages where tactile interactivity signals quality.",
+ "avoidWhen": "Dense form layouts or light backgrounds — glow and drift assume a dark surface and open space around the button.",
+ "agentPrompt": "Change the idle drift amplitude from 14/9 to 6/4 for a subtler float, and set accent color to #ff6b6b by replacing #2BAB6B throughout. Theme: dark tokens live in :root, the light variant in :root[data-theme=\"light\"]; ?theme=light or a {type:'forever:theme'} postMessage switches at runtime. Autonomous preview ends at first deliberate input and never resumes.",
+ "editableAreas": [
+  "magnetic pull strength (strength = 0.4)",
+  "idle orbit amplitude (cos/sin multipliers 14, 9, 5, 3)",
+  "orbit speed (e*0.9, e*0.7, e*0.37, e*1.3)",
+  "gradient accent colors (--grad-iris-cyan)",
+  "button label text ('Hover me')",
+  "theme tokens (:root dark defaults + [data-theme=light] overrides)"
+ ],
+ "preserveElements": [
+  "IIFE wrapper",
+  "prefers-reduced-motion guard (reduce check before apply)",
+  "visibilitychange stop/start loop",
+  "label inner-parallax (separate transform on .c01-mag__label)",
+  "theme hook (?theme= bootstrap + forever:theme message listener + theme tokens)",
+  "demo-v1 preview lifecycle: initialize demoEnabled from window.__foreverPreview and stop attract work on the window forever:interactive event; retain manual feedback, settling, cleanup and explicit sessions"
+ ],
+ "knownLimitations": [
+  "CSS transition on transform fights the rAF loop when exiting hover — works fine visually but two systems control transform simultaneously",
+  "Magnetic effect applies only within the button bounding box, not a wider attraction radius",
+  "State remains local to each mounted instance; format/theme remount preserves takeover, not component values."
+ ],
+ "tier": "curated",
+ "labels": [
+  "agent-ready",
+  "easy-to-modify",
+  "mobile-ready",
+  "accessible",
+  "copy-paste-safe",
+  "minimal-deps",
+  "light-ready"
+ ],
+ "tags": [
+  "button",
+  "magnetic",
+  "hover",
+  "glow",
+  "orbital",
+  "ui-control",
+  "pointer"
+ ]
+}
+</script>
+</head>
+<body>
+<div id="c01-stage" data-section="stage">
+  <button class="c01-mag" type="button"><span class="c01-mag__label">Hover me</span></button>
+</div>
+<div class="cap">Magnetic button</div>
+<script>
+(function(){
+  "use strict";
+  var reduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
+  var btn = document.querySelector(".c01-mag");
+  var label = btn.querySelector(".c01-mag__label");
+  var strength = 0.4, hovering = false, demoEnabled=window.__foreverPreview?.demoEnabled!==false;
+
+  function apply(x,y){
+    btn.style.transform = "translate("+x*strength+"px,"+y*strength+"px)";
+    if(label) label.style.transform = "translate("+x*strength*0.4+"px,"+y*strength*0.4+"px)";
+  }
+  function reset(){ btn.style.transform=""; if(label) label.style.transform=""; }
+
+  btn.addEventListener("pointerenter", function(){ hovering = true; });
+  btn.addEventListener("pointermove", function(e){
+    if(reduce) return;
+    var r = btn.getBoundingClientRect();
+    apply(e.clientX-(r.left+r.width/2), e.clientY-(r.top+r.height/2));
+  });
+  btn.addEventListener("pointerleave", function(){ hovering = false; reset(); });
+
+  // autonomous idle: gentle orbital drift when not hovered
+  var t0 = null, raf = null;
+  function loop(t){
+    if(!demoEnabled)return;
+    if(t0===null) t0=t;
+    var e=(t-t0)/1000;
+    if(!hovering){
+      var x = Math.cos(e*0.9)*14 + Math.cos(e*0.37)*5;
+      var y = Math.sin(e*0.7)*9 + Math.sin(e*1.3)*3;
+      apply(x,y);
+    }
+    raf = requestAnimationFrame(loop);
+  }
+  function takeover(){demoEnabled=false;if(raf){cancelAnimationFrame(raf);raf=null;}}
+  window.addEventListener("forever:interactive",takeover);
+  btn.addEventListener("pointerdown",takeover,true);
+  btn.addEventListener("keydown",function(e){if(/^(Enter| |Arrow|Escape)/.test(e.key))takeover();},true);
+  function start(){ if(reduce||!demoEnabled) return; if(!raf){ t0=null; raf=requestAnimationFrame(loop);} }
+  function stop(){ if(raf){ cancelAnimationFrame(raf); raf=null; } reset(); }
+  document.addEventListener("visibilitychange", function(){ document.hidden?stop():start(); });
+  // live re-theme: the canvas broadcasts {type:'forever:theme', theme:'light'|'dark'}
+  addEventListener("message", function(e){
+    var d=e.data; if(d && d.type==="forever:theme" && (d.theme==="light"||d.theme==="dark")) document.documentElement.setAttribute("data-theme", d.theme);
+  });
+  start();
+})();
+</script>
+</body>
+</html>
