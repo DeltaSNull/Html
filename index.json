@@ -2,6 +2,7 @@
   "name": "InstaLanding.ai",
   "url": "https://instalanding.ai",
   "license": "MIT",
+  "version": "1.0",
   "counts": {
     "pages": 22,
     "components": 15,

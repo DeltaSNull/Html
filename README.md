@@ -32,9 +32,11 @@ details that usually break, which is what makes the result look designed rather 
 
 ## For agents
 
-Start with [`AGENTS.md`](AGENTS.md). [`index.json`](index.json) lists every page with what it is best
-for, its style, its sections in order, its stack (libraries, fonts, WebGL/canvas) and its file
-paths, so an agent can choose a page without opening one. The same library is served as flat files
+Start with [`AGENTS.md`](AGENTS.md). [`index.json`](index.json) (registry `version` 1.0) lists every
+page, component and dashboard with what it is best for, its style, its sections in order, its stack
+(libraries, fonts, WebGL/canvas) and its file paths, so an agent can choose without opening a file.
+Pages are complete landing pages, components are single self-contained animated assets, and
+dashboards are full-page dashboard examples and references. The same library is served as flat files
 at [instalanding.ai/llms.txt](https://instalanding.ai/llms.txt),
 [instalanding.ai/prompts.json](https://instalanding.ai/prompts.json) and
 `instalanding.ai/p/<slug>.txt`.
@@ -67,12 +69,14 @@ at [instalanding.ai/llms.txt](https://instalanding.ai/llms.txt),
 ## Repo layout
 
 ```
-pages/<slug>/
+pages/<slug>/         one complete landing page per folder
+components/<slug>/    one self-contained animated asset per folder
+dashboards/<slug>/    dashboard examples and references per folder
   index.html    the page: one file, every asset inlined, opens from disk
   PROMPT.md     the one-shot brief it was built from
   README.md     what it is for, its style, sections, stack, and credits
-  preview.jpg   1200x600 screenshot
-index.json      every page's metadata, for agents and scripts
+  preview.jpg   1280x720 screenshot
+index.json      every entry's metadata, for agents and scripts (registry version 1.0)
 AGENTS.md       how an agent should use this repo
 ```
 
