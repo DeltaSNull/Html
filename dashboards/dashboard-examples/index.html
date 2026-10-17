@@ -1,0 +1,155 @@
+<!doctype html>
+<!--
+  INSTALANDING.AI · Dashboard Examples
+  slug     dashboard-examples
+  page     curated reference — external links, no vendored code
+  license  MIT for this page itself
+
+  MAP
+  tokens    :root custom properties — palette, card radius, shadows
+  sections  hero · grid — eleven dashboard reference cards (live demos + open-source kits)
+  scripts   one inline script: license filter chips + result count
+  assets    none — all text and CSS, works from file://
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard Examples — curated references</title>
+<style>
+:root{
+  --bg:#0d1117; --panel:#161b22; --line:#30363d; --ink:#e6edf3; --dim:#8b949e;
+  --accent:#58a6ff; --green:#3fb950; --purple:#bc8cff; --orange:#d29922;
+  --radius:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;padding:48px 24px 80px}
+.wrap{max-width:1080px;margin:0 auto}
+.hero{text-align:center;margin-bottom:40px}
+.hero h1{font-size:clamp(28px,4vw,44px);letter-spacing:-.02em;margin-bottom:12px}
+.hero p{color:var(--dim);max-width:640px;margin:0 auto}
+.filters{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:32px 0}
+.chip{background:var(--panel);border:1px solid var(--line);color:var(--dim);border-radius:999px;padding:8px 18px;font-size:14px;cursor:pointer;transition:.15s}
+.chip:hover{border-color:var(--accent);color:var(--ink)}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#0d1117;font-weight:600}
+.count{text-align:center;color:var(--dim);font-size:14px;margin-bottom:24px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:24px;display:flex;flex-direction:column;gap:12px;transition:.15s}
+.card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.card h2{font-size:18px;letter-spacing:-.01em}
+.card p{color:var(--dim);font-size:14px;flex:1}
+.tags{display:flex;gap:8px;flex-wrap:wrap}
+.tag{font-size:12px;padding:3px 10px;border-radius:999px;border:1px solid var(--line);color:var(--dim)}
+.tag.mit{border-color:var(--green);color:var(--green)}
+.tag.apache{border-color:var(--accent);color:var(--accent)}
+.tag.agpl{border-color:var(--orange);color:var(--orange)}
+.tag.live{border-color:var(--purple);color:var(--purple)}
+.card a{color:var(--accent);font-size:14px;font-weight:600;text-decoration:none}
+.card a:hover{text-decoration:underline}
+footer{text-align:center;color:var(--dim);font-size:13px;margin-top:56px}
+@media (prefers-reduced-motion:reduce){.card{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <h1>Dashboard Examples</h1>
+    <p>Eleven dashboard references worth stealing from — open-source kits you can self-host and live demos you can click through. Curated October 2026.</p>
+  </div>
+  <div class="filters">
+    <button class="chip on" data-f="all">All</button>
+    <button class="chip" data-f="kit">UI kits</button>
+    <button class="chip" data-f="live">Live demos</button>
+    <button class="chip" data-f="charts">Charts &amp; maps</button>
+  </div>
+  <div class="count" id="count"></div>
+  <div class="grid" id="grid">
+
+    <div class="card" data-k="kit">
+      <h2>Tabler</h2>
+      <p>MIT admin template — 100+ components, clean defaults, dark mode. The fastest way to make an internal tool look intentional.</p>
+      <div class="tags"><span class="tag mit">MIT</span><span class="tag">self-host</span></div>
+      <a href="https://tabler.io" target="_blank" rel="noopener">tabler.io →</a>
+    </div>
+
+    <div class="card" data-k="kit">
+      <h2>AdminLTE</h2>
+      <p>The veteran MIT admin template. Huge widget gallery — charts, calendars, mailboxes, kanban — all with consistent styling.</p>
+      <div class="tags"><span class="tag mit">MIT</span><span class="tag">self-host</span></div>
+      <a href="https://adminlte.io" target="_blank" rel="noopener">adminlte.io →</a>
+    </div>
+
+    <div class="card" data-k="live">
+      <h2>Grafana Play</h2>
+      <p>The reference metrics dashboard — time-series panels, alerting, annotations. Log in to the public playground and poke real dashboards.</p>
+      <div class="tags"><span class="tag live">live demo</span><span class="tag">metrics</span></div>
+      <a href="https://play.grafana.org" target="_blank" rel="noopener">play.grafana.org →</a>
+    </div>
+
+    <div class="card" data-k="live">
+      <h2>Plausible live demo</h2>
+      <p>Privacy-first web analytics (AGPL). The demo shows the whole product — realtime visitors, sources, goals — no signup.</p>
+      <div class="tags"><span class="tag agpl">AGPL-3.0</span><span class="tag live">live demo</span></div>
+      <a href="https://plausible.io/plausible.io" target="_blank" rel="noopener">plausible.io →</a>
+    </div>
+
+    <div class="card" data-k="charts">
+      <h2>ECharts examples</h2>
+      <p>Apache-2.0 charting library with hundreds of live examples — 3D, geo, sankey, candlestick. Every example is editable in-browser.</p>
+      <div class="tags"><span class="tag apache">Apache-2.0</span><span class="tag">charts</span></div>
+      <a href="https://echarts.apache.org/examples/en/index.html" target="_blank" rel="noopener">echarts.apache.org →</a>
+    </div>
+
+    <div class="card" data-k="live">
+      <h2>Netdata demo</h2>
+      <p>Realtime infrastructure monitoring — per-second metrics with anomaly detection. The live demo streams a real monitored server.</p>
+      <div class="tags"><span class="tag live">live demo</span><span class="tag">metrics</span></div>
+      <a href="https://www.netdata.cloud/demo/" target="_blank" rel="noopener">netdata.cloud →</a>
+    </div>
+
+    <div class="card" data-k="charts">
+      <h2>Kepler.gl</h2>
+      <p>Uber's MIT geospatial tool — drag in a CSV and get a GPU-powered map with time playback, hexbins and 3D arcs.</p>
+      <div class="tags"><span class="tag mit">MIT</span><span class="tag">maps</span></div>
+      <a href="https://kepler.gl/demo" target="_blank" rel="noopener">kepler.gl →</a>
+    </div>
+
+    <div class="card" data-k="live">
+      <h2>earth.nullschool.net</h2>
+      <p>The famous live wind map (MIT) — global weather rendered as animated particles on a 3D globe. One page, unforgettable.</p>
+      <div class="tags"><span class="tag mit">MIT</span><span class="tag live">live demo</span></div>
+      <a href="https://earth.nullschool.net" target="_blank" rel="noopener">earth.nullschool.net →</a>
+    </div>
+
+    <div class="card" data-k="kit">
+      <h2>Homer</h2>
+      <p>Apache-2.0 static homepage dashboard — services, bookmarks and widgets from one YAML file. Dead simple, very pretty.</p>
+      <div class="tags"><span class="tag apache">Apache-2.0</span><span class="tag">self-host</span></div>
+      <a href="https://github.com/bastienwirtz/homer" target="_blank" rel="noopener">github.com/bastienwirtz/homer →</a>
+    </div>
+
+    <div class="card" data-k="kit">
+      <h2>xterm.js</h2>
+      <p>MIT terminal component used by VS Code — drop a real terminal into any web dashboard. Powers web consoles everywhere.</p>
+      <div class="tags"><span class="tag mit">MIT</span><span class="tag">component</span></div>
+      <a href="https://xtermjs.org" target="_blank" rel="noopener">xtermjs.org →</a>
+    </div>
+
+    <div class="card" data-k="kit">
+      <h2>Glance</h2>
+      <p>Self-hosted dashboard for your homelab — RSS, weather, stocks, calendars, Docker stats in widget cards. One Go binary.</p>
+      <div class="tags"><span class="tag">self-host</span><span class="tag">widgets</span></div>
+      <a href="https://github.com/glanceapp/glance" target="_blank" rel="noopener">github.com/glanceapp/glance →</a>
+    </div>
+
+  </div>
+  <footer>Curated for the InstaLanding.ai collection · October 2026 · links were live when checked</footer>
+</div>
+<script>
+const chips=[...document.querySelectorAll('.chip')],cards=[...document.querySelectorAll('.card')],count=document.getElementById('count');
+function apply(f){let n=0;cards.forEach(c=>{const show=f==='all'||c.dataset.k===f;c.style.display=show?'':'none';if(show)n++});count.textContent=n+' of '+cards.length+' shown'}
+chips.forEach(ch=>ch.addEventListener('click',()=>{chips.forEach(c=>c.classList.remove('on'));ch.classList.add('on');apply(ch.dataset.f)}));
+apply('all');
+</script>
+</body>
+</html>

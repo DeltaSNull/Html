@@ -5,8 +5,9 @@ Instructions for coding agents using this repository to build or restyle a landi
 ## What is here
 
 `pages/<slug>/` holds one complete landing page per folder; `components/<slug>/` holds one
-self-contained component (a single animated asset, not a full page) per folder. Both use the
-same folder layout:
+self-contained component (a single animated asset, not a full page) per folder;
+`dashboards/<slug>/` holds dashboard examples and dashboard reference pages per folder.
+All three use the same folder layout:
 
 - `index.html` — the reference build. One file, every asset inlined, opens from disk, no build step.
 - `PROMPT.md` — the one-shot brief it was built from: stack, design values as numbers, structure,
@@ -14,12 +15,12 @@ same folder layout:
 - `README.md` — what the page or component is best for, its style, sections, stack and credits.
 
 `index.json` lists all of them with the same metadata: landing pages under `pages`, components
-under `components`, with per-kind counts in `counts`. Read it first; it is small.
+under `components`, dashboards under `dashboards`, with per-kind counts in `counts`. Read it first; it is small.
 
 ## The loop
 
 1. **Choose.** Match the user's request against `bestFor` and `style` in `index.json`, looking in
-   both `pages` and `components`. Shortlist two or three and read their `README.md` files,
+   `pages`, `components` and `dashboards`. Shortlist two or three and read their `README.md` files,
    not their HTML.
 2. **Decide how to use it.**
    - The user has a framework (React, Vue, Svelte, Astro, …): build from `PROMPT.md` in that

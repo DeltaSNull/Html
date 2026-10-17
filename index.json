@@ -3,8 +3,9 @@
   "url": "https://instalanding.ai",
   "license": "MIT",
   "counts": {
-    "pages": 21,
-    "components": 15
+    "pages": 22,
+    "components": 15,
+    "dashboards": 1
   },
   "pages": [
     {
@@ -1261,6 +1262,40 @@
         "preview": "pages/web-ocean/preview.jpg"
       },
       "page": "https://github.com/Noniv/web-ocean"
+    },
+    {
+      "slug": "fluid-simulation",
+      "title": "Fluid Simulation",
+      "description": "GPU Navier-Stokes fluid solver — drag to paint swirling color with bloom, vorticity and sunrays. Works in mobile browsers.",
+      "bestFor": [
+        "hero backgrounds",
+        "playful interactive pages",
+        "GPU technique references"
+      ],
+      "style": [
+        "dark",
+        "webgl",
+        "fluid",
+        "particles",
+        "glow",
+        "interactive"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "libraries": [
+        "dat.GUI"
+      ],
+      "fonts": [],
+      "uses": [
+        "webgl",
+        "navier-stokes",
+        "pointer-events",
+        "touch"
+      ],
+      "sizeKB": 106,
+      "promptTokens": 400,
+      "builtOn": "WebGL-Fluid-Simulation by Pavel Dobryakov (MIT) — vendored adaptation; analytics + promo removed"
     }
   ],
   "components": [
@@ -1984,6 +2019,41 @@
         "preview": "components/liquid-toggle/preview.jpg"
       },
       "page": "https://forevercomponents.com/components/inputs-switches/liquid-toggle/"
+    }
+  ],
+  "dashboards": [
+    {
+      "slug": "dashboard-examples",
+      "title": "Dashboard Examples",
+      "description": "Eleven dashboard references — open-source kits and live demos — as filterable cards with license tags.",
+      "bestFor": [
+        "dashboard inspiration",
+        "admin template research",
+        "picking a charting stack"
+      ],
+      "style": [
+        "dark",
+        "github",
+        "cards",
+        "filterable",
+        "reference"
+      ],
+      "sections": [
+        "hero",
+        "filters",
+        "grid"
+      ],
+      "libraries": [],
+      "fonts": [
+        "system stack"
+      ],
+      "uses": [
+        "css-grid",
+        "filter-chips"
+      ],
+      "sizeKB": 9,
+      "promptTokens": 250,
+      "builtOn": "curated reference — no vendored code"
     }
   ]
 }
