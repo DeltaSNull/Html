@@ -3,7 +3,7 @@
   "url": "https://instalanding.ai",
   "license": "MIT",
   "counts": {
-    "pages": 20,
+    "pages": 21,
     "components": 15
   },
   "pages": [
@@ -1213,6 +1213,54 @@
       },
       "liveDemo": "https://instalanding.ai/demos/marquee-wall.html",
       "page": "https://instalanding.ai/prompt/skewed-marquee-wall"
+    },
+    {
+      "slug": "web-ocean",
+      "title": "Web Ocean",
+      "description": "Real-time WebGPU ocean renderer from scratch — sunset sea with FFT-simulated waves, whitecaps, sun glitter and a physical sky, flown with a free camera",
+      "category": "web",
+      "theme": "dark",
+      "bestFor": [
+        "WebGPU showcases",
+        "procedural nature demos",
+        "graphics programming references"
+      ],
+      "style": [
+        "dark",
+        "webgpu",
+        "ocean",
+        "procedural",
+        "sunset",
+        "realistic"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "webgpu",
+          "compute-shaders",
+          "fft-waves",
+          "procedural"
+        ]
+      },
+      "credits": [
+        {
+          "label": "web-ocean — GitHub (Noniv)",
+          "href": "https://github.com/Noniv/web-ocean",
+          "note": "The demo this page is adapted from (MIT)."
+        }
+      ],
+      "files": {
+        "html": "pages/web-ocean/index.html",
+        "prompt": "pages/web-ocean/PROMPT.md",
+        "preview": "pages/web-ocean/preview.jpg"
+      },
+      "page": "https://github.com/Noniv/web-ocean"
     }
   ],
   "components": [
