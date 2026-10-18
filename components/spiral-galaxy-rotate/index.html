@@ -1,0 +1,140 @@
+<!doctype html>
+<!--
+  INSTALANDING.AI · Spiral Galaxy Rotate
+  slug     spiral-galaxy-rotate
+  page     https://forevercomponents.com/components/cosmic-space/spiral-galaxy-rotate/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    page CSS: hardcoded dark ground #06040f (in CSS and canvas fill);
+            star palette (#fff3d0 / #D0C3DF / #ff9ad0 / #D8C197), violet core glow
+  sections  stage — full-viewport canvas (#c); the galaxy is the whole page
+  scripts   one inline IIFE: 115-star two-arm spiral, DPR-aware sizing, pointermove
+            spin boost (2.4x decaying), visibilitychange pause, reduced-motion guard
+  assets    none: pure canvas 2D
+
+  ADAPTING
+  - Safe to edit: star count (N=115), arm count (arms=2), base spin (t += 0.0055),
+    spin boost, core glow colors/size, star palette. The forever-agent-meta JSON block
+    lists editable areas, elements to preserve, and known limitations — read it before
+    changing things.
+  - Keep intact: DPR-aware canvas sizing, visibilitychange pause/start, the
+    prefers-reduced-motion guard, and the IIFE wrapper.
+  - Background is hardcoded #06040f in both CSS and the canvas fill — change both
+    to retheme.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="A two-armed spiral galaxy of pink and lilac stars rotates slowly around a glowing violet core, spinning faster on pointer move.">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spiral Galaxy Rotate</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#06040f;}
+  #c{display:block;width:100%;height:100%;}
+  .cap{position:fixed;left:8px;bottom:7px;font:600 10px/1.2 system-ui,sans-serif;
+       letter-spacing:.08em;color:#e6d6ff;opacity:.34;text-transform:uppercase;
+       pointer-events:none;user-select:none;}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+ "file": "infinite/cosmic-space/04-spiral-galaxy-rotate.html",
+ "title": "Spiral Galaxy Rotate",
+ "description": "115 stars form a two-armed spiral galaxy rotating around a violet radial-gradient core; pointer move briefly doubles spin speed.",
+ "useWhen": "Dark-mode hero backgrounds, space or sci-fi themes, ambient screensaver loops.",
+ "avoidWhen": "Light backgrounds (hardcoded dark fill). Layouts where constant rotation competes with readable content.",
+ "agentPrompt": "Increase star count to 200, change arm count to 3, and shift the outer star color from #D8C197 to #ffe066.",
+ "editableAreas": [
+  "star count (N=115)",
+  "arm count (arms=2)",
+  "base spin speed (t += 0.0055)",
+  "spin boost on pointer (spin=2.4)",
+  "core glow colors and size (55*scale)",
+  "star color palette (c assignment)"
+ ],
+ "preserveElements": [
+  "DPR-aware canvas sizing",
+  "visibilitychange pause/start",
+  "prefers-reduced-motion guard",
+  "IIFE wrapper"
+ ],
+ "knownLimitations": [
+  "Background color hardcoded in CSS and canvas fill — must change both to retheme",
+  "Reduced-motion path still renders one frame but does not fully stop animation loop"
+ ],
+ "tier": "curated",
+ "labels": [
+  "mobile-ready",
+  "accessible",
+  "copy-paste-safe",
+  "minimal-deps",
+  "easy-to-modify"
+ ],
+ "tags": [
+  "galaxy",
+  "spiral",
+  "space",
+  "canvas",
+  "rotation",
+  "stars",
+  "ambient"
+ ]
+}
+</script>
+</head>
+<body>
+<canvas id="c" data-section="stage"></canvas>
+<div class="cap">Spiral Galaxy Rotate</div>
+<script>
+(function(){
+  const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W,H,DPR,cx,cy,scale;
+  function size(){
+    DPR=Math.min(devicePixelRatio||1,2);
+    W=cv.clientWidth;H=cv.clientHeight;
+    cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);
+    cx=W/2;cy=H/2;scale=Math.min(W,H)/420;
+  }
+  addEventListener('resize',size);size();
+  const N=115,arms=2,parts=[];
+  for(let i=0;i<N;i++){
+    const arm=i%arms,rr=Math.pow(Math.random(),0.6)*190;
+    parts.push({
+      r:rr, base:arm*(Math.PI*2/arms)+rr*0.022,
+      jit:(Math.random()-0.5)*0.5,
+      sz:0.6+Math.random()*1.8,
+      c:rr<40?'#fff3d0':rr<110?'#D0C3DF':(Math.random()<0.3?'#ff9ad0':'#D8C197')
+    });
+  }
+  let t=0,spin=1;
+  cv.addEventListener('pointermove',()=>{spin=2.4;});
+  function frame(){
+    spin+=(1-spin)*0.04;
+    t+=reduce?0:0.0055*spin;
+    ctx.fillStyle='rgba(6,4,15,0.3)';ctx.fillRect(0,0,W,H);
+    ctx.save();ctx.translate(cx,cy);ctx.scale(1,0.62);ctx.rotate(t);
+    // core glow
+    const g=ctx.createRadialGradient(0,0,0,0,0,55*scale);
+    g.addColorStop(0,'rgba(255,240,210,0.9)');g.addColorStop(.5,'rgba(208,195,223,0.25)');
+    g.addColorStop(1,'rgba(178,169,188,0)');
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,55*scale,0,Math.PI*2);ctx.fill();
+    parts.forEach(p=>{
+      const a=p.base+p.jit+t*0.15*(60/Math.max(p.r,20));
+      const x=Math.cos(a)*p.r*scale,y=Math.sin(a)*p.r*scale;
+      ctx.globalAlpha=0.85;ctx.fillStyle=p.c;
+      ctx.beginPath();ctx.arc(x,y,p.sz*scale,0,Math.PI*2);ctx.fill();
+    });
+    ctx.restore();ctx.globalAlpha=1;
+    raf=requestAnimationFrame(frame);
+  }
+  let raf=0;
+  function start(){if(!raf)raf=requestAnimationFrame(frame);}
+  function stop(){cancelAnimationFrame(raf);raf=0;}
+  document.addEventListener('visibilitychange',()=>{document.hidden?stop():start();});
+  if(reduce){ctx.fillStyle='#06040f';ctx.fillRect(0,0,W,H);frame();}else start();
+})();
+</script>
+</body>
+</html>
