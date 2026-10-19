@@ -5,7 +5,7 @@
  "version": "1.0",
  "counts": {
   "pages": 22,
-  "components": 18,
+  "components": 21,
   "dashboards": 1
  },
  "pages": [
@@ -2170,6 +2170,156 @@
     "preview": "components/x-ray-blueprint-loupe/preview.jpg"
    },
    "page": "https://forevercomponents.com/components/cards/xray-blueprint-loupe/"
+  },
+  {
+   "slug": "viscosity-swirl",
+   "title": "Viscosity Swirl",
+   "description": "Circular espresso cup where 65 golden crema particles swirl like thick liquid; move the pointer to stir and agitate them",
+   "category": "motion",
+   "theme": "dark",
+   "bestFor": [
+    "ambient section backdrops",
+    "sensory/physics-themed demos",
+    "dark-mode hero accents"
+   ],
+   "style": [
+    "dark",
+    "particles",
+    "canvas",
+    "organic",
+    "interactive",
+    "physics"
+   ],
+   "sections": [
+    "stage"
+   ],
+   "stack": {
+    "format": "single-file-html",
+    "buildStep": false,
+    "libraries": [],
+    "fonts": [
+     "Caprasimo",
+     "Work Sans"
+    ],
+    "features": [
+     "canvas-2d",
+     "pointer-interaction",
+     "reduced-motion"
+    ]
+   },
+   "credits": [
+    {
+     "label": "Viscosity Swirl — Forever Components",
+     "href": "https://forevercomponents.com/components/particles-physics/crema-viscosity-hydrodynamic-flow/",
+     "note": "The component this demo is adapted from."
+    }
+   ],
+   "files": {
+    "html": "components/viscosity-swirl/index.html",
+    "prompt": "components/viscosity-swirl/PROMPT.md",
+    "preview": "components/viscosity-swirl/preview.jpg"
+   },
+   "page": "https://forevercomponents.com/components/particles-physics/crema-viscosity-hydrodynamic-flow/"
+  },
+  {
+   "slug": "lissajous-scope",
+   "title": "Lissajous Scope",
+   "description": "Cyan Lissajous figure drifts and rotates on a dark scope grid with phosphor trail decay and a glowing beam head; a Live button upgrades to real mic input",
+   "category": "motion",
+   "theme": "dark",
+   "bestFor": [
+    "audio/music contexts",
+    "ambient hero backgrounds",
+    "creative portfolio pages needing a technical aesthetic"
+   ],
+   "style": [
+    "dark",
+    "canvas",
+    "generative",
+    "phosphor",
+    "audio",
+    "interactive"
+   ],
+   "sections": [
+    "stage"
+   ],
+   "stack": {
+    "format": "single-file-html",
+    "buildStep": false,
+    "libraries": [],
+    "fonts": [
+     "ui-monospace"
+    ],
+    "features": [
+     "canvas-2d",
+     "pointer-interaction",
+     "reduced-motion"
+    ]
+   },
+   "credits": [
+    {
+     "label": "Lissajous Scope — Forever Components",
+     "href": "https://forevercomponents.com/components/audio-visualizers/lissajous-scope/",
+     "note": "The component this demo is adapted from."
+    }
+   ],
+   "files": {
+    "html": "components/lissajous-scope/index.html",
+    "prompt": "components/lissajous-scope/PROMPT.md",
+    "preview": "components/lissajous-scope/preview.jpg"
+   },
+   "page": "https://forevercomponents.com/components/audio-visualizers/lissajous-scope/"
+  },
+  {
+   "slug": "reaction-diffusion",
+   "title": "Reaction Diffusion",
+   "description": "Gray-Scott reaction-diffusion simulation morphing between coral, spots, and maze patterns on a 128x128 grid; teal-to-bone color ramp on near-black",
+   "category": "motion",
+   "theme": "dark",
+   "bestFor": [
+    "ambient generative backgrounds",
+    "science/nature themes",
+    "creative portfolio hero sections needing organic texture"
+   ],
+   "style": [
+    "dark",
+    "canvas",
+    "generative",
+    "simulation",
+    "organic",
+    "interactive",
+    "light-ready"
+   ],
+   "sections": [
+    "stage"
+   ],
+   "stack": {
+    "format": "single-file-html",
+    "buildStep": false,
+    "libraries": [],
+    "fonts": [
+     "ui-monospace"
+    ],
+    "features": [
+     "canvas-2d",
+     "pointer-interaction",
+     "light-theme",
+     "reduced-motion"
+    ]
+   },
+   "credits": [
+    {
+     "label": "Reaction Diffusion — Forever Components",
+     "href": "https://forevercomponents.com/components/generative-geometry/reaction-diffusion/",
+     "note": "The component this demo is adapted from."
+    }
+   ],
+   "files": {
+    "html": "components/reaction-diffusion/index.html",
+    "prompt": "components/reaction-diffusion/PROMPT.md",
+    "preview": "components/reaction-diffusion/preview.jpg"
+   },
+   "page": "https://forevercomponents.com/components/generative-geometry/reaction-diffusion/"
   }
  ],
  "dashboards": [
