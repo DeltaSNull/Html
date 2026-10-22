@@ -1,0 +1,227 @@
+<!doctype html>
+<!--
+  INSTALANDING.AI · Glitch Split
+  slug     glitch-split
+  page     https://forevercomponents.com/components/text-effects/glitch-split/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    near-black #0a0b10 (ground, hardcoded), channel red #ff2d4d / channel cyan
+            #2dd6ff / anchor white #f3f6ff, caption gold #f5d76e (ui-monospace caption),
+            WORD fill font "Arial Black",Impact
+  sections  stage — full-viewport canvas demo; the canvas (#tte06-c) is role="img"
+            with an aria-label
+  scripts   one inline IIFE: canvas 2D glitch renderer. Idle RGB channel-split breathes
+            through a two-rate sine drift; bursts (first ~340ms after mount, then every
+            ~2.1s) jitter offsets, displace 2..6 horizontal slices sideways and fire
+            scanline glints. An idle CRT scan band sweeps the word continuously.
+            DPR-aware sizing on resize; visibilitychange pauses the loop;
+            prefers-reduced-motion renders a single static frame instead
+  assets    none: canvas-drawn, system fonts only
+
+  ADAPTING
+  - Safe to edit: WORD content ('GLITCH'), channel offset range (idle ~0.6, burst 7..11),
+    burst frequency (nextBurst 1400..4000ms), slice count (2..6), scan glint intensity
+    (e*0.5), burst cadence and the idle CRT scan band. The
+    <script type="application/json" id="forever-agent-meta"> block lists editable areas,
+    elements to preserve, and known limitations — read it before changing things.
+  - Keep intact: prefers-reduced-motion guard + staticFrame fallback, visibilitychange
+    pause, the IIFE wrapper, globalCompositeOperation='lighter' for the RGB blend, and
+    the idle CRT scan band between bursts.
+  - Background is hardcoded near-black (#0a0b10); repoint CSS and JS for light themes.
+  - html/body overflow:hidden is what prevents horizontal scroll — keep it.
+  - Source anomalies (reproduced from the component page, not fixed upstream): the
+    meta description ends "...scanline glints on b" (truncated upstream); the
+    knownLimitations entry renders "(<200px)" on the page but arrived with control
+    characters, so this adaptation uses the page-rendered "<200px".
+-->
+<html lang="en"><head><meta charset="utf-8">
+<meta name="description" content="Bold word GLITCH with red/cyan RGB channel-split, idle shimmer and periodic bursts of horizontal slice displacement and scanline glints on b">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Glitch Split</title>
+<style>
+html,body{margin:0;height:100%;overflow:hidden}
+body{background:#0a0b10;display:grid;place-items:center}
+#tte06-c{width:100%;height:100%;display:block}
+.cap{position:fixed;left:8px;bottom:7px;font:600 10px/1 ui-monospace,Menlo,monospace;
+  color:#f5d76e;opacity:.45;letter-spacing:.08em;text-transform:uppercase;user-select:none}
+</style><script type="application/json" id="forever-agent-meta">
+{
+ "file": "infinite/text-effects/06-glitch-split.html",
+ "title": "Glitch Split",
+ "description": "Bold word renders with red/cyan RGB channel-split; periodic bursts trigger horizontal slice displacement and scanline glints over a dark background.",
+ "useWhen": "Cyberpunk/hacker aesthetic hero sections, error states, game UIs, or any dark-theme display needing dramatic ambient motion.",
+ "avoidWhen": "Light backgrounds (dark color hardcoded), accessibility-sensitive contexts (reduced-motion collapses to static), or layouts needing legible body text.",
+ "agentPrompt": "Change WORD to 'ERROR', set the red channel color to '#ff6600' and cyan to '#00ffcc', and slow burst decay from 240ms to 400ms.",
+ "editableAreas": [
+  "WORD content ('GLITCH')",
+  "channel offset range (idle 0.6, burst 7..11)",
+  "burst frequency (nextBurst 1400..4000ms)",
+  "slice count (2..6)",
+  "scan glint intensity (e*0.5)",
+  "burst cadence (nextBurst: first ≈340 ms after mount, then every ~2.1 s) and the idle CRT scan band"
+ ],
+ "preserveElements": [
+  "prefers-reduced-motion guard and staticFrame fallback",
+  "visibilitychange pause",
+  "IIFE wrapper",
+  "globalCompositeOperation='lighter' for RGB blend",
+  "idle CRT scan band between bursts"
+ ],
+ "knownLimitations": [
+  "Background color hardcoded to #0a0b10 — must edit CSS to change",
+  "No touch/pointer interactivity — purely autonomous",
+  "Font size scales with viewport but may clip on very narrow screens (<200px)"
+ ],
+ "tier": "curated",
+ "labels": [
+  "agent-ready",
+  "easy-to-modify",
+  "mobile-ready",
+  "accessible",
+  "copy-paste-safe",
+  "minimal-deps"
+ ],
+ "tags": [
+  "glitch",
+  "rgb-split",
+  "text",
+  "canvas",
+  "chromatic-aberration",
+  "scanlines",
+  "loop"
+ ]
+}
+</script>
+</head><body>
+<canvas id="tte06-c" data-section="stage" role="img" aria-label="Word with RGB channel-split glitch effect"></canvas>
+<div class="cap">Glitch Split</div>
+<script>(function(){
+var cv=document.getElementById('tte06-c'),ctx=cv.getContext('2d');
+var reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+var W=0,H=0,DPR=1,raf=0,running=true,t0=performance.now();
+var WORD='GLITCH',FONT='800 #PXpx "Arial Black",Impact,sans-serif';
+
+function size(){
+  DPR=Math.min(2,window.devicePixelRatio||1);
+  W=cv.clientWidth;H=cv.clientHeight;
+  cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+
+// glitch burst state — calm between, occasional jitter
+var burst=0;        // remaining intensity 0..1
+var nextBurst=340;  // ms until next burst — the first one lands almost on mount
+var slices=[];      // active displaced slices
+function fontFor(px){return FONT.replace('#PX',px);}
+
+function fire(){
+  burst=1;
+  var n=2+((Math.random()*4)|0);
+  slices.length=0;
+  for(var i=0;i<n;i++){
+    slices.push({y:Math.random(),h:.04+Math.random()*.13,dx:(Math.random()*2-1)});
+  }
+  // cap total slice elements well under budget
+  if(slices.length>16)slices.length=16;
+}
+
+function fnt(px){ctx.font=fontFor(px);ctx.textAlign='center';ctx.textBaseline='middle';}
+
+function draw(now){
+  var dt=now-(draw._p||now);draw._p=now;
+  var cx=W/2,cy=H/2;
+  var px=Math.min(W*0.20,H*0.30,140);
+  px=Math.max(px,22);
+
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#0a0b10';ctx.fillRect(0,0,W,H);
+
+  // burst scheduling
+  if(burst<=0){
+    nextBurst-=dt;
+    if(nextBurst<=0){fire();nextBurst=1100+Math.random()*1200;}
+  }else{
+    burst-=dt/300; // decay ~300ms
+    if(burst<0)burst=0;
+  }
+  var b=burst<0?0:burst;
+  // ease-out the intensity so the tail is gentle
+  var e=b*b*(3-2*b);
+
+  fnt(px);
+  // chromatic channel offset scales with burst; between bursts the split never fully
+  // settles — a slow two-rate breath drifts it through registration and back out
+  var idle=1.4+Math.sin(now/760)*1.7+Math.sin(now/1730)*0.7;
+  var off=idle+e*(7+Math.sin(now/40)*4);
+  var jx=(Math.random()*2-1)*e*3;
+  var jy=(Math.random()*2-1)*e*2;
+
+  ctx.globalCompositeOperation='lighter';
+  // R + B channels split apart, G stays as anchor for legibility
+  ctx.fillStyle='#ff2d4d';ctx.fillText(WORD,cx-off+jx,cy+jy*0.5);
+  ctx.fillStyle='#2dd6ff';ctx.fillText(WORD,cx+off+jx,cy-jy*0.5);
+  ctx.fillStyle='#f3f6ff';ctx.fillText(WORD,cx,cy);
+  ctx.globalCompositeOperation='source-over';
+
+  // accent baseline tick — quiet structure
+  ctx.strokeStyle='rgba(245,215,110,'+(0.18+e*0.5)+')';
+  ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(cx-px*1.3,cy+px*0.62);ctx.lineTo(cx+px*1.3,cy+px*0.62);ctx.stroke();
+
+  // idle CRT scan — one soft band sweeps the word every ~2.1s so the quiet is never a still
+  var bandY=cy-px*0.95+((now/2100)%1)*(px*1.95);
+  ctx.fillStyle='rgba(245,215,110,.13)';ctx.fillRect(0,bandY,W,1.5);
+  ctx.fillStyle='rgba(45,214,255,.05)';ctx.fillRect(0,bandY+2,W,px*0.2);
+
+  // slice displacement: re-stamp horizontal bands shifted sideways
+  if(e>0.02){
+    for(var i=0;i<slices.length;i++){
+      var s=slices[i];
+      var sy=(cy-px*0.7)+s.y*(px*1.4);
+      var sh=s.h*px*1.4;
+      var sdx=s.dx*e*26;
+      ctx.save();
+      ctx.beginPath();ctx.rect(0,sy,W,sh);ctx.clip();
+      ctx.globalCompositeOperation='lighter';
+      ctx.fillStyle='rgba(255,45,77,.9)';ctx.fillText(WORD,cx-off+sdx,cy);
+      ctx.fillStyle='rgba(45,214,255,.9)';ctx.fillText(WORD,cx+off+sdx,cy);
+      ctx.fillStyle='#eef2ff';ctx.fillText(WORD,cx+sdx,cy);
+      ctx.restore();
+    }
+    // scan glints
+    var gn=(e*5)|0;
+    ctx.fillStyle='rgba(245,215,110,'+(e*0.5)+')';
+    for(var g=0;g<gn;g++){
+      var gy=cy-px*0.7+Math.random()*px*1.4;
+      ctx.fillRect(0,gy,W,1);
+    }
+  }
+
+  if(running&&!reduce)raf=requestAnimationFrame(draw);
+}
+
+function start(){if(!running)return;cancelAnimationFrame(raf);draw._p=0;raf=requestAnimationFrame(draw);}
+function staticFrame(){
+  // settle to clean, legible word — no offset, no slices
+  burst=0;
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#0a0b10';ctx.fillRect(0,0,W,H);
+  var cx=W/2,cy=H/2,px=Math.max(Math.min(W*0.20,H*0.30,140),22);
+  fnt(px);
+  ctx.fillStyle='#f3f6ff';ctx.fillText(WORD,cx,cy);
+  ctx.strokeStyle='rgba(245,215,110,.35)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(cx-px*1.3,cy+px*0.62);ctx.lineTo(cx+px*1.3,cy+px*0.62);ctx.stroke();
+}
+
+function vis(){
+  if(document.hidden){running=false;cancelAnimationFrame(raf);}
+  else if(!reduce){running=true;start();}
+}
+document.addEventListener('visibilitychange',vis);
+window.addEventListener('resize',function(){size();if(reduce)staticFrame();});
+
+size();
+if(reduce){staticFrame();}
+else{start();}
+})();</script>
+</body></html>

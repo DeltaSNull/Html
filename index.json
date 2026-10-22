@@ -5,7 +5,7 @@
  "version": "1.0",
  "counts": {
   "pages": 22,
-  "components": 27,
+  "components": 30,
   "dashboards": 1
  },
  "pages": [
@@ -2625,6 +2625,152 @@
     "preview": "components/weight-morph-wave/preview.jpg"
    },
    "page": "https://forevercomponents.com/components/kinetic-type/weight-morph-wave/"
+  },
+  {
+   "slug": "glitch-split",
+   "title": "Glitch Split",
+   "description": "Bold word renders with red/cyan RGB channel-split; periodic bursts trigger horizontal slice displacement and scanline glints over a dark background",
+   "category": "motion",
+   "theme": "dark",
+   "bestFor": [
+    "cyberpunk/hacker hero sections",
+    "error states",
+    "game UIs",
+    "dramatic dark-theme display"
+   ],
+   "style": [
+    "dark",
+    "glitch",
+    "rgb-split",
+    "chromatic-aberration",
+    "scanlines",
+    "loop"
+   ],
+   "sections": [
+    "stage"
+   ],
+   "stack": {
+    "format": "single-file-html",
+    "buildStep": false,
+    "libraries": [],
+    "fonts": [],
+    "features": [
+     "canvas-2d",
+     "additive-blend",
+     "reduced-motion"
+    ]
+   },
+   "credits": [
+    {
+     "label": "Glitch Split — Forever Components",
+     "href": "https://forevercomponents.com/components/text-effects/glitch-split/",
+     "note": "The component this demo is adapted from."
+    }
+   ],
+   "files": {
+    "html": "components/glitch-split/index.html",
+    "prompt": "components/glitch-split/PROMPT.md",
+    "preview": "components/glitch-split/preview.jpg"
+   },
+   "page": "https://forevercomponents.com/components/text-effects/glitch-split/"
+  },
+  {
+   "slug": "light-caustics-lens",
+   "title": "Light Caustics Lens",
+   "description": "Card that tilts toward the pointer while soft lime and neutral caustic light shifts behind it",
+   "category": "motion",
+   "theme": "dark",
+   "bestFor": [
+    "interactive feature cards",
+    "product highlight panels",
+    "pointer-playful landing sections"
+   ],
+   "style": [
+    "dark",
+    "card",
+    "caustics",
+    "tilt",
+    "light",
+    "lens"
+   ],
+   "sections": [
+    "stage"
+   ],
+   "stack": {
+    "format": "single-file-html",
+    "buildStep": false,
+    "libraries": [],
+    "fonts": [],
+    "features": [
+     "canvas-2d",
+     "pointer-tilt",
+     "light-theme",
+     "reduced-motion"
+    ]
+   },
+   "credits": [
+    {
+     "label": "Light Caustics Lens — Forever Components",
+     "href": "https://forevercomponents.com/components/cards/light-caustics-lens/",
+     "note": "The component this demo is adapted from."
+    }
+   ],
+   "files": {
+    "html": "components/light-caustics-lens/index.html",
+    "prompt": "components/light-caustics-lens/PROMPT.md",
+    "preview": "components/light-caustics-lens/preview.jpg"
+   },
+   "page": "https://forevercomponents.com/components/cards/light-caustics-lens/"
+  },
+  {
+   "slug": "starfield-warp",
+   "title": "Starfield Warp",
+   "description": "Stars streak outward from center as cyan/purple/blue light trails simulating hyperspace warp; auto-spawning keeps density constant on any viewport",
+   "category": "motion",
+   "theme": "dark",
+   "bestFor": [
+    "dark-mode hero backgrounds",
+    "sci-fi or space themes",
+    "loading screens",
+    "immersive ambient backdrops"
+   ],
+   "style": [
+    "dark",
+    "stars",
+    "warp",
+    "hyperspace",
+    "streaks",
+    "ambient"
+   ],
+   "sections": [
+    "stage"
+   ],
+   "stack": {
+    "format": "single-file-html",
+    "buildStep": false,
+    "libraries": [],
+    "fonts": [
+     "Space Grotesk"
+    ],
+    "features": [
+     "canvas-2d",
+     "motion-blur",
+     "reduced-motion"
+    ]
+   },
+   "credits": [
+    {
+     "label": "Starfield Warp — Forever Components",
+     "href": "https://forevercomponents.com/components/backgrounds/starfield-warp/",
+     "note": "The component this demo is adapted from."
+    }
+   ],
+   "files": {
+    "html": "components/starfield-warp/index.html",
+    "prompt": "components/starfield-warp/PROMPT.md",
+    "preview": "components/starfield-warp/preview.jpg"
+   },
+   "page": "https://forevercomponents.com/components/backgrounds/starfield-warp/"
   }
  ],
  "dashboards": [
