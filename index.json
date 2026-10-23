@@ -5,7 +5,7 @@
  "version": "1.0",
  "counts": {
   "pages": 22,
-  "components": 30,
+  "components": 33,
   "dashboards": 1
  },
  "pages": [
@@ -2771,6 +2771,153 @@
     "preview": "components/starfield-warp/preview.jpg"
    },
    "page": "https://forevercomponents.com/components/backgrounds/starfield-warp/"
+  },
+  {
+   "slug": "gravitational-lens-ring",
+   "title": "Gravitational Lens Ring",
+   "description": "Starlight bends tangentially around a dark mass; lensed galaxy arcs converge into a glowing magenta Einstein ring",
+   "category": "motion",
+   "theme": "dark",
+   "bestFor": [
+    "dark-mode hero backgrounds",
+    "science/space themes",
+    "ambient screensavers"
+   ],
+   "style": [
+    "dark",
+    "space",
+    "canvas",
+    "ambient",
+    "physics",
+    "generative"
+   ],
+   "sections": [
+    "stage"
+   ],
+   "stack": {
+    "format": "single-file-html",
+    "buildStep": false,
+    "libraries": [],
+    "fonts": [
+     "ui-monospace"
+    ],
+    "features": [
+     "canvas-2d",
+     "pointer-interaction",
+     "reduced-motion"
+    ]
+   },
+   "credits": [
+    {
+     "label": "Gravitational Lens Ring — Forever Components",
+     "href": "https://forevercomponents.com/components/cosmic-space/gravitational-lens-ring/",
+     "note": "The component this demo is adapted from."
+    }
+   ],
+   "files": {
+    "html": "components/gravitational-lens-ring/index.html",
+    "prompt": "components/gravitational-lens-ring/PROMPT.md",
+    "preview": "components/gravitational-lens-ring/preview.jpg"
+   },
+   "page": "https://forevercomponents.com/components/cosmic-space/gravitational-lens-ring/"
+  },
+  {
+   "slug": "hyperspace-warp",
+   "title": "Hyperspace Warp",
+   "description": "110 star streaks radiate outward from a glowing center in a hyperspace tunnel; press and hold to accelerate 2.6x",
+   "category": "motion",
+   "theme": "dark",
+   "bestFor": [
+    "dark-mode hero backgrounds",
+    "sci-fi/space UIs",
+    "loading screens"
+   ],
+   "style": [
+    "dark",
+    "space",
+    "canvas",
+    "warp",
+    "stars",
+    "animation-heavy"
+   ],
+   "sections": [
+    "stage"
+   ],
+   "stack": {
+    "format": "single-file-html",
+    "buildStep": false,
+    "libraries": [],
+    "fonts": [],
+    "features": [
+     "canvas-2d",
+     "pointer-interaction",
+     "keyboard",
+     "reduced-motion"
+    ]
+   },
+   "credits": [
+    {
+     "label": "Hyperspace Warp — Forever Components",
+     "href": "https://forevercomponents.com/components/cosmic-space/hyperspace-warp-streaks/",
+     "note": "The component this demo is adapted from."
+    }
+   ],
+   "files": {
+    "html": "components/hyperspace-warp/index.html",
+    "prompt": "components/hyperspace-warp/PROMPT.md",
+    "preview": "components/hyperspace-warp/preview.jpg"
+   },
+   "page": "https://forevercomponents.com/components/cosmic-space/hyperspace-warp-streaks/"
+  },
+  {
+   "slug": "mandelbrot-zoom",
+   "title": "Mandelbrot Zoom",
+   "description": "Escape-time Mandelbrot set slowly zooms into a filigree boundary seam, in smooth red-to-gold bands on near-black",
+   "category": "motion",
+   "theme": "dark",
+   "bestFor": [
+    "dark-mode hero backgrounds",
+    "math/science pages",
+    "ambient screensaver displays"
+   ],
+   "style": [
+    "dark",
+    "fractal",
+    "canvas",
+    "generative",
+    "ambient",
+    "math",
+    "light-ready"
+   ],
+   "sections": [
+    "stage"
+   ],
+   "stack": {
+    "format": "single-file-html",
+    "buildStep": false,
+    "libraries": [],
+    "fonts": [
+     "ui-monospace"
+    ],
+    "features": [
+     "canvas-2d",
+     "reduced-motion",
+     "light-theme"
+    ]
+   },
+   "credits": [
+    {
+     "label": "Mandelbrot Zoom — Forever Components",
+     "href": "https://forevercomponents.com/components/fractals-automata/mandelbrot-zoom/",
+     "note": "The component this demo is adapted from."
+    }
+   ],
+   "files": {
+    "html": "components/mandelbrot-zoom/index.html",
+    "prompt": "components/mandelbrot-zoom/PROMPT.md",
+    "preview": "components/mandelbrot-zoom/preview.jpg"
+   },
+   "page": "https://forevercomponents.com/components/fractals-automata/mandelbrot-zoom/"
   }
  ],
  "dashboards": [
