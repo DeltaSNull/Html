@@ -1,0 +1,280 @@
+<!doctype html>
+<!--
+  INSTALANDING.AI · N-Body Waltz
+  slug     n-body-waltz
+  page     https://forevercomponents.com/components/particles-physics/n-body-waltz/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    :root custom properties: --nbw-bg (deep ground), --nbw-fade (trail
+            fade), --nbw-accent (caption), --nbw-p1..p5 (core,glow palette
+            pairs), --nbw-blend / --nbw-halo / --nbw-ta / --nbw-ga (trail and
+            glow alphas); a :root[data-theme="light"] block holds the light
+            palette, switched by ?theme=light or a {type:'forever:theme'}
+            postMessage
+  sections  stage — full-viewport canvas (#nbw-c); the orbiting bodies are the
+            whole page
+  scripts   one inline IIFE: O(N²) gravity loop with 3 substeps per frame,
+            colored comet trails, pointer repulsion, click reseeds, soft
+            recentering and leash, DPR-aware sizing, theme sync from tokens
+  assets    none: pure canvas 2D
+
+  ADAPTING
+  - Safe to edit: body count (N=5), gravitational constant (G=1400), trail
+    length (TLEN=46), color palette (PAL array / --nbw-p* tokens), pointer
+    repulsion strength (f=2600/d2), substep count (sub=3), theme tokens.
+    The forever-agent-meta JSON block lists editable areas, elements to
+    preserve, and known limitations — read it before changing things.
+  - Keep intact: DPR-aware canvas sizing and ctx.setTransform, the
+    visibilitychange pause/start guard, the reduced-motion static fallback
+    (draw after 140 steps), the IIFE wrapper, and the theme hook.
+  - O(N²) loop with 3 substeps is heavy on low-end CPUs as N grows; soft
+    recentering and the leash may cause subtle energy drift in long runs.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="forever-preview-lifecycle" content="demo-v1">
+<meta name="description" content="Five glowing gravitational bodies orbit and sling each other on deep space, trailing colored comet tails; pointer perturbs the dance.">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>N-Body Waltz</title>
+<script>
+/* theme hook: the canvas loads the tile with ?theme=light|dark (or stamps data-theme on <html>).
+   Runs before first paint — no dark flash. Standalone default stays dark. */
+(function(){var t=new URLSearchParams(location.search).get('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);})();
+</script>
+<style>
+  /* theme tokens — dark values are the defaults; light palette in the [data-theme] block.
+     --nbw-p1..p5 are "core,glow" pairs; --nbw-blend drops additive glow on a light ground. */
+  :root{
+    --nbw-bg:#211A17; --nbw-fade:rgba(33,26,23,0.30); --nbw-accent:#D345A4; --nbw-cap-o:.34;
+    --nbw-blend:lighter; --nbw-halo:rgba(0,0,0,0); --nbw-ta:0.5; --nbw-ga:0.85;
+    --nbw-p1:#ffd0ec,#D345A4; --nbw-p2:#ffd9a8,#ff9d4d; --nbw-p3:#a8ffe6,#39d6a8;
+    --nbw-p4:#fff0c2,#C0B459; --nbw-p5:#ffb4c8,#ff5e86;
+  }
+  :root[data-theme="light"]{
+    --nbw-bg:#f7f1ee; --nbw-fade:rgba(247,241,238,0.30); --nbw-accent:#c12e91; --nbw-cap-o:.62;
+    --nbw-blend:source-over; --nbw-halo:rgba(247,241,238,0); --nbw-ta:0.42; --nbw-ga:0.5;
+    --nbw-p1:#7d1a5c,#c12e91; --nbw-p2:#7d4106,#cf7a1c; --nbw-p3:#0b5040,#1d8a6b;
+    --nbw-p4:#5c5410,#8d7e26; --nbw-p5:#7d1029,#c33a5c;
+  }
+  html,body{margin:0;height:100%;overflow:hidden;background:var(--nbw-bg);}
+  #nbw-c{display:block;width:100%;height:100%;}
+  .cap{position:fixed;left:9px;bottom:8px;font:600 10px/1.2 ui-monospace,Menlo,Consolas,monospace;
+       letter-spacing:.16em;color:var(--nbw-accent);opacity:var(--nbw-cap-o);text-transform:uppercase;
+       pointer-events:none;user-select:none;}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+ "file": "infinite/particles-physics/14-n-body-waltz.html",
+ "title": "N-Body Waltz",
+ "description": "Five glowing gravitational bodies orbit and sling each other in deep space, trailing colored comet tails; pointer perturbs the dance, click reseeds.",
+ "useWhen": "Dark-mode hero backgrounds, space/science themes, generative art displays where constant motion is welcome.",
+ "avoidWhen": "Low-end devices (O(N²) physics loop per frame with 3 substeps). Any context requiring legible text overlays or light backgrounds.",
+ "agentPrompt": "Increase body count to 7 by changing N=5 to N=7 and add two palette entries to PAL, then slow trails by reducing TLEN from 46 to 30. Theme: dark tokens live in :root, the light variant in :root[data-theme=\"light\"]; ?theme=light or a {type:'forever:theme'} postMessage switches at runtime.",
+ "editableAreas": [
+  "body count (N=5)",
+  "gravitational constant (G=1400)",
+  "trail length (TLEN=46)",
+  "color palette (PAL array)",
+  "pointer repulsion strength (f=2600/d2)",
+  "substep count (sub=3)",
+  "theme tokens (:root dark defaults + [data-theme=light] overrides)"
+ ],
+ "preserveElements": [
+  "DPR-aware canvas sizing and ctx.setTransform",
+  "visibilitychange pause/start guard",
+  "reduced-motion static fallback (draw after 140 steps)",
+  "IIFE wrapper",
+  "theme hook (?theme= bootstrap + forever:theme message listener + theme tokens)",
+  "demo-v1 preview lifecycle: initialize demoEnabled from window.__foreverPreview and stop attract work on the window forever:interactive event; retain manual feedback, settling, cleanup and explicit sessions"
+ ],
+ "knownLimitations": [
+  "O(N²) gravity loop runs 3 substeps per frame — heavy on low-end CPUs as N grows",
+  "Background color hardcoded (#05060f) — must edit CSS to change from deep navy",
+  "Soft recentering and leash may cause subtle energy drift in long runs",
+  "State remains local to each mounted instance; format/theme remount preserves takeover, not component values."
+ ],
+ "tier": "curated",
+ "labels": [
+  "mobile-ready",
+  "accessible",
+  "copy-paste-safe",
+  "minimal-deps",
+  "animation-heavy",
+  "light-ready"
+ ],
+ "tags": [
+  "physics",
+  "gravity",
+  "n-body",
+  "canvas",
+  "particles",
+  "space",
+  "generative"
+ ]
+}
+</script>
+</head>
+<body>
+<canvas id="nbw-c" class="nbw-root" data-section="stage"></canvas>
+<div class="cap">N-Body Waltz</div>
+<script>
+(function(){
+  let demoEnabled=window.__foreverPreview?.demoEnabled!==false,sessionActive=false,takenOver=window.__foreverPreview?.interactive===true;
+  function stopDemo(){if(!takenOver){sessionActive=false;takenOver=true;}demoEnabled=false;}
+  addEventListener('forever:interactive',stopDemo);
+  document.addEventListener('pointerdown',stopDemo,{capture:true});document.addEventListener('click',stopDemo,{capture:true});document.addEventListener('keydown',e=>{if(e.key!=='Tab')stopDemo();},{capture:true});
+
+  const cv=document.getElementById('nbw-c'),ctx=cv.getContext('2d');
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W,H,DPR,cx,cy,S;
+  function size(){
+    DPR=Math.min(devicePixelRatio||1,2);
+    W=cv.clientWidth;H=cv.clientHeight;
+    cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);
+    cx=W/2;cy=H/2;S=Math.min(W,H)/520;
+  }
+  addEventListener('resize',size);size();
+
+  // colour palette around accent #D345A4 — filled from the --nbw-p* tokens
+  const PAL=[{},{},{},{},{}];
+  const root=document.documentElement, C={};
+  function syncTheme(){          // re-read on every theme flip; the bodies keep their PAL refs
+    const FB={'--nbw-bg':'#211A17','--nbw-fade':'rgba(33,26,23,0.30)','--nbw-blend':'lighter','--nbw-halo':'rgba(0,0,0,0)','--nbw-ta':'0.5','--nbw-ga':'0.85','--nbw-p1':'#ffd0ec,#D345A4','--nbw-p2':'#ffd9a8,#ff9d4d','--nbw-p3':'#a8ffe6,#39d6a8','--nbw-p4':'#fff0c2,#C0B459','--nbw-p5':'#ffb4c8,#ff5e86'}, cs=getComputedStyle(root), g=n=>cs.getPropertyValue(n).trim()||FB[n];
+    C.bg=g('--nbw-bg');C.fade=g('--nbw-fade');C.halo=g('--nbw-halo');C.blend=g('--nbw-blend');
+    C.ta=+g('--nbw-ta');C.ga=+g('--nbw-ga');
+    for(let i=0;i<5;i++){const p=g('--nbw-p'+(i+1)).split(',');PAL[i].c=p[0].trim();PAL[i].g=p[1].trim();}
+  }
+  addEventListener('message',e=>{const d=e.data;
+    if(d&&d.type==='forever:theme'&&(d.theme==='light'||d.theme==='dark')){
+      root.setAttribute('data-theme',d.theme);syncTheme();
+      if(reduce){ctx.fillStyle=C.bg;ctx.fillRect(0,0,W,H);draw();}
+    }});
+  syncTheme();
+  const N=5, G=1400, SOFT=900, TLEN=46;
+  let B=[];
+  function seed(){
+    B=[];
+    for(let i=0;i<N;i++){
+      const a=Math.PI*2*i/N+0.3, r=70+Math.random()*40;
+      const m=10+Math.random()*22;
+      B.push({
+        x:Math.cos(a)*r, y:Math.sin(a)*r,
+        vx:-Math.sin(a)*0.9, vy:Math.cos(a)*0.9,
+        m:m, rad:2+Math.pow(m,0.42)*0.9,
+        pal:PAL[i%PAL.length], tr:[]
+      });
+    }
+    // zero net momentum + center
+    let px=0,py=0,mx=0,my=0,M=0;
+    B.forEach(b=>{px+=b.vx*b.m;py+=b.vy*b.m;mx+=b.x*b.m;my+=b.y*b.m;M+=b.m;});
+    B.forEach(b=>{b.vx-=px/M/b.m*0;b.vy-=py/M/b.m*0;b.x-=mx/M;b.y-=my/M;});
+    px=0;py=0;B.forEach(b=>{px+=b.vx*b.m;py+=b.vy*b.m;});
+    B.forEach(b=>{b.vx-=px/M;b.vy-=py/M;});
+  }
+  seed();
+
+  let kick=0;
+  cv.addEventListener('pointermove',e=>{
+    const r=cv.getBoundingClientRect();
+    const mx=(e.clientX-r.left-cx)/S, my=(e.clientY-r.top-cy)/S;
+    B.forEach(b=>{
+      const dx=b.x-mx, dy=b.y-my, d2=dx*dx+dy*dy+400, d=Math.sqrt(d2);
+      const f=2600/d2; b.vx+=dx/d*f; b.vy+=dy/d*f;
+    });
+    kick=1;
+  });
+  cv.addEventListener('click',()=>{seed();kick=1;});
+
+  function step(dt){
+    // accelerations
+    for(let i=0;i<N;i++){let bi=B[i];bi.ax=0;bi.ay=0;}
+    for(let i=0;i<N;i++){
+      for(let j=i+1;j<N;j++){
+        const bi=B[i],bj=B[j];
+        let dx=bj.x-bi.x, dy=bj.y-bi.y;
+        const d2=dx*dx+dy*dy+SOFT, inv=1/Math.sqrt(d2), f=G/d2;
+        const fx=dx*inv*f, fy=dy*inv*f;
+        bi.ax+=fx*bj.m; bi.ay+=fy*bj.m;
+        bj.ax-=fx*bi.m; bj.ay-=fy*bi.m;
+      }
+    }
+    let cmx=0,cmy=0,M=0;
+    for(let i=0;i<N;i++){
+      const b=B[i];
+      b.vx+=b.ax*dt; b.vy+=b.ay*dt;
+      b.x+=b.vx*dt; b.y+=b.vy*dt;
+      cmx+=b.x*b.m;cmy+=b.y*b.m;M+=b.m;
+    }
+    // soft recenter so the dance never drifts off-frame
+    cmx/=M;cmy/=M;
+    const bound=Math.min(W,H)/S*0.45;
+    for(let i=0;i<N;i++){
+      const b=B[i];
+      b.x-=cmx*0.04; b.y-=cmy*0.04;
+      // gentle leash if a body slings too far
+      const d=Math.hypot(b.x,b.y);
+      if(d>bound){const pull=(d-bound)*0.0009; b.vx-=b.x/d*pull*d; b.vy-=b.y/d*pull*d;}
+      b.tr.push(b.x,b.y);
+      if(b.tr.length>TLEN*2)b.tr.splice(0,b.tr.length-TLEN*2);
+    }
+  }
+
+  function draw(){
+    ctx.fillStyle=C.fade;ctx.fillRect(0,0,W,H);
+    ctx.save();ctx.translate(cx,cy);ctx.scale(S,S);
+    ctx.globalCompositeOperation=C.blend;
+    // tails
+    ctx.lineCap='round';
+    for(let i=0;i<N;i++){
+      const b=B[i], tr=b.tr, n=tr.length/2;
+      for(let k=1;k<n;k++){
+        const t=k/n;
+        ctx.strokeStyle=b.pal.g;
+        ctx.globalAlpha=t*t*C.ta;
+        ctx.lineWidth=(0.4+t*2.2);
+        ctx.beginPath();
+        ctx.moveTo(tr[(k-1)*2],tr[(k-1)*2+1]);
+        ctx.lineTo(tr[k*2],tr[k*2+1]);
+        ctx.stroke();
+      }
+    }
+    ctx.globalAlpha=1;
+    // bodies with glow
+    for(let i=0;i<N;i++){
+      const b=B[i];
+      const gr=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.rad*5.5);
+      gr.addColorStop(0,b.pal.c);
+      gr.addColorStop(0.28,b.pal.g);
+      gr.addColorStop(1,C.halo);
+      ctx.fillStyle=gr;ctx.globalAlpha=C.ga;
+      ctx.beginPath();ctx.arc(b.x,b.y,b.rad*5.5,0,6.2832);ctx.fill();
+      ctx.fillStyle=b.pal.c;ctx.globalAlpha=1;
+      ctx.beginPath();ctx.arc(b.x,b.y,b.rad,0,6.2832);ctx.fill();
+    }
+    ctx.restore();ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
+  }
+
+  let raf=0;
+  function frame(){raf=0;if(document.hidden)return;
+    kick*=0.92;
+    const sub=3, dt=0.55;
+    for(let s=0;s<sub;s++)step(dt);
+    draw();
+    if(!reduce&&(demoEnabled||(sessionActive)))start();
+  }
+  function start(){if(!raf&&!document.hidden&&!reduce&&(demoEnabled||(sessionActive)))raf=requestAnimationFrame(frame);}
+  function stop(){cancelAnimationFrame(raf);raf=0;}
+  document.addEventListener('visibilitychange',()=>{document.hidden?stop():start();});
+  if(reduce){
+    ctx.fillStyle=C.bg;ctx.fillRect(0,0,W,H);
+    for(let s=0;s<140;s++)step(0.55);
+    draw();
+  }else start();
+  ['pointerdown','pointermove','pointerleave','click'].forEach(type=>cv.addEventListener(type,()=>{sessionActive=true;if(reduce){for(let k=0;k<4;k++)step(.55);draw();}else start();}));
+})();
+</script>
+</body>
+</html>

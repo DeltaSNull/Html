@@ -5,7 +5,7 @@
  "version": "1.0",
  "counts": {
   "pages": 22,
-  "components": 33,
+  "components": 36,
   "dashboards": 1
  },
  "pages": [
@@ -2918,6 +2918,154 @@
     "preview": "components/mandelbrot-zoom/preview.jpg"
    },
    "page": "https://forevercomponents.com/components/fractals-automata/mandelbrot-zoom/"
+  },
+  {
+   "slug": "n-body-waltz",
+   "title": "N-Body Waltz",
+   "description": "Five glowing gravitational bodies orbit and sling each other in deep space, trailing colored comet tails; pointer perturbs the dance, click reseeds",
+   "category": "motion",
+   "theme": "dark",
+   "bestFor": [
+    "dark-mode hero backgrounds",
+    "space/science themes",
+    "generative art displays"
+   ],
+   "style": [
+    "dark",
+    "space",
+    "canvas",
+    "physics",
+    "generative",
+    "ambient"
+   ],
+   "sections": [
+    "stage"
+   ],
+   "stack": {
+    "format": "single-file-html",
+    "buildStep": false,
+    "libraries": [],
+    "fonts": [
+     "ui-monospace"
+    ],
+    "features": [
+     "canvas-2d",
+     "pointer-interaction",
+     "reduced-motion",
+     "theme-switch"
+    ]
+   },
+   "credits": [
+    {
+     "label": "N-Body Waltz — Forever Components",
+     "href": "https://forevercomponents.com/components/particles-physics/n-body-waltz/",
+     "note": "The component this demo is adapted from."
+    }
+   ],
+   "files": {
+    "html": "components/n-body-waltz/index.html",
+    "prompt": "components/n-body-waltz/PROMPT.md",
+    "preview": "components/n-body-waltz/preview.jpg"
+   },
+   "page": "https://forevercomponents.com/components/particles-physics/n-body-waltz/"
+  },
+  {
+   "slug": "charged-plasma-lattice",
+   "title": "Charged Plasma Lattice",
+   "description": "Charged particles attract and repel via Coulomb forces; teal bonds crystallize between opposite charges as temperature pulses between order and chaos",
+   "category": "motion",
+   "theme": "dark",
+   "bestFor": [
+    "dark-mode hero backgrounds",
+    "science/tech themes",
+    "ambient visualizations"
+   ],
+   "style": [
+    "dark",
+    "space",
+    "canvas",
+    "physics",
+    "generative",
+    "ambient"
+   ],
+   "sections": [
+    "stage"
+   ],
+   "stack": {
+    "format": "single-file-html",
+    "buildStep": false,
+    "libraries": [],
+    "fonts": [
+     "ui-monospace"
+    ],
+    "features": [
+     "canvas-2d",
+     "pointer-interaction",
+     "reduced-motion",
+     "theme-switch"
+    ]
+   },
+   "credits": [
+    {
+     "label": "Charged Plasma Lattice — Forever Components",
+     "href": "https://forevercomponents.com/components/particles-physics/charged-plasma-lattice/",
+     "note": "The component this demo is adapted from."
+    }
+   ],
+   "files": {
+    "html": "components/charged-plasma-lattice/index.html",
+    "prompt": "components/charged-plasma-lattice/PROMPT.md",
+    "preview": "components/charged-plasma-lattice/preview.jpg"
+   },
+   "page": "https://forevercomponents.com/components/particles-physics/charged-plasma-lattice/"
+  },
+  {
+   "slug": "drifting-nebula",
+   "title": "Drifting Nebula",
+   "description": "26 soft radial blobs in pink, violet, and blue drift with additive blending over 70 twinkling stars; cursor gently pulls the nebula clouds",
+   "category": "motion",
+   "theme": "dark",
+   "bestFor": [
+    "dark-mode hero backgrounds",
+    "space/sci-fi themes",
+    "ambient looping screensavers"
+   ],
+   "style": [
+    "dark",
+    "space",
+    "canvas",
+    "ambient",
+    "generative"
+   ],
+   "sections": [
+    "stage"
+   ],
+   "stack": {
+    "format": "single-file-html",
+    "buildStep": false,
+    "libraries": [],
+    "fonts": [
+     "system-ui"
+    ],
+    "features": [
+     "canvas-2d",
+     "pointer-interaction",
+     "reduced-motion"
+    ]
+   },
+   "credits": [
+    {
+     "label": "Drifting Nebula — Forever Components",
+     "href": "https://forevercomponents.com/components/cosmic-space/drifting-nebula/",
+     "note": "The component this demo is adapted from."
+    }
+   ],
+   "files": {
+    "html": "components/drifting-nebula/index.html",
+    "prompt": "components/drifting-nebula/PROMPT.md",
+    "preview": "components/drifting-nebula/preview.jpg"
+   },
+   "page": "https://forevercomponents.com/components/cosmic-space/drifting-nebula/"
   }
  ],
  "dashboards": [

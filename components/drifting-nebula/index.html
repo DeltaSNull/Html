@@ -1,0 +1,148 @@
+<!doctype html>
+<!--
+  INSTALANDING.AI · Drifting Nebula
+  slug     drifting-nebula
+  page     https://forevercomponents.com/components/cosmic-space/drifting-nebula/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    hardcoded dark purple ground #0a0418 — in both the CSS and the
+            canvas fill; change both to retheme. Blob palette (cols array):
+            pink 255,90,170 / violet 150,90,255 / blue 90,160,255 / peach
+            255,140,90; starlight #fff; caption #ffd6f4 at opacity .34
+  sections  stage — full-viewport canvas (#c); the nebula field is the whole
+            page
+  scripts   one inline IIFE: 26 soft radial blobs breathing and drifting
+            with additive blending over 70 twinkling stars, cursor pull,
+            DPR-aware sizing
+  assets    none: pure canvas 2D
+
+  ADAPTING
+  - Safe to edit: blob count (N=26), color palette (cols array), drift
+    speed (dx/dy *= 0.0004), breathe intensity (0.85+0.15*sin), pointer
+    pull strength (0.02). The forever-agent-meta JSON block lists editable
+    areas, elements to preserve, and known limitations — read it before
+    changing things.
+  - Keep intact: the IIFE wrapper, the visibilitychange pause/start guard,
+    the prefers-reduced-motion guard (t freezes, blobs stop moving), and
+    DPR-aware canvas sizing.
+  - Background is hardcoded #0a0418 in both CSS and the canvas fill — change
+    both to retheme. Reduced-motion renders one static frame only.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="Soft additive-blended pink, violet and blue nebula clouds breathe and drift over twinkling stars, gently pulled by the cursor.">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Drifting Nebula</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#0a0418;}
+  #c{display:block;width:100%;height:100%;}
+  .cap{position:fixed;left:8px;bottom:7px;font:600 10px/1.2 system-ui,sans-serif;
+       letter-spacing:.08em;color:#ffd6f4;opacity:.34;text-transform:uppercase;
+       pointer-events:none;user-select:none;}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+ "file": "infinite/cosmic-space/09-drifting-nebula.html",
+ "title": "Drifting Nebula",
+ "description": "26 soft radial blobs in pink, violet, and blue drift with additive blending over 70 twinkling stars; cursor gently pulls the nebula clouds.",
+ "useWhen": "Dark-mode hero backgrounds, space or sci-fi themes, ambient looping screensavers where gentle motion sets atmosphere.",
+ "avoidWhen": "Light-background UIs (background hardcoded dark purple). Content-heavy layouts where text legibility matters.",
+ "agentPrompt": "Change the color palette to cool teal/green tones by replacing cols with ['90,255,200','60,200,180','100,255,150','40,180,220'], and increase blob count N from 26 to 36 for a denser nebula.",
+ "editableAreas": [
+  "blob count (N=26)",
+  "color palette (cols array)",
+  "drift speed (dx/dy *= 0.0004)",
+  "breathe intensity (0.85+0.15*sin)",
+  "pointer pull strength (0.02)"
+ ],
+ "preserveElements": [
+  "IIFE wrapper",
+  "visibilitychange pause/start",
+  "prefers-reduced-motion guard (t freezes, blobs stop moving)",
+  "DPR-aware canvas sizing"
+ ],
+ "knownLimitations": [
+  "Background color hardcoded in CSS and canvas fill — must change both to alter base color",
+  "Reduced-motion mode renders one static frame only; stars still twinkle since t still advances in that single frame"
+ ],
+ "tier": "curated",
+ "labels": [
+  "mobile-ready",
+  "accessible",
+  "copy-paste-safe",
+  "minimal-deps"
+ ],
+ "tags": [
+  "nebula",
+  "canvas",
+  "space",
+  "additive-blend",
+  "ambient",
+  "pointer",
+  "background"
+ ]
+}
+</script>
+</head>
+<body>
+<canvas id="c" data-section="stage"></canvas>
+<div class="cap">Drifting Nebula</div>
+<script>
+(function(){
+  const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W,H,DPR;
+  function size(){
+    DPR=Math.min(devicePixelRatio||1,2);
+    W=cv.clientWidth;H=cv.clientHeight;
+    cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);
+  }
+  addEventListener('resize',size);size();
+  const cols=['255,90,170','150,90,255','90,160,255','255,140,90'];
+  const N=26,blobs=[];
+  for(let i=0;i<N;i++)blobs.push({
+    x:Math.random(),y:Math.random(),
+    r:0.16+Math.random()*0.26,
+    c:cols[(Math.random()*cols.length)|0],
+    dx:(Math.random()-0.5)*0.0004,dy:(Math.random()-0.5)*0.0004,
+    ph:Math.random()*6.28,sp:0.3+Math.random()*0.6
+  });
+  const stars=[];for(let i=0;i<70;i++)stars.push({x:Math.random(),y:Math.random(),r:Math.random()*1.2,ph:Math.random()*6.28});
+  let t=0,px=0.5,py=0.5;
+  cv.addEventListener('pointermove',e=>{const r=cv.getBoundingClientRect();
+    px=(e.clientX-r.left)/W;py=(e.clientY-r.top)/H;});
+  function frame(){
+    t+=reduce?0:0.01;
+    ctx.fillStyle='#0a0418';ctx.fillRect(0,0,W,H);
+    ctx.globalCompositeOperation='lighter';
+    const D=Math.min(W,H);
+    blobs.forEach(b=>{
+      if(!reduce){b.x+=b.dx;b.y+=b.dy;
+        if(b.x<-.2||b.x>1.2)b.dx*=-1;if(b.y<-.2||b.y>1.2)b.dy*=-1;}
+      const pull=0.02*(px-0.5),pullY=0.02*(py-0.5);
+      const breath=0.85+0.15*Math.sin(t*b.sp+b.ph);
+      const x=(b.x+pull)*W,y=(b.y+pullY)*H,rr=b.r*D*breath;
+      const g=ctx.createRadialGradient(x,y,0,x,y,rr);
+      g.addColorStop(0,'rgba('+b.c+',0.22)');
+      g.addColorStop(0.5,'rgba('+b.c+',0.08)');
+      g.addColorStop(1,'rgba('+b.c+',0)');
+      ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,rr,0,Math.PI*2);ctx.fill();
+    });
+    ctx.globalCompositeOperation='source-over';
+    stars.forEach(s=>{ctx.globalAlpha=0.4+0.5*Math.abs(Math.sin(t*3+s.ph));
+      ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(s.x*W,s.y*H,s.r,0,Math.PI*2);ctx.fill();});
+    ctx.globalAlpha=1;
+    raf=requestAnimationFrame(frame);
+  }
+  let raf=0;
+  function start(){if(!raf)raf=requestAnimationFrame(frame);}
+  function stop(){cancelAnimationFrame(raf);raf=0;}
+  document.addEventListener('visibilitychange',()=>{document.hidden?stop():start();});
+  if(reduce){frame();}else start();
+})();
+</script>
+</body>
+</html>
