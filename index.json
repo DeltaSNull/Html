@@ -5,7 +5,7 @@
  "version": "1.0",
  "counts": {
   "pages": 22,
-  "components": 36,
+  "components": 39,
   "dashboards": 1
  },
  "pages": [
@@ -3066,6 +3066,154 @@
     "preview": "components/drifting-nebula/preview.jpg"
    },
    "page": "https://forevercomponents.com/components/cosmic-space/drifting-nebula/"
+  },
+  {
+   "slug": "crt-phosphor-degauss",
+   "title": "CRT Phosphor Degauss",
+   "description": "An 8-bit arcade monitor panel with a green-phosphor CRT screen; pressing DEGAUSS warps the glowing vector ship with magnetic distortion",
+   "category": "motion",
+   "theme": "dark",
+   "bestFor": [
+    "retro gaming themes",
+    "arcade-style controls",
+    "8-bit hero accents"
+   ],
+   "style": [
+    "dark",
+    "retro",
+    "arcade",
+    "glitch",
+    "pixel",
+    "canvas"
+   ],
+   "sections": [
+    "stage"
+   ],
+   "stack": {
+    "format": "single-file-html",
+    "buildStep": false,
+    "libraries": [],
+    "fonts": [
+     "Press Start 2P"
+    ],
+    "features": [
+     "canvas-2d",
+     "click-interaction",
+     "reduced-motion"
+    ]
+   },
+   "credits": [
+    {
+     "label": "CRT Phosphor Degauss — Forever Components",
+     "href": "https://forevercomponents.com/components/retro-glitch/crt-scanline-phosphor-glitch-pad/",
+     "note": "The component this demo is adapted from."
+    }
+   ],
+   "files": {
+    "html": "components/crt-phosphor-degauss/index.html",
+    "prompt": "components/crt-phosphor-degauss/PROMPT.md",
+    "preview": "components/crt-phosphor-degauss/preview.jpg"
+   },
+   "page": "https://forevercomponents.com/components/retro-glitch/crt-scanline-phosphor-glitch-pad/"
+  },
+  {
+   "slug": "glyph-corruption-cascade",
+   "title": "Glyph Corruption Cascade",
+   "description": "Green monospace glyph grid with a descending wavefront corrupting ASCII into flickering box-drawing mojibake; cursor nudges the corruption band",
+   "category": "motion",
+   "theme": "dark",
+   "bestFor": [
+    "dark-mode hero backgrounds",
+    "hacker/terminal themes",
+    "cyberpunk UI accents"
+   ],
+   "style": [
+    "dark",
+    "glitch",
+    "terminal",
+    "monospace",
+    "canvas",
+    "retro"
+   ],
+   "sections": [
+    "stage"
+   ],
+   "stack": {
+    "format": "single-file-html",
+    "buildStep": false,
+    "libraries": [],
+    "fonts": [
+     "ui-monospace"
+    ],
+    "features": [
+     "canvas-2d",
+     "pointer-interaction",
+     "reduced-motion"
+    ]
+   },
+   "credits": [
+    {
+     "label": "Glyph Corruption Cascade — Forever Components",
+     "href": "https://forevercomponents.com/components/retro-glitch/glyph-corruption-cascade/",
+     "note": "The component this demo is adapted from."
+    }
+   ],
+   "files": {
+    "html": "components/glyph-corruption-cascade/index.html",
+    "prompt": "components/glyph-corruption-cascade/PROMPT.md",
+    "preview": "components/glyph-corruption-cascade/preview.jpg"
+   },
+   "page": "https://forevercomponents.com/components/retro-glitch/glyph-corruption-cascade/"
+  },
+  {
+   "slug": "lenia",
+   "title": "Lenia",
+   "description": "Lenia smooth-life automaton: glowing teal-to-cyan blobs drift and pulse on a dark field via a typed-array convolution sim scaled up with CSS",
+   "category": "motion",
+   "theme": "dark",
+   "bestFor": [
+    "ambient hero backgrounds",
+    "science and generative-art themes",
+    "dark-mode showcases"
+   ],
+   "style": [
+    "dark",
+    "generative",
+    "organic",
+    "canvas",
+    "simulation",
+    "ambient"
+   ],
+   "sections": [
+    "stage"
+   ],
+   "stack": {
+    "format": "single-file-html",
+    "buildStep": false,
+    "libraries": [],
+    "fonts": [
+     "ui-monospace"
+    ],
+    "features": [
+     "canvas-2d",
+     "cellular-automata",
+     "reduced-motion",
+     "theme-switch"
+    ]
+   },
+   "credits": [
+    {
+     "label": "Lenia — Forever Components",
+     "href": "https://forevercomponents.com/components/fractals-automata/lenia-smooth/",
+     "note": "The component this demo is adapted from."
+    }
+   ],
+   "files": {
+    "html": "components/lenia/index.html",
+    "prompt": "components/lenia/PROMPT.md",
+    "preview": "components/lenia/preview.jpg"
+   },
+   "page": "https://forevercomponents.com/components/fractals-automata/lenia-smooth/"
   }
  ],
  "dashboards": [

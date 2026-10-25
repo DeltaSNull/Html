@@ -1,0 +1,288 @@
+<!doctype html>
+<!--
+  INSTALANDING.AI · Lenia
+  slug     lenia
+  page     https://forevercomponents.com/components/fractals-automata/lenia-smooth/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    :root custom properties: --fr04-bg / --fr04-bg1 / --fr04-bg2 (ground
+            gradient), --fr04-blend (screen dark / multiply light), --fr04-g1 /
+            --fr04-g2 (static glow), --fr04-cap / --fr04-cap-o (caption),
+            --fr04-r0..r4 (density ramp, dark: deep teal to pale mint); a
+            :root[data-theme="light"] block holds the inverted light palette,
+            switched by ?theme=light or a {type:'forever:theme'} postMessage
+  sections  stage — full-viewport stage (#fr04-stage): static radial glow plus
+            the 96x96 simulation canvas (#fr04-c) scaled up by CSS
+  scripts   one inline IIFE: 96x96 typed-array Lenia convolution (annular kernel
+            R=12, growth bell MU=0.15 / SIG=0.03 / DT=0.1), density-ramp blit,
+            theme hook and theme sync, reduced-motion settled frame,
+            visibilitychange pause
+  assets    none: pure canvas 2D, CSS radial gradients
+
+  ADAPTING
+  - Safe to edit: grid size (N=96), kernel radius (R=12), growth params
+    (MU=0.15, SIG=0.03, DT=0.1), color ramp stops, simulation rate
+    (STEP=1000/22), theme tokens. The
+    <script type="application/json" id="forever-agent-meta"> block lists editable areas,
+    elements to preserve, and known limitations — read it before changing things.
+  - Keep intact: the IIFE wrapper, the prefers-reduced-motion guard (static
+    settled frame), the visibilitychange pause, toroidal boundary wrapping in
+    step(), and the theme hook (?theme= bootstrap + forever:theme listener).
+  - O(N^2 x KLEN) convolution per frame is heavy on low-end devices at larger
+    grid sizes; grid resolution is fixed at 96x96 and blobs cannot be steered
+    or seeded at runtime.
+  - The canvas is 100% x 100% inside a fixed, overflow:hidden stage, so there
+    is no horizontal scroll at any width.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="Lenia smooth-life automaton: glowing organic teal-to-cyan blobs glide and pulse across a dark field with a soft radial glow.">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lenia</title>
+<script>
+/* theme hook: the canvas loads the tile with ?theme=light|dark (or stamps data-theme on <html>).
+   Runs before first paint — no dark flash. Standalone default stays dark. */
+(function(){var t=new URLSearchParams(location.search).get('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);})();
+</script>
+<style>
+  /* theme tokens — dark defaults (solid-dark-bg contract), light in the one
+     [data-theme="light"] block. --fr04-r0..r4 = the density ramp the JS blits: dark
+     brighter = denser, light the same hues inverted so denser = deeper ink. The canvas
+     composites additively on the dark ground, so light swaps the blend to multiply. */
+  :root{--fr04-bg:#06070b;--fr04-bg1:#0c0e18;--fr04-bg2:#06070b;--fr04-blend:screen;
+    --fr04-g1:rgba(29,172,201,.16);--fr04-g2:rgba(96,210,200,.06);--fr04-cap:#fff;--fr04-cap-o:.42;
+    --fr04-r0:#06070b;--fr04-r1:#0f3c46;--fr04-r2:#1dacc9;--fr04-r3:#8ce0d4;--fr04-r4:#e8f5f0}
+  :root[data-theme="light"]{--fr04-bg:#eef5f6;--fr04-bg1:#f8fcfc;--fr04-bg2:#eef5f6;--fr04-blend:multiply;
+    --fr04-g1:rgba(21,122,143,.13);--fr04-g2:rgba(45,140,130,.06);--fr04-cap:#123338;--fr04-cap-o:.62;
+    --fr04-r0:#f1f2f6;--fr04-r1:#c6e7ee;--fr04-r2:#3ab9d3;--fr04-r3:#308c7f;--fr04-r4:#2c5847}
+  html,body{margin:0;height:100%;background:var(--fr04-bg)}
+  #fr04-stage{position:fixed;inset:0;overflow:hidden;background:
+    radial-gradient(120% 120% at 50% 40%, var(--fr04-bg1) 0%, var(--fr04-bg2) 70%);
+    display:grid;place-items:center}
+  /* static glow — never repaints */
+  #fr04-glow{position:absolute;width:78%;height:78%;border-radius:50%;
+    background:radial-gradient(circle, var(--fr04-g1) 0%, var(--fr04-g2) 45%, transparent 70%);
+    pointer-events:none}
+  #fr04-c{width:100%;height:100%;display:block;
+    image-rendering:auto;
+    mix-blend-mode:var(--fr04-blend);
+    will-change:transform}
+  .cap{position:fixed;left:8px;bottom:7px;font:600 10px/1 ui-monospace,Menlo,monospace;color:var(--fr04-cap);opacity:var(--fr04-cap-o);letter-spacing:.08em;text-transform:uppercase;user-select:none}
+  @media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;animation-iteration-count:1!important}}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+ "file": "infinite/fractals-automata/04-lenia-smooth.html",
+ "title": "Lenia",
+ "description": "Lenia smooth-life automaton: glowing teal-to-cyan blobs drift and pulse on a dark field via a typed-array convolution sim scaled up with CSS.",
+ "useWhen": "Ambient hero backgrounds for science, generative art, or creative tech themes. Dark-mode showcases needing organic, living motion.",
+ "avoidWhen": "Low-end CPUs (toroidal convolution loop runs every frame). Contexts needing light backgrounds or legible text overlaid on the canvas.",
+ "agentPrompt": "Change MU to 0.18 and SIG to 0.025 to shift blob behavior toward tighter, faster-pulsing clusters, and update the ramp stops to warm amber tones. Theme: dark tokens live in :root, the light variant in :root[data-theme=\"light\"]; ?theme=light or a {type:'forever:theme'} postMessage switches at runtime.",
+ "editableAreas": [
+  "grid size (N=96)",
+  "kernel radius (R=12)",
+  "growth params (MU=0.15, SIG=0.03, DT=0.1)",
+  "color ramp stops array",
+  "simulation rate (STEP=1000/22)",
+  "theme tokens (:root dark defaults + [data-theme=light] overrides)"
+ ],
+ "preserveElements": [
+  "IIFE wrapper",
+  "prefers-reduced-motion guard (static settled frame)",
+  "visibilitychange pause",
+  "toroidal boundary wrapping in step()",
+  "theme hook (?theme= bootstrap + forever:theme message listener + theme tokens)"
+ ],
+ "knownLimitations": [
+  "O(N^2 x KLEN) convolution per frame — heavy on low-end devices at larger grid sizes",
+  "Grid resolution fixed at 96x96; increasing N sharply raises CPU cost",
+  "No interactivity — blobs cannot be steered or seeded at runtime"
+ ],
+ "tier": "curated",
+ "labels": [
+  "accessible",
+  "copy-paste-safe",
+  "minimal-deps",
+  "animation-heavy",
+  "light-ready"
+ ],
+ "tags": [
+  "cellular-automata",
+  "lenia",
+  "canvas",
+  "generative",
+  "organic",
+  "indigo",
+  "simulation"
+ ]
+}
+</script>
+</head>
+<body>
+<div id="fr04-stage" data-section="stage" role="img" aria-label="Lenia smooth-life cellular automaton: glowing organic blobs gliding and pulsing across a dark field">
+  <div id="fr04-glow"></div>
+  <canvas id="fr04-c"></canvas>
+</div>
+<div class="cap">Lenia</div>
+<script>
+(function(){
+  "use strict";
+  var reduce = matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var cv = document.getElementById('fr04-c');
+  var ctx = cv.getContext('2d', {alpha:true});
+
+  // --- sim grid (small, typed arrays) ---
+  var N = 96;                       // grid edge
+  var NN = N*N;
+  var A = new Float32Array(NN);     // state field
+  var B = new Float32Array(NN);     // next field
+  // precomputed annular kernel offsets + weights
+  var R = 12;                       // kernel radius
+  var kw = []; var ksum = 0;
+  (function(){
+    for(var dy=-R;dy<=R;dy++)for(var dx=-R;dx<=R;dx++){
+      var d = Math.sqrt(dx*dx+dy*dy)/R;
+      if(d>1) continue;
+      // smooth bump shell (peak at r~0.5)
+      var s = d/0.5;
+      var w = Math.exp(-(s-1)*(s-1)*4.5);
+      if(w<0.02) continue;
+      kw.push(w); ksum+=w;
+    }
+  })();
+  var KLEN = kw.length;
+  for(var i=0;i<KLEN;i++) kw[i]/=ksum;
+
+  // growth mapping (Lenia smooth-life): bell around mu
+  var MU=0.15, SIG=0.03, DT=0.1;
+  function bell(x){ var t=(x-MU)/SIG; return 2*Math.exp(-t*t*0.5)-1; }
+
+  // seed a few orbium-ish gaussian patches
+  function seed(){
+    for(var i=0;i<NN;i++) A[i]=0;
+    var spots=[[0.30,0.42,9],[0.66,0.36,11],[0.50,0.68,10]];
+    for(var s=0;s<spots.length;s++){
+      var cx=spots[s][0]*N, cy=spots[s][1]*N, rr=spots[s][2];
+      for(var y=-rr;y<=rr;y++)for(var x=-rr;x<=rr;x++){
+        var gx=(((cx+x)|0)%N+N)%N, gy=(((cy+y)|0)%N+N)%N;
+        var dd=(x*x+y*y)/(rr*rr);
+        if(dd<=1) A[gy*N+gx] += 0.85*Math.exp(-dd*1.6)*(0.6+0.4*Math.random());
+      }
+    }
+    for(i=0;i<NN;i++) if(A[i]>1)A[i]=1;
+  }
+  seed();
+
+  // split kernel offsets into dx/dy for wrap-correct sampling
+  var koffX=new Int8Array(KLEN), koffY=new Int8Array(KLEN);
+  (function(){
+    var idx=0;
+    for(var dy=-R;dy<=R;dy++)for(var dx=-R;dx<=R;dx++){
+      var d=Math.sqrt(dx*dx+dy*dy)/R; if(d>1)continue;
+      var s=d/0.5; var w=Math.exp(-(s-1)*(s-1)*4.5); if(w<0.02)continue;
+      koffX[idx]=dx; koffY[idx]=dy; idx++;
+    }
+  })();
+
+  // toroidal Lenia step (allocation-free)
+  function step(){
+    var x,y,k,sum,idx,nx,ny;
+    for(y=0;y<N;y++){
+      for(x=0;x<N;x++){
+        sum=0;
+        for(k=0;k<KLEN;k++){
+          ny=y+koffY[k]; if(ny<0)ny+=N; else if(ny>=N)ny-=N;
+          nx=x+koffX[k]; if(nx<0)nx+=N; else if(nx>=N)nx-=N;
+          sum+=A[ny*N+nx]*kw[k];
+        }
+        idx=y*N+x;
+        var v=A[idx]+DT*bell(sum);
+        B[idx]= v<0?0:(v>1?1:v);
+      }
+    }
+    var t=A;A=B;B=t;
+  }
+
+  // --- render: single ImageData blit at grid res, CSS scales up ---
+  var img = ctx.createImageData(N,N);
+  var data = img.data;
+  // density ramp, rebuilt from the CSS tokens on every theme switch: dark runs
+  // bg -> deep teal -> accent -> highlight, light runs the same hues inverted.
+  var RAMP=256, rampR=new Uint8Array(RAMP), rampG=new Uint8Array(RAMP), rampB=new Uint8Array(RAMP);
+  var root=document.documentElement, STOP_AT=[0.00,0.30,0.62,0.85,1.00];
+  function hex2rgb(h){ h=(h||'').trim().replace('#','');
+    if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2]; var v=parseInt(h,16);
+    return h.length===6&&isFinite(v)?[(v>>16)&255,(v>>8)&255,v&255]:[0,0,0]; }
+  function buildRamp(){
+    var cs=getComputedStyle(root);
+    function lerp(a,b,t){return a+(b-a)*t;}
+    var stops=[],i;
+    for(i=0;i<5;i++){ var c=hex2rgb(cs.getPropertyValue('--fr04-r'+i)); stops.push([STOP_AT[i],c[0],c[1],c[2]]); }
+    for(i=0;i<RAMP;i++){
+      var t=i/(RAMP-1),a=stops[0],b=stops[stops.length-1];
+      for(var j=0;j<stops.length-1;j++){ if(t>=stops[j][0]&&t<=stops[j+1][0]){a=stops[j];b=stops[j+1];break;} }
+      var lt=(t-a[0])/(b[0]-a[0]||1);
+      rampR[i]=lerp(a[1],b[1],lt)|0; rampG[i]=lerp(a[2],b[2],lt)|0; rampB[i]=lerp(a[3],b[3],lt)|0;
+    }
+  }
+  function syncTheme(){ buildRamp(); draw(); }   // repaint at once, reduced-motion included
+  addEventListener('message',function(ev){ var d=ev.data;
+    if(d&&d.type==='forever:theme'&&(d.theme==='light'||d.theme==='dark')){
+      root.setAttribute('data-theme',d.theme);syncTheme(); } });
+  buildRamp();
+
+  function draw(){
+    var p=0;
+    for(var i=0;i<NN;i++){
+      var v=A[i]; if(v<0)v=0; else if(v>1)v=1;
+      var ci=(v*255)|0;
+      data[p]=rampR[ci]; data[p+1]=rampG[ci]; data[p+2]=rampB[ci];
+      data[p+3]=(v*255)|0;
+      p+=4;
+    }
+    ctx.putImageData(img,0,0);
+  }
+
+  function size(){
+    var stage=document.getElementById('fr04-stage');
+    var w=stage.clientWidth, h=stage.clientHeight;
+    var d=Math.min(2,window.devicePixelRatio||1);
+    // canvas backing = grid res; scale to box via CSS already (width/height 100%)
+    cv.width=N; cv.height=N;
+    ctx.imageSmoothingEnabled=true;
+    void w; void h; void d;
+  }
+  size();
+
+  if(reduce){
+    for(var w=0;w<40;w++) step();   // settle to a developed frame
+    draw();
+    return;
+  }
+
+  var running=true, raf=0, acc=0, last=0, STEP=1000/22; // sim ~22Hz
+  function loop(ts){
+    if(!running) return;
+    if(!last) last=ts;
+    var dt=ts-last; last=ts; if(dt>120)dt=120;
+    acc+=dt;
+    var did=false;
+    while(acc>=STEP){ step(); acc-=STEP; did=true; }
+    if(did) draw();
+    raf=requestAnimationFrame(loop);
+  }
+  raf=requestAnimationFrame(loop);
+
+  document.addEventListener('visibilitychange',function(){
+    if(document.hidden){ running=false; cancelAnimationFrame(raf); }
+    else if(!running){ running=true; last=0; raf=requestAnimationFrame(loop); }
+  });
+  var rt;
+  window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(size,150); });
+})();
+</script>
+</body>
+</html>
