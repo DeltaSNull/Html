@@ -5,7 +5,7 @@
  "version": "1.0",
  "counts": {
   "pages": 22,
-  "components": 39,
+  "components": 42,
   "dashboards": 1
  },
  "pages": [
@@ -3214,6 +3214,153 @@
     "preview": "components/lenia/preview.jpg"
    },
    "page": "https://forevercomponents.com/components/fractals-automata/lenia-smooth/"
+  },
+  {
+   "slug": "iron-filings-field",
+   "title": "Iron Filings Field",
+   "description": "A grid of short rods aligns to a roaming dipole magnetic field like iron filings; rods tint red/gold by nearest pole and react to pointer",
+   "category": "motion",
+   "theme": "dark",
+   "bestFor": [
+    "science-themed hero backgrounds",
+    "physics visualizations",
+    "ambient dark-mode displays"
+   ],
+   "style": [
+    "dark",
+    "canvas",
+    "generative",
+    "particles",
+    "physics",
+    "ambient"
+   ],
+   "sections": [
+    "stage"
+   ],
+   "stack": {
+    "format": "single-file-html",
+    "buildStep": false,
+    "libraries": [],
+    "fonts": [
+     "ui-monospace"
+    ],
+    "features": [
+     "canvas-2d",
+     "pointer-reactive",
+     "reduced-motion",
+     "theme-switch"
+    ]
+   },
+   "credits": [
+    {
+     "label": "Iron Filings Field — Forever Components",
+     "href": "https://forevercomponents.com/components/particles-physics/magnetic-field/",
+     "note": "The component this demo is adapted from."
+    }
+   ],
+   "files": {
+    "html": "components/iron-filings-field/index.html",
+    "prompt": "components/iron-filings-field/PROMPT.md",
+    "preview": "components/iron-filings-field/preview.jpg"
+   },
+   "page": "https://forevercomponents.com/components/particles-physics/magnetic-field/"
+  },
+  {
+   "slug": "lissajous-phase-lock",
+   "title": "Lissajous Phase Lock",
+   "description": "Oscilloscope Lissajous trace cycling frequency ratios until it phase-locks; pointer sets sweep speed, click or Enter changes ratio",
+   "category": "motion",
+   "theme": "dark",
+   "bestFor": [
+    "loading states",
+    "oscilloscope and signal-themed displays",
+    "retro-tech showcases"
+   ],
+   "style": [
+    "dark",
+    "canvas",
+    "oscilloscope",
+    "waveform",
+    "loader"
+   ],
+   "sections": [
+    "stage"
+   ],
+   "stack": {
+    "format": "single-file-html",
+    "buildStep": false,
+    "libraries": [],
+    "fonts": [
+     "ui-monospace"
+    ],
+    "features": [
+     "canvas-2d",
+     "pointer-reactive",
+     "reduced-motion",
+     "theme-switch"
+    ]
+   },
+   "credits": [
+    {
+     "label": "Lissajous Phase Lock — Forever Components",
+     "href": "https://forevercomponents.com/components/loaders/lissajous-phase-lock/",
+     "note": "The component this demo is adapted from."
+    }
+   ],
+   "files": {
+    "html": "components/lissajous-phase-lock/index.html",
+    "prompt": "components/lissajous-phase-lock/PROMPT.md",
+    "preview": "components/lissajous-phase-lock/preview.jpg"
+   },
+   "page": "https://forevercomponents.com/components/loaders/lissajous-phase-lock/"
+  },
+  {
+   "slug": "morphing-blob",
+   "title": "Morphing Blob",
+   "description": "Aurora-gradient blob slowly morphs border-radius and rotates, with an inset dark ghost layer counter-rotating",
+   "category": "motion",
+   "theme": "dark",
+   "bestFor": [
+    "loading screens",
+    "splash states",
+    "dark-mode hero backgrounds"
+   ],
+   "style": [
+    "dark",
+    "gradient",
+    "organic",
+    "ambient",
+    "css-animation"
+   ],
+   "sections": [
+    "stage"
+   ],
+   "stack": {
+    "format": "single-file-html",
+    "buildStep": false,
+    "libraries": [],
+    "fonts": [
+     "ui-monospace"
+    ],
+    "features": [
+     "css-animation",
+     "reduced-motion",
+     "theme-switch"
+    ]
+   },
+   "credits": [
+    {
+     "label": "Morphing Blob — Forever Components",
+     "href": "https://forevercomponents.com/components/loaders/morphing-blob/",
+     "note": "The component this demo is adapted from."
+    }
+   ],
+   "files": {
+    "html": "components/morphing-blob/index.html",
+    "prompt": "components/morphing-blob/PROMPT.md",
+    "preview": "components/morphing-blob/preview.jpg"
+   },
+   "page": "https://forevercomponents.com/components/loaders/morphing-blob/"
   }
  ],
  "dashboards": [
