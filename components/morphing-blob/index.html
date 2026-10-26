@@ -1,0 +1,171 @@
+<!doctype html>
+<!--
+  INSTALANDING.AI · Morphing Blob
+  slug     morphing-blob
+  page     https://forevercomponents.com/components/loaders/morphing-blob/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    :root custom properties: --bg-900 (ground), --bg-600 (ghost layer),
+            --accent-iris / --accent-cyan / --accent-magenta (aurora gradient stops),
+            --grad-aurora (135deg gradient), --glow-a / --glow-b (ambient glows),
+            --blob-glow (box-shadow glow), --cap / --cap-o (caption); a
+            :root[data-theme="light"] block holds the light palette, switched by
+            ?theme=light or a {type:'forever:theme'} postMessage
+  sections  stage — centered blob (.c02-blob): an aurora-gradient shape morphing
+            border-radius (6s) and rotating (9s), with an inset ghost layer (11%)
+            counter-rotating; purely decorative, no progress semantics
+  scripts   one inline IIFE: visibilitychange pause (animationPlayState toggle) and the
+            theme hook (forever:theme message listener); no animation code — motion is
+            CSS keyframes only
+  assets    none: pure CSS morph/rotation keyframes, no images
+
+  ADAPTING
+  - Safe to edit: accent colors (--accent-iris, --accent-magenta, --accent-cyan), blob size
+    (min(34vmin,150px)), morph duration (6s), rotation duration (9s), ghost inset size
+    (11%), glow strength (box-shadow spread/opacity), theme tokens. The
+    <script type="application/json" id="forever-agent-meta"> block lists editable areas,
+    elements to preserve, and known limitations — read it before changing things.
+  - Keep intact: the visibilitychange pause, the IIFE wrapper, the prefers-reduced-motion
+    guard, the c02- namespace prefix on all classes, and the theme hook (?theme=
+    bootstrap + forever:theme listener + theme tokens).
+  - No semantic progress indication — decorative only; the light re-theme lives in the
+    [data-theme=light] token block.
+  - The blob is min(34vmin,150px) centered on an overflow:hidden page, so there is no
+    horizontal scroll at any width.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="An aurora-gradient blob slowly morphs its rounded shape and rotates with an inset ghost layer, glowing on a dark backdrop.">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Morphing Blob</title>
+<script>
+/* theme hook: the canvas loads the tile with ?theme=light|dark (or stamps data-theme on <html>).
+Runs before first paint — no dark flash. Standalone default stays dark. */
+(function(){var t=new URLSearchParams(location.search).get('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);})();
+</script>
+<style>
+/* theme tokens — dark values are the defaults (solid-dark-bg contract);
+the light re-theme is the [data-theme="light"] block */
+:root{
+--bg-900:#08090d; --bg-600:#181b27;
+--accent-iris:#2BAB6B; --accent-cyan:#C08459; --accent-magenta:#87A194;
+--grad-aurora:linear-gradient(135deg,var(--accent-iris) 0%,var(--accent-magenta) 55%,var(--accent-cyan) 100%);
+--glow-a:rgba(43,171,107,.16); --glow-b:rgba(192,132,89,.16);
+--blob-glow:rgba(43,171,107,0.6);
+--cap:#C08459; --cap-o:.45;
+}
+:root[data-theme="light"]{
+--bg-900:#f2f4f8; --bg-600:#ffffff;
+--glow-a:rgba(43,171,107,.18); --glow-b:rgba(192,132,89,.18);
+--blob-glow:rgba(32,126,79,.25);
+--cap:#1b2130; --cap-o:.5;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden}
+body{
+background:var(--bg-900);
+background-image:
+radial-gradient(60vw 40vw at 15% -10%,var(--glow-a),transparent 60%),
+radial-gradient(50vw 40vw at 90% 0%,var(--glow-b),transparent 55%);
+display:grid;place-items:center;
+}
+.c02-blob{position:relative;width:min(34vmin,150px);aspect-ratio:1}
+.c02-blob__shape{position:absolute;inset:0;background:var(--grad-aurora);
+border-radius:42% 58% 63% 37% / 41% 44% 56% 59%;
+animation:c02-blob-morph 6s cubic-bezier(.65,0,.35,1) infinite,c02-blob-rot 9s linear infinite;
+box-shadow:0 0 40px -8px var(--blob-glow);filter:saturate(1.1)}
+.c02-blob__shape--ghost{inset:11%;background:var(--bg-600);
+border-radius:58% 42% 37% 63% / 56% 59% 41% 44%;
+animation:c02-blob-morph2 6s cubic-bezier(.65,0,.35,1) infinite,c02-blob-rot 9s linear infinite reverse;
+box-shadow:none;filter:none}
+@keyframes c02-blob-morph{
+0%,100%{border-radius:42% 58% 63% 37% / 41% 44% 56% 59%}
+33%{border-radius:63% 37% 41% 59% / 57% 63% 37% 43%}
+66%{border-radius:38% 62% 56% 44% / 63% 38% 62% 37%}}
+@keyframes c02-blob-morph2{
+0%,100%{border-radius:58% 42% 37% 63% / 56% 59% 41% 44%}
+33%{border-radius:37% 63% 59% 41% / 43% 37% 63% 57%}
+66%{border-radius:62% 38% 44% 56% / 37% 62% 38% 63%}}
+@keyframes c02-blob-rot{to{transform:rotate(360deg)}}
+.cap{position:fixed;left:8px;bottom:7px;font:600 10px/1 ui-monospace,Menlo,monospace;
+color:var(--cap);opacity:var(--cap-o);letter-spacing:.08em;text-transform:uppercase;user-select:none}
+@media (prefers-reduced-motion:reduce){
+*{animation-duration:.001ms!important;animation-iteration-count:1!important}
+}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+"file":"infinite/loaders/02-morphing-blob.html",
+"title":"Morphing Blob",
+"description":"Aurora-gradient blob slowly morphs border-radius and rotates, with an inset dark ghost layer counter-rotating. Soft glow on dark backdrop.",
+"useWhen":"Loading screens, splash states, dark-mode hero backgrounds needing organic ambient motion.",
+"avoidWhen":"Light backgrounds (dark hardcoded). Contexts needing progress indication — this is purely decorative.",
+"agentPrompt":"Change accent colors to lime and teal: set --accent-iris to #22c55e, --accent-magenta to #14b8a6, slow morph to 10s. Theme: dark tokens live in :root, the light variant in :root[data-theme=\"light\"]; ?theme=light or a {type:'forever:theme'} postMessage switches at runtime.",
+"editableAreas": [
+"accent colors (--accent-iris, --accent-magenta, --accent-cyan)",
+"blob size (min(34vmin,150px))",
+"morph duration (6s)",
+"rotation duration (9s)",
+"ghost inset size (11%)",
+"glow strength (box-shadow spread/opacity)",
+"theme tokens (:root dark defaults + [data-theme=light] overrides)"
+],
+"preserveElements": [
+"visibilitychange pause (animationPlayState toggle)",
+"IIFE wrapper",
+"prefers-reduced-motion guard",
+"c02- namespace prefix on all classes",
+"theme hook (?theme= bootstrap + forever:theme message listener + theme tokens)"
+],
+"knownLimitations": [
+"Light re-theme via the [data-theme=light] token block; catalog bg/accent describe the dark default",
+"No semantic progress indication — decorative only"
+],
+"tier":"curated",
+"labels": [
+"agent-ready",
+"easy-to-modify",
+"mobile-ready",
+"accessible",
+"copy-paste-safe",
+"minimal-deps",
+"light-ready"
+],
+"tags": [
+"blob",
+"loader",
+"morphing",
+"aurora",
+"gradient",
+"ambient",
+"css-animation"
+]
+}
+</script>
+</head>
+<body>
+<div class="c02-blob" data-section="stage" role="img" aria-label="Morphing blob loader">
+<span class="c02-blob__shape"></span>
+<span class="c02-blob__shape c02-blob__shape--ghost"></span>
+</div>
+<div class="cap">Morphing Blob</div>
+<script>
+(function(){
+var root=document.documentElement;
+var nodes=document.querySelectorAll('.c02-blob__shape');
+function vis(){var s=document.hidden?'paused':'running';nodes.forEach(function(n){n.style.animationPlayState=s;});}
+document.addEventListener('visibilitychange',vis);vis();
+// live re-theme: the canvas broadcasts {type:'forever:theme', theme:'light'|'dark'}
+addEventListener('message',function(e){
+var d=e.data;
+if(d&&d.type==='forever:theme'&&(d.theme==='light'||d.theme==='dark')){
+root.setAttribute('data-theme',d.theme);
+}
+});
+})();
+</script>
+</body>
+</html>

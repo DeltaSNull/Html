@@ -1,0 +1,183 @@
+<!doctype html>
+<!--
+  INSTALANDING.AI · Iron Filings Field
+  slug     iron-filings-field
+  page     https://forevercomponents.com/components/particles-physics/magnetic-field/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    :root custom properties: --c10-bg (ground), --c10-cap / --c10-cap-o (caption),
+            --c10-fade (per-frame trail wash, must match the page bg), --c10-s / --c10-l
+            (filing hsl), --c10-pos / --c10-neg (pole colors); a :root[data-theme="light"]
+            block holds the light palette, switched by ?theme=light or a
+            {type:'forever:theme'} postMessage
+  sections  stage — full-viewport canvas (#c10-canvas): short rods aligning to a roaming
+            dipole magnetic field like iron filings, tinted red/gold by nearest pole,
+            pointer-reactive
+  scripts   one inline IIFE: dipole field simulation, DPR-aware canvas sizing, theme hook
+            and theme sync, reduced-motion static frames, visibilitychange pause, demo-v1
+            preview lifecycle (demoEnabled from window.__foreverPreview, stops on
+            forever:interactive)
+  assets    none: pure canvas 2D
+
+  ADAPTING
+  - Safe to edit: orbit speed (t += 0.012), grid density (step divisor /15), rod length
+    multiplier (step*0.42), pole colors (#f87171 / #C08459), pointer attractor strength
+    (80/d2), trail fade opacity (0.35 in fillRect), theme tokens. The
+    <script type="application/json" id="forever-agent-meta"> block lists editable areas,
+    elements to preserve, and known limitations — read it before changing things.
+  - Keep intact: angle interpolation (da wrap + f.a+=da*0.2), the visibilitychange pause,
+    DPR-aware canvas sizing, the reduced-motion guard, and the theme hook (?theme=
+    bootstrap + forever:theme listener + theme tokens).
+  - Reduced-motion path renders two static frames then stops — no looping static fallback.
+  - The canvas is 100% x 100% inside an overflow:hidden page, so there is no horizontal
+    scroll at any width.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="forever-preview-lifecycle" content="demo-v1">
+<meta name="description" content="A grid of short rods aligns to a roaming dipole field like iron filings, tinted red/gold by nearest pole, pointer-reactive.">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Iron Filings Field</title>
+<script>
+/* theme hook: the canvas loads the tile with ?theme=light|dark (or stamps data-theme on <html>).
+Runs before first paint — no dark flash. Standalone default stays dark. */
+(function(){var t=new URLSearchParams(location.search).get('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);})();
+</script>
+<style>
+/* theme tokens — dark values are the defaults (solid-dark-bg contract);
+the light re-theme is the [data-theme="light"] block. --c10-fade is the per-frame trail
+wash (must match the page bg); --c10-s/--c10-l tint the filings, --c10-pos/--c10-neg the poles. */
+:root{
+--c10-bg:#0c0c0e; --c10-cap:#C43131; --c10-cap-o:.55;
+--c10-fade:rgba(12,12,14,0.35); --c10-s:85; --c10-l:60; --c10-pos:#f87171; --c10-neg:#C08459;
+}
+:root[data-theme="light"]{
+--c10-bg:#f4f3f2; --c10-cap:#c43131; --c10-cap-o:.7;
+--c10-fade:rgba(244,243,242,0.35); --c10-s:72; --c10-l:36; --c10-pos:#db0b0b; --c10-neg:#98613a;
+}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--c10-bg)}
+#c10-canvas{display:block;width:100%;height:100%}
+.cap{position:fixed;right:8px;bottom:7px;font:600 10px/1 ui-monospace,Menlo,monospace;
+color:var(--c10-cap);opacity:var(--c10-cap-o);letter-spacing:.08em;text-transform:uppercase;user-select:none}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+"file":"infinite/particles-physics/10-magnetic-field.html",
+"title":"Iron Filings Field",
+"description":"A grid of short rods aligns to a roaming dipole magnetic field like iron filings; rods tint red/gold by nearest pole and react to pointer.",
+"useWhen":"Science-themed hero backgrounds, physics visualizations, ambient dark-mode displays needing elegant generative motion.",
+"avoidWhen":"Light-background UIs (background hardcoded dark). Contexts where constant field rotation competes with readable content.",
+"agentPrompt":"Change the dipole orbit speed by setting t+=0.025, increase rod density by lowering step divisor from 15 to 20, and change positive pole color from #f87171 to #facc15. Theme: dark tokens live in :root, the light variant in :root[data-theme=\"light\"]; ?theme=light or a {type:'forever:theme'} postMessage switches at runtime.",
+"editableAreas": [
+"orbit speed (t += 0.012)",
+"grid density (step divisor /15)",
+"rod length multiplier (step*0.42)",
+"pole colors (#f87171 / #C08459)",
+"pointer attractor strength (80/d2)",
+"trail fade opacity (0.35 in fillRect)",
+"theme tokens (:root dark defaults + [data-theme=light] overrides)"
+],
+"preserveElements": [
+"angle interpolation (da wrap + f.a+=da*0.2)",
+"visibilitychange pause/play",
+"DPR-aware canvas sizing",
+"reduced-motion guard (static frames only)",
+"theme hook (?theme= bootstrap + forever:theme message listener + theme tokens)",
+"demo-v1 preview lifecycle: initialize demoEnabled from window.__foreverPreview and stop attract work on the window forever:interactive event; retain manual feedback, settling, cleanup and explicit sessions"
+],
+"knownLimitations": [
+"Reduced-motion path only renders two static frames then stops — no looping static fallback",
+"Background color hardcoded in CSS (#0c0c0e) — must edit to change dark theme",
+"State remains local to each mounted instance; format/theme remount preserves takeover, not component values."
+],
+"tier":"curated",
+"labels": [
+"mobile-ready",
+"accessible",
+"minimal-deps",
+"copy-paste-safe",
+"light-ready"
+],
+"tags": [
+"magnetic",
+"field",
+"particles",
+"physics",
+"canvas",
+"generative",
+"ambient"
+]
+}
+</script>
+</head>
+<body>
+<canvas id="c10-canvas" class="c10-root" data-section="stage" role="img" aria-label="Iron filings field: short rods aligning to a roaming dipole magnetic field, tinted red and gold by nearest pole"></canvas>
+<div class="cap">Iron Filings Field</div>
+<script>
+(function(){
+let demoEnabled=window.__foreverPreview?.demoEnabled!==false,sessionActive=false,takenOver=window.__foreverPreview?.interactive===true;
+function stopDemo(){if(!takenOver){sessionActive=false;takenOver=true;}demoEnabled=false;}
+addEventListener('forever:interactive',stopDemo);
+document.addEventListener('pointerdown',stopDemo,{capture:true});document.addEventListener('click',stopDemo,{capture:true});document.addEventListener('keydown',e=>{if(e.key!=='Tab')stopDemo();},{capture:true});
+
+const cv=document.getElementById('c10-canvas'),x=cv.getContext('2d');
+let W,H,DPR,fil=[],t=0,reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+let poles=[];
+const root=document.documentElement;
+let FADE='rgba(12,12,14,0.35)',FS=85,FL=60,POS='#f87171',NEG='#C08459';   // trail wash, filing hsl, pole dots
+function syncTheme(){const cs=getComputedStyle(root);
+FADE=cs.getPropertyValue('--c10-fade').trim();
+FS=parseFloat(cs.getPropertyValue('--c10-s'));FL=parseFloat(cs.getPropertyValue('--c10-l'));
+POS=cs.getPropertyValue('--c10-pos').trim();NEG=cs.getPropertyValue('--c10-neg').trim();}
+// live re-theme: the canvas broadcasts {type:'forever:theme', theme:'light'|'dark'}
+addEventListener('message',e=>{const d=e.data;
+if(d&&d.type==='forever:theme'&&(d.theme==='light'||d.theme==='dark')){root.setAttribute('data-theme',d.theme);syncTheme();}});
+function size(){DPR=Math.min(2,devicePixelRatio||1);W=cv.clientWidth;H=cv.clientHeight;
+cv.width=W*DPR;cv.height=H*DPR;x.setTransform(DPR,0,0,DPR,0,0);init();}
+function init(){fil=[];const step=Math.max(13,Math.min(W,H)/15);
+for(let yy=step/2;yy<H;yy+=step)for(let xx=step/2;xx<W;xx+=step)
+fil.push({x:xx,y:yy,a:0,len:step*0.42});
+}
+addEventListener('resize',size);size();
+let pointer={x:-999,y:-999,on:false};
+cv.addEventListener('pointermove',e=>{const r=cv.getBoundingClientRect();
+pointer.x=e.clientX-r.left;pointer.y=e.clientY-r.top;pointer.on=true;});
+cv.addEventListener('pointerleave',()=>pointer.on=false);
+function field(px,py){
+let fx=0,fy=0;
+for(const p of poles){const dx=px-p.x,dy=py-p.y,d2=dx*dx+dy*dy+200,d=Math.sqrt(d2);
+const s=p.q/d2;fx+=dx/d*s*60;fy+=dy/d*s*60;}
+if(pointer.on){const dx=px-pointer.x,dy=py-pointer.y,d2=dx*dx+dy*dy+200,d=Math.sqrt(d2);
+const s=80/d2;fx+=dx/d*s*60;fy+=dy/d*s*60;}
+return Math.atan2(fy,fx);
+}
+function step(){
+x.fillStyle=FADE;x.fillRect(0,0,W,H);if(demoEnabled&&!reduce)t+=0.012;
+poles=[{x:W/2+Math.cos(t)*W*0.28,y:H/2+Math.sin(t*1.3)*H*0.28,q:1},
+{x:W/2+Math.cos(t+Math.PI)*W*0.28,y:H/2+Math.sin(t*1.3+Math.PI)*H*0.28,q:-1}];
+for(const f of fil){
+const a=field(f.x,f.y);
+let da=a-f.a;while(da>Math.PI)da-=2*Math.PI;while(da<-Math.PI)da+=2*Math.PI;
+f.a+=da*0.2;
+const c=Math.cos(f.a),s=Math.sin(f.a),L=f.len;
+const dx=f.x-poles[0].x,dy=f.y-poles[0].y,dn=Math.hypot(dx,dy);
+const hue=dn<Math.hypot(f.x-poles[1].x,f.y-poles[1].y)?15:30;
+x.strokeStyle='hsl('+hue+','+FS+'%,'+FL+'%)';x.lineWidth=2;x.lineCap='round';
+x.beginPath();x.moveTo(f.x-c*L,f.y-s*L);x.lineTo(f.x+c*L,f.y+s*L);x.stroke();
+}
+for(const p of poles){x.fillStyle=p.q>0?POS:NEG;
+x.beginPath();x.arc(p.x,p.y,4,0,7);x.fill();}
+}
+let raf=0;function loop(){raf=0;if(document.hidden)return;step();if(!reduce&&(demoEnabled||(fil.some(f=>Math.abs(Math.sin(field(f.x,f.y)-f.a))>.002))))play();}
+function play(){if(!raf&&!document.hidden){if(reduce){step();return;}raf=requestAnimationFrame(loop);}}
+function stop(){cancelAnimationFrame(raf);raf=0;}
+document.addEventListener('visibilitychange',()=>document.hidden?stop():(demoEnabled?play():step()));
+['pointerdown','pointermove','pointerleave','click'].forEach(type=>cv.addEventListener(type,()=>{sessionActive=true;play();}));
+play();
+})();
+</script>
+</body>
+</html>
