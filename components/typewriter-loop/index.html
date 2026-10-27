@@ -1,0 +1,137 @@
+<!doctype html>
+<!--
+  INSTALANDING.AI · Typewriter Loop
+  slug     typewriter-loop
+  page     https://forevercomponents.com/components/kinetic-type/typewriter-caret/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    hardcoded palette, no :root tokens: ground #101418, text #e8eef2,
+            prompt grey #5c6b78, caret green #46e6a0 (with glow); font
+            ui-monospace stack, size clamp(24px,9vw,64px), weight 600
+  sections  stage — centered terminal line (#tw): a "> " prompt, a typing span,
+            and a glowing green block caret; types, pauses, and deletes phrases
+            in a loop with randomized keystroke timing
+  scripts   one inline IIFE: type/delete loop over the phrases array (type
+            90+Math.random()*60 ms/key, 1100ms hold, delete 45ms/key, 420ms gap),
+            prefers-reduced-motion static fallback (first phrase only),
+            visibilitychange pause/resume
+  assets    none: pure text/CSS caret, no images
+
+  ADAPTING
+  - Safe to edit: phrases array content, typing speed (90+Math.random()*60),
+    delete speed (45ms), caret color (#46e6a0), font-size clamp range. The
+    <script type="application/json" id="forever-agent-meta"> block lists editable areas,
+    elements to preserve, and known limitations — read it before changing things.
+  - Keep intact: the IIFE wrapper, the prefers-reduced-motion guard (static first
+    phrase fallback), and the visibilitychange pause/resume.
+  - Known limitations: background color hardcoded near-black — edit CSS to use on
+    light backgrounds; no ARIA live region — screen readers won't announce the
+    changing text.
+  - The line is white-space:nowrap but centered at clamp(24px,9vw,64px) on an
+    overflow:hidden page, so there is no horizontal scroll at any viewport width.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="Monospace terminal line that types, pauses, and deletes phrases in a loop behind a glowing green blinking caret on near-black.">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Typewriter Loop</title>
+<style>
+html,body{margin:0;height:100%;overflow:hidden;background:#101418;}
+body{display:flex;align-items:center;justify-content:center;
+font-family:ui-monospace,"SFMono-Regular","Courier New",monospace;}
+#tw{
+font-size:clamp(24px,9vw,64px);
+font-weight:600;
+color:#e8eef2;
+letter-spacing:.02em;
+white-space:nowrap;
+}
+#pre{color:#5c6b78;}
+#caret{
+display:inline-block;width:.6ch;height:1.05em;
+background:#46e6a0;vertical-align:-.16em;margin-left:2px;
+box-shadow:0 0 10px rgba(70,230,160,.6);
+animation:blink 1s steps(1) infinite;
+}
+@keyframes blink{50%{opacity:0;}}
+@media (prefers-reduced-motion: reduce){#caret{animation:none;}}
+.cap{position:absolute;left:10px;bottom:8px;font-size:11px;letter-spacing:.08em;
+color:#46e6a0;opacity:.4;text-transform:uppercase;font-weight:600;}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+  "file": "infinite/kinetic-type/10-typewriter-caret.html",
+  "title": "Typewriter Loop",
+  "description": "Monospace terminal line types and deletes phrases in a loop with randomized keystroke timing; a glowing green block caret blinks throughout.",
+  "useWhen": "Developer-oriented hero text, CLI-themed landing pages, or any dark-background context needing ambient motion with a coding aesthetic.",
+  "avoidWhen": "Light-background UIs (background hardcoded near-black). Contexts where rapid text cycling distracts from primary content.",
+  "agentPrompt": "Change the phrases array to [\"build.\", \"ship.\", \"iterate.\", \"deploy();\"], set caret color to #60a5fa, and slow typing speed to 130+Math.random()*80.",
+  "editableAreas": [
+    "phrases array content",
+    "typing speed (90+Math.random()*60)",
+    "delete speed (45ms)",
+    "caret color (#46e6a0)",
+    "font-size clamp range"
+  ],
+  "preserveElements": [
+    "IIFE wrapper",
+    "prefers-reduced-motion guard (static first phrase fallback)",
+    "visibilitychange pause/resume"
+  ],
+  "knownLimitations": [
+    "Background color hardcoded near-black in CSS — must edit to use on light backgrounds",
+    "No ARIA live region — screen readers won't announce changing text"
+  ],
+  "tier": "curated",
+  "labels": [
+    "agent-ready",
+    "easy-to-modify",
+    "mobile-ready",
+    "accessible",
+    "copy-paste-safe",
+    "minimal-deps"
+  ],
+  "tags": [
+    "typewriter",
+    "terminal",
+    "monospace",
+    "loop",
+    "caret",
+    "typography",
+    "text-animation"
+  ]
+}
+</script>
+</head>
+<body>
+<div id="tw" data-section="stage"><span id="pre">&gt;&nbsp;</span><span id="body"></span><span id="caret"></span></div>
+<div class="cap">Typewriter Loop</div>
+<script>
+(function(){
+var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+var phrases=["type.","delete.","repeat.","kinetic_type();"];
+var bodyEl=document.getElementById('body');
+var pi=0, ci=0, deleting=false, timer=0;
+function step(){
+var cur=phrases[pi];
+if(!deleting){
+ci++; bodyEl.textContent=cur.slice(0,ci);
+if(ci>=cur.length){ deleting=true; timer=setTimeout(step,1100);return; }
+timer=setTimeout(step,90+Math.random()*60);
+}else{
+ci--; bodyEl.textContent=cur.slice(0,ci);
+if(ci<=0){ deleting=false; pi=(pi+1)%phrases.length; timer=setTimeout(step,420);return; }
+timer=setTimeout(step,45);
+}
+}
+function start(){if(!reduce && !timer) step(); }
+function stop(){ clearTimeout(timer); timer=0; }
+document.addEventListener('visibilitychange',function(){document.hidden?stop():start();});
+if(reduce){ bodyEl.textContent=phrases[0]; }else start();
+})();
+</script>
+</body>
+</html>
