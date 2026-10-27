@@ -5,7 +5,7 @@
  "version": "1.0",
  "counts": {
   "pages": 22,
-  "components": 42,
+  "components": 45,
   "dashboards": 1
  },
  "pages": [
@@ -3361,6 +3361,154 @@
     "preview": "components/morphing-blob/preview.jpg"
    },
    "page": "https://forevercomponents.com/components/loaders/morphing-blob/"
+  },
+  {
+   "slug": "ferrofluid-snap-switch",
+   "title": "Ferrofluid Snap Switch",
+   "description": "A magnetic switch: a ferrofluid drop stretches toward the cursor, merges with its anchors and snaps across on release",
+   "category": "motion",
+   "theme": "dark",
+   "bestFor": [
+    "toggle and switch controls",
+    "playful settings UIs",
+    "physics-themed demos"
+   ],
+   "style": [
+    "dark",
+    "svg-filter",
+    "magnetic",
+    "spring",
+    "interactive",
+    "light-ready"
+   ],
+   "sections": [
+    "stage"
+   ],
+   "stack": {
+    "format": "single-file-html",
+    "buildStep": false,
+    "libraries": [],
+    "fonts": [
+     "ui-monospace"
+    ],
+    "features": [
+     "svg-filter",
+     "spring-physics",
+     "pointer-reactive",
+     "reduced-motion",
+     "theme-switch"
+    ]
+   },
+   "credits": [
+    {
+     "label": "Ferrofluid Snap Switch — Forever Components",
+     "href": "https://forevercomponents.com/components/buttons/ferrofluid-snap-switch/",
+     "note": "The component this demo is adapted from."
+    }
+   ],
+   "files": {
+    "html": "components/ferrofluid-snap-switch/index.html",
+    "prompt": "components/ferrofluid-snap-switch/PROMPT.md",
+    "preview": "components/ferrofluid-snap-switch/preview.jpg"
+   },
+   "page": "https://forevercomponents.com/components/buttons/ferrofluid-snap-switch/"
+  },
+  {
+   "slug": "log-stream",
+   "title": "Log Stream",
+   "description": "Simulates a live server log tail — new entries slide in every 650ms with color-coded INFO/WARN/ERROR/DEBUG levels and real-time timestamps",
+   "category": "motion",
+   "theme": "dark",
+   "bestFor": [
+    "developer dashboards",
+    "terminal-aesthetic hero sections",
+    "ops-themed loading screens",
+    "ambient backgrounds"
+   ],
+   "style": [
+    "dark",
+    "terminal",
+    "monospace",
+    "ambient",
+    "typewriter"
+   ],
+   "sections": [
+    "stage"
+   ],
+   "stack": {
+    "format": "single-file-html",
+    "buildStep": false,
+    "libraries": [],
+    "fonts": [
+     "ui-monospace"
+    ],
+    "features": [
+     "ambient-animation",
+     "reduced-motion",
+     "mobile-ready"
+    ]
+   },
+   "credits": [
+    {
+     "label": "Log Stream — Forever Components",
+     "href": "https://forevercomponents.com/components/terminal/log-stream/",
+     "note": "The component this demo is adapted from."
+    }
+   ],
+   "files": {
+    "html": "components/log-stream/index.html",
+    "prompt": "components/log-stream/PROMPT.md",
+    "preview": "components/log-stream/preview.jpg"
+   },
+   "page": "https://forevercomponents.com/components/terminal/log-stream/"
+  },
+  {
+   "slug": "typewriter-loop",
+   "title": "Typewriter Loop",
+   "description": "Monospace terminal line types and deletes phrases in a loop with randomized keystroke timing; a glowing green block caret blinks throughout",
+   "category": "motion",
+   "theme": "dark",
+   "bestFor": [
+    "developer-oriented hero text",
+    "CLI-themed landing pages",
+    "dark-background ambient motion"
+   ],
+   "style": [
+    "dark",
+    "terminal",
+    "monospace",
+    "typography",
+    "text-animation"
+   ],
+   "sections": [
+    "stage"
+   ],
+   "stack": {
+    "format": "single-file-html",
+    "buildStep": false,
+    "libraries": [],
+    "fonts": [
+     "ui-monospace"
+    ],
+    "features": [
+     "text-animation",
+     "reduced-motion",
+     "mobile-ready"
+    ]
+   },
+   "credits": [
+    {
+     "label": "Typewriter Loop — Forever Components",
+     "href": "https://forevercomponents.com/components/kinetic-type/typewriter-caret/",
+     "note": "The component this demo is adapted from."
+    }
+   ],
+   "files": {
+    "html": "components/typewriter-loop/index.html",
+    "prompt": "components/typewriter-loop/PROMPT.md",
+    "preview": "components/typewriter-loop/preview.jpg"
+   },
+   "page": "https://forevercomponents.com/components/kinetic-type/typewriter-caret/"
   }
  ],
  "dashboards": [
