@@ -5,7 +5,7 @@
  "version": "1.0",
  "counts": {
   "pages": 22,
-  "components": 45,
+  "components": 48,
   "dashboards": 1
  },
  "pages": [
@@ -3509,6 +3509,161 @@
     "preview": "components/typewriter-loop/preview.jpg"
    },
    "page": "https://forevercomponents.com/components/kinetic-type/typewriter-caret/"
+  },
+  {
+   "slug": "strange-attractor-swarm",
+   "title": "Strange Attractor Swarm",
+   "description": "560 hot-pink particles trace the slowly rotating Aizawa strange attractor in 3D, glowing where fast",
+   "category": "motion",
+   "theme": "dark",
+   "bestFor": [
+    "dark-mode hero backgrounds",
+    "generative art displays",
+    "math/science visualizations"
+   ],
+   "style": [
+    "dark",
+    "particles",
+    "canvas",
+    "physics",
+    "generative",
+    "magenta",
+    "3d-projection",
+    "light-ready"
+   ],
+   "sections": [
+    "stage"
+   ],
+   "stack": {
+    "format": "single-file-html",
+    "buildStep": false,
+    "libraries": [],
+    "fonts": [
+     "ui-monospace"
+    ],
+    "features": [
+     "canvas-2d",
+     "pointer-interaction",
+     "click",
+     "reduced-motion",
+     "light-theme"
+    ]
+   },
+   "credits": [
+    {
+     "label": "Strange Attractor Swarm — Forever Components",
+     "href": "https://forevercomponents.com/components/particles-physics/strange-attractor-swarm/",
+     "note": "The component this demo is adapted from."
+    }
+   ],
+   "files": {
+    "html": "components/strange-attractor-swarm/index.html",
+    "prompt": "components/strange-attractor-swarm/PROMPT.md",
+    "preview": "components/strange-attractor-swarm/preview.jpg"
+   },
+   "page": "https://forevercomponents.com/components/particles-physics/strange-attractor-swarm/"
+  },
+  {
+   "slug": "liquid-pour-sph",
+   "title": "Liquid Pour SPH",
+   "description": "200 SPH fluid particles pour into a basin, slosh, and drain on a slow cycle with an additive-blend cyan glow",
+   "category": "motion",
+   "theme": "dark",
+   "bestFor": [
+    "ambient hero backgrounds",
+    "loading screens",
+    "interactive art installations"
+   ],
+   "style": [
+    "dark",
+    "fluid",
+    "particles",
+    "canvas",
+    "physics",
+    "metaball",
+    "generative",
+    "light-ready"
+   ],
+   "sections": [
+    "stage"
+   ],
+   "stack": {
+    "format": "single-file-html",
+    "buildStep": false,
+    "libraries": [],
+    "fonts": [
+     "ui-monospace"
+    ],
+    "features": [
+     "canvas-2d",
+     "pointer-interaction",
+     "click",
+     "reduced-motion",
+     "light-theme"
+    ]
+   },
+   "credits": [
+    {
+     "label": "Liquid Pour SPH — Forever Components",
+     "href": "https://forevercomponents.com/components/particles-physics/liquid-pour-sph/",
+     "note": "The component this demo is adapted from."
+    }
+   ],
+   "files": {
+    "html": "components/liquid-pour-sph/index.html",
+    "prompt": "components/liquid-pour-sph/PROMPT.md",
+    "preview": "components/liquid-pour-sph/preview.jpg"
+   },
+   "page": "https://forevercomponents.com/components/particles-physics/liquid-pour-sph/"
+  },
+  {
+   "slug": "solar-flare-pulse",
+   "title": "Solar Flare Pulse",
+   "description": "Fiery orange sun with a pulsing radial corona, 60 radiating flare spikes, and 5 arcing prominences; clicking triggers a brighter solar burst",
+   "category": "motion",
+   "theme": "dark",
+   "bestFor": [
+    "dark-mode hero backgrounds",
+    "space/sci-fi themes",
+    "loading screens"
+   ],
+   "style": [
+    "dark",
+    "solar",
+    "canvas",
+    "space",
+    "fire",
+    "corona",
+    "particles",
+    "click"
+   ],
+   "sections": [
+    "stage"
+   ],
+   "stack": {
+    "format": "single-file-html",
+    "buildStep": false,
+    "libraries": [],
+    "fonts": [],
+    "features": [
+     "canvas-2d",
+     "click",
+     "reduced-motion"
+    ]
+   },
+   "credits": [
+    {
+     "label": "Solar Flare Pulse — Forever Components",
+     "href": "https://forevercomponents.com/components/cosmic-space/solar-flare-pulse/",
+     "note": "The component this demo is adapted from."
+    }
+   ],
+   "files": {
+    "html": "components/solar-flare-pulse/index.html",
+    "prompt": "components/solar-flare-pulse/PROMPT.md",
+    "preview": "components/solar-flare-pulse/preview.jpg"
+   },
+   "page": "https://forevercomponents.com/components/cosmic-space/solar-flare-pulse/"
   }
  ],
  "dashboards": [
