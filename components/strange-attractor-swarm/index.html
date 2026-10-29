@@ -1,0 +1,218 @@
+<!doctype html>
+<!--
+  INSTALANDING.AI · Strange Attractor Swarm
+  slug     strange-attractor-swarm
+  page     https://forevercomponents.com/components/particles-physics/strange-attractor-swarm/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    :root theme tokens: --sas-bg #120010 plus a speed ramp (--sas-c0 base rgb
+            + --sas-cd delta); light variant in [data-theme="light"] (ramp inverted,
+            paper ground). Theme hook: ?theme= bootstrap + forever:theme listener
+  sections  stage — full-viewport canvas (#sas-c); the attractor swarm is the whole page
+  scripts   one inline IIFE: Aizawa attractor velocity field, 560 particles (900 in
+            reduced-motion), 3D rotation + perspective projection, speed-to-hue ramp,
+            pointer spin/boost, demo-v1 preview lifecycle, DPR-aware sizing
+  assets    none: pure canvas 2D
+
+  ADAPTING
+  - Safe to edit: particle count (N=560), attractor params (A,B,C,D,E,F), rotation
+    speed, color ramp, perspective strength, time step (DT=0.0085), theme tokens.
+    The forever-agent-meta JSON block lists editable areas, elements to preserve,
+    and known limitations — read it before changing things.
+  - Keep intact: IIFE wrapper, reduced-motion static frame, visibilitychange guards,
+    DPR-aware sizing, theme hook, demo-v1 preview lifecycle.
+  - CPU-bound per-frame loop — lowering N is the first lever on low-end devices.
+    Reduced-motion path uses MORE particles (900) than the animated path (560);
+    that is deliberate, not a bug.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="forever-preview-lifecycle" content="demo-v1">
+<meta name="description" content="Hundreds of hot-pink particles trace a slowly rotating Aizawa strange attractor in 3D, glowing where fast; pointer spins and boosts.">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Strange Attractor Swarm</title>
+<script>
+/* theme hook: the canvas loads the tile with ?theme=light|dark (or stamps data-theme on <html>).
+Runs before first paint — no dark flash. Standalone default stays dark. */
+(function(){var t=new URLSearchParams(location.search).get('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);})();
+</script>
+<style>
+/* theme tokens — dark values are the defaults; light palette in the [data-theme] block.
+--sas-c0/-cd are the speed ramp (base rgb + delta); --sas-blend drops additive glow. */
+:root{
+--sas-bg:#120010; --sas-fade:rgba(18,0,16,0.16); --sas-accent:#ff5fa0; --sas-cap-o:.36;
+--sas-blend:lighter; --sas-c0:255,95,160; --sas-cd:0,120,-40; --sas-ak:1;
+}
+:root[data-theme="light"]{
+--sas-bg:#f8eef4; --sas-fade:rgba(248,238,244,0.16); --sas-accent:#d60057; --sas-cap-o:.62;
+--sas-blend:source-over; --sas-c0:186,32,96; --sas-cd:-70,-20,-40; --sas-ak:2.1;
+}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--sas-bg);}
+#sas-c{display:block;width:100%;height:100%;}
+.sas-cap{position:fixed;left:8px;bottom:7px;font:600 10px/1.2 ui-monospace,Menlo,Consolas,monospace;
+letter-spacing:.14em;color:var(--sas-accent);opacity:var(--sas-cap-o);text-transform:uppercase;
+pointer-events:none;user-select:none;}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+"file":"infinite/particles-physics/16-strange-attractor-swarm.html",
+"title":"Strange Attractor Swarm",
+"description":"560 hot-pink particles trace the Aizawa strange attractor in 3D, glowing with additive blend; pointer spins the view and boosts simulation speed.",
+"useWhen":"Dark-mode hero backgrounds, generative art displays, math/science visualizations needing ambient complexity.",
+"avoidWhen":"Low-end mobile (per-frame N-body loop at 560 particles). Light backgrounds — hardcoded dark purple canvas.",
+"agentPrompt":"Change particle count from N=560 to N=300, shift color ramp to cyan (set cr2=0, cg=200, cb=255), and slow rotation by changing rot+=0.0016 to rot+=0.0008. Theme: dark tokens live in :root, the light variant in :root[data-theme=\"light\"]; ?theme=light or a {type:'forever:theme'} postMessage switches at runtime.",
+"editableAreas": [
+"particle count (N=560)",
+"attractor params (A,B,C,D,E,F)",
+"rotation speed (rot += 0.0016)",
+"color ramp (cr2, cg, cb expressions)",
+"perspective strength (1.7/(1.7+tz+1.3))",
+"time step (DT=0.0085)",
+"theme tokens (:root dark defaults + [data-theme=light] overrides)"
+],
+"preserveElements": [
+"IIFE wrapper",
+"prefers-reduced-motion static-frame fallback",
+"visibilitychange stop/start guards",
+"DPR-aware canvas sizing",
+"theme hook (?theme= bootstrap + forever:theme message listener + theme tokens)",
+"demo-v1 preview lifecycle: initialize demoEnabled from window.__foreverPreview and stop attract work on the window forever:interactive event; retain manual feedback, settling, cleanup and explicit sessions"
+],
+"knownLimitations": [
+"CPU-bound per-frame velocity loop — can drop frames on low-end devices at full particle count",
+"Background color hardcoded in CSS (#120010) — must edit to change dark purple",
+"Reduced-motion path uses MORE particles (900) than the animated path (560) for a denser static frame — may confuse future editors",
+"State remains local to each mounted instance; format/theme remount preserves takeover, not component values."
+],
+"tier":"curated",
+"labels": [
+"accessible",
+"copy-paste-safe",
+"minimal-deps",
+"animation-heavy",
+"mobile-ready",
+"light-ready"
+],
+"tags": [
+"attractor",
+"particles",
+"canvas",
+"physics",
+"generative",
+"magenta",
+"3d-projection"
+]
+}
+</script>
+</head>
+<body>
+<canvas id="sas-c" class="sas-root" data-section="stage"></canvas>
+<div class="sas-cap">Strange Attractor Swarm</div>
+<script>
+(function(){
+let demoEnabled=window.__foreverPreview?.demoEnabled!==false,sessionActive=false,takenOver=window.__foreverPreview?.interactive===true;
+function stopDemo(){if(!takenOver){sessionActive=false;takenOver=true;}demoEnabled=false;}
+addEventListener('forever:interactive',stopDemo);
+document.addEventListener('pointerdown',stopDemo,{capture:true});document.addEventListener('click',stopDemo,{capture:true});document.addEventListener('keydown',e=>{if(e.key!=='Tab')stopDemo();},{capture:true});
+const cv=document.getElementById('sas-c'),ctx=cv.getContext('2d');
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let W,H,DPR,cx,cy,scale;
+// the swarm's colours live in tokens; a flip re-reads them (never per frame)
+const root=document.documentElement, TH={};
+function syncTheme(){
+const cs=getComputedStyle(root), g=n=>cs.getPropertyValue(n).trim();
+TH.bg=g('--sas-bg');TH.fade=g('--sas-fade');TH.blend=g('--sas-blend');TH.ak=+g('--sas-ak');
+TH.c0=g('--sas-c0').split(',').map(Number);TH.cd=g('--sas-cd').split(',').map(Number);
+}
+addEventListener('message',e=>{const d=e.data;
+if(d&&d.type==='forever:theme'&&(d.theme==='light'||d.theme==='dark')){
+root.setAttribute('data-theme',d.theme);syncTheme();
+if(reduce)still();               // static frame: repaint in the new palette
+}});
+syncTheme();
+function size(){
+DPR=Math.min(devicePixelRatio||1,2);
+W=cv.clientWidth;H=cv.clientHeight;
+cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);
+cx=W/2;cy=H/2;scale=Math.min(W,H)/4.4;
+}
+addEventListener('resize',size);size();
+// Aizawa attractor params — a folded two-lobed flow that never self-crosses.
+const A=0.95,B=0.7,C=0.6,D=3.5,E=0.25,F=0.1,DT=0.0085;
+function vel(p){
+const x=p.x,y=p.y,z=p.z;
+return{
+x:(z-B)*x - D*y,
+y:D*x + (z-B)*y,
+z:C + A*z - z*z*z/3- (x*x+y*y)*(1+E*z) + F*z*x*x*x
+};
+}
+const N=reduce?900:560,P=[];
+function seed(p){ // scatter near the attractor basin
+p.x=(Math.random()-0.5)*2; p.y=(Math.random()-0.5)*2; p.z=Math.random()*1.4;
+p.life=Math.random()*240|0;
+}
+for(let i=0;i<N;i++){const p={};seed(p);P.push(p);}
+let rot=0.5,boost=0,pull=0;
+cv.addEventListener('pointermove',e=>{boost=1;pull=(e.offsetX/W-0.5)*1.4;});
+cv.addEventListener('click',()=>{boost=1.6;});
+function project(p,sr,cr){
+// rotate about vertical axis, tilt slightly, perspective for depth glow
+const rx=p.x*cr - p.y*sr, ry=p.x*sr + p.y*cr;
+const tz=ry*0.42+ p.z*0.91, ty=ry*0.91- p.z*0.42;
+const persp=1.7/(1.7+tz+1.3);
+return{sx:cx+rx*scale*persp, sy:cy - ty*scale*persp + scale*0.15, d:persp};
+}
+function frame(){raf=0;if(document.hidden)return;
+ctx.fillStyle=TH.fade;ctx.fillRect(0,0,W,H);
+boost*=0.93; pull*=0.9;
+if(!reduce)rot+=(demoEnabled?.0016:0)+pull*.004;
+const sr=Math.sin(rot),cr=Math.cos(rot);
+const steps=reduce?1:(2+(boost>0.05?2:0));
+ctx.globalCompositeOperation=TH.blend;
+for(let i=0;i<N;i++){
+const p=P[i];
+for(let s=0;s<steps;s++){
+const v=vel(p);
+p.x+=v.x*DT; p.y+=v.y*DT; p.z+=v.z*DT;
+p.life++;
+}
+if(p.life>520||Math.abs(p.x)>3||Math.abs(p.z)>3) seed(p);
+const q=project(p,sr,cr);
+const spd=Math.min(1,(p.x*p.x+p.y*p.y)*0.18);   // speed → hue toward white/hot pink
+const a=(0.10+q.d*0.5);
+const r=(0.5+q.d*1.7);
+// colour ramp: deep magenta dust → hot pink → near-white crest (inverted in light)
+const cr2=TH.c0[0]+spd*TH.cd[0], cg=TH.c0[1]+spd*TH.cd[1], cb=TH.c0[2]+spd*TH.cd[2];
+ctx.fillStyle='rgba('+(cr2|0)+','+(cg|0)+','+(cb|0)+','+(a*(0.55+spd*0.6)*TH.ak).toFixed(3)+')';
+ctx.beginPath();ctx.arc(q.sx,q.sy,r,0,6.2832);ctx.fill();
+}
+ctx.globalCompositeOperation='source-over';
+if(!reduce&&(demoEnabled||(boost>.003||Math.abs(pull)>.003)))start();
+}
+let raf=0;
+function start(){if(!raf&&!document.hidden&&!reduce&&(demoEnabled||(boost>.003||Math.abs(pull)>.003)))raf=requestAnimationFrame(frame);}
+function stop(){cancelAnimationFrame(raf);raf=0;}
+document.addEventListener('visibilitychange',()=>{document.hidden?stop():start();});
+function still(){
+ctx.fillStyle=TH.bg;ctx.fillRect(0,0,W,H);
+const sr=Math.sin(rot),cr=Math.cos(rot);
+ctx.globalCompositeOperation=TH.blend;
+for(let i=0;i<N;i++){const p=P[i],q=project(p,sr,cr);const spd=Math.min(1,(p.x*p.x+p.y*p.y)*0.18);
+ctx.fillStyle='rgba('+((TH.c0[0]+spd*TH.cd[0])|0)+','+((TH.c0[1]+spd*TH.cd[1])|0)+','+((TH.c0[2]+spd*TH.cd[2])|0)+','+((0.10+q.d*0.5)*TH.ak).toFixed(3)+')';
+ctx.beginPath();ctx.arc(q.sx,q.sy,(0.5+q.d*1.7),0,6.2832);ctx.fill();}
+ctx.globalCompositeOperation='source-over';
+}
+if(reduce){
+// settle the swarm onto the attractor, then draw one static frame
+for(let w=0;w<700;w++)for(let i=0;i<N;i++){const p=P[i],v=vel(p);p.x+=v.x*DT;p.y+=v.y*DT;p.z+=v.z*DT;if(Math.abs(p.x)>3)seed(p);}
+still();
+}else start();
+['pointerdown','pointermove','pointerleave','click'].forEach(type=>cv.addEventListener(type,()=>{sessionActive=true;if(reduce){rot+=pull*.12;still();}else start();}));
+})();
+</script>
+</body>
+</html>
