@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<!--
+  INSTALANDING.AI · Voronoi Shatter
+  slug     voronoi-shatter
+  page     https://forevercomponents.com/components/generative-geometry/voronoi-shatter/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    :root theme tokens: --gg01-bg #0d1b2a (ground), --gg01-cap #7fd1ff
+            (caption), --gg01-cell-s 55 / --gg01-cell-l 30 (cell saturation /
+            lightness), --gg01-dot rgba(220,245,255,.8); light variant in
+            :root[data-theme="light"]
+  sections  stage — full-viewport canvas (#c); the Voronoi mosaic is the whole
+            page
+  scripts   one inline IIFE: 14 drifting sites partition a coarse cell grid
+            into HSL Voronoi cells; pointermove nudges the nearest site toward
+            the cursor; theme hook (?theme= bootstrap + forever:theme
+            postMessage) re-reads the CSS tokens; DPR-aware sizing
+  assets    none: pure canvas 2D
+
+  ADAPTING
+  - Safe to edit: site count (N=14), hue range (rnd(180,210)), drift speed
+    (0.004 multiplier), cell resolution (s/64), lightness formula, theme
+    tokens. The forever-agent-meta JSON block lists editable areas, elements
+    to preserve, and known limitations — read it before changing things.
+  - Keep intact: the IIFE wrapper, the prefers-reduced-motion guard (static
+    single frame), the visibilitychange pause, DPR-aware canvas sizing, and
+    the theme hook.
+  - Background is hardcoded in both CSS and the canvas fillRect — change
+    both to retheme. The pointer-nudge md/mdy captures are dead code; the
+    O(N*cells) loop tanks perf with large N on big screens.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="Cool blue Voronoi cell mosaic with drifting sites that recolor and shift; pointer nudges the nearest cell.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voronoi Shatter</title>
+<script>
+/* theme hook: the canvas loads the tile with ?theme=light|dark (or stamps data-theme on <html>).
+   Runs before first paint — no dark flash. Standalone default stays dark. */
+(function(){var t=new URLSearchParams(location.search).get('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);})();
+</script>
+<style>
+/* theme tokens — dark values are the defaults (solid-dark-bg contract);
+   the light re-theme is the [data-theme="light"] block. The --gg01-cell / --gg01-dot values feed the canvas. */
+:root{
+  --gg01-bg:#0d1b2a; --gg01-cap:#7fd1ff; --gg01-cap-o:.45;
+  --gg01-cell-s:55; --gg01-cell-l:30; --gg01-dot:rgba(220,245,255,.8);
+}
+:root[data-theme="light"]{
+  --gg01-bg:#eef4f9; --gg01-cap:#0072b2; --gg01-cap-o:.8;
+  --gg01-cell-s:55; --gg01-cell-l:65; --gg01-dot:rgba(12,42,66,.8);
+}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--gg01-bg)}
+#c{display:block;width:100%;height:100%}
+#cap{position:fixed;left:8px;bottom:7px;font:11px/1 ui-monospace,Menlo,monospace;
+color:var(--gg01-cap);opacity:var(--gg01-cap-o);letter-spacing:.5px;pointer-events:none;user-select:none}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+"file": "infinite/generative-geometry/01-voronoi-shatter.html",
+"title": "Voronoi Shatter",
+"description": "14 drifting sites partition the canvas into cool-blue Voronoi mosaic cells; moving the pointer nudges the nearest site toward the cursor.",
+"useWhen": "Dark-theme hero backgrounds, generative art showcases, geometric texture layers behind UI.",
+"avoidWhen": "Light backgrounds (hardcoded dark navy). Low-end mobile — per-frame cell loop scales with canvas area.",
+"agentPrompt": "Change site count to 20 by setting N=20, shift hue range to warm tones (h:rnd(20,50)), slow drift by changing the 0.004 multiplier to 0.002. Theme: dark tokens live in :root, the light variant in :root[data-theme="light"]; ?theme=light or a {type:'forever:theme'} postMessage switches at runtime.",
+"editableAreas": [
+"site count (N=14)",
+"hue range per site (rnd(180,210))",
+"drift speed multiplier (0.004)",
+"cell resolution divisor (s/64)",
+"lightness formula (li base 30 + sine offset)",
+"theme tokens (:root dark defaults + [data-theme=light] overrides)"
+],
+"preserveElements": [
+"IIFE wrapper",
+"prefers-reduced-motion guard (static single frame fallback)",
+"visibilitychange pause",
+"DPR-aware canvas sizing",
+"theme hook (?theme= bootstrap + forever:theme message listener + theme tokens)"
+],
+"knownLimitations": [
+"Background color hardcoded in both CSS and canvas fillRect — must change both to retheme",
+"Pointer nudge captures md/mdy variables but never uses them (dead code)",
+"Cell loop is O(N*cells) — large N or small cell size tanks perf on large screens"
+],
+"tier": "curated",
+"labels": [
+"accessible",
+"copy-paste-safe",
+"minimal-deps",
+"mobile-ready",
+"light-ready"
+],
+"tags": [
+"voronoi",
+"generative",
+"canvas",
+"mosaic",
+"pointer",
+"geometry",
+"ambient"
+]
+}
+</script>
+</head>
+<body>
+<canvas id="c" data-section="stage"></canvas>
+<div id="cap">voronoi shatter</div>
+<script>
+(function(){
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+let W,H,DPR,pts,mouse=null,reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const N=14;
+// theme: every canvas colour is read from the CSS tokens, once at start and once per switch
+const root=document.documentElement;
+const C={bg:'#0d1b2a',cellS:55,cellL:30,dot:'rgba(220,245,255,.8)'};
+function syncTheme(){
+const cs=getComputedStyle(root);
+C.bg=cs.getPropertyValue('--gg01-bg').trim()||C.bg;
+C.cellS=parseFloat(cs.getPropertyValue('--gg01-cell-s'))||55;
+C.cellL=parseFloat(cs.getPropertyValue('--gg01-cell-l'))||30;
+C.dot=cs.getPropertyValue('--gg01-dot').trim()||C.dot;
+}
+addEventListener('message',e=>{const d=e.data;
+if(d&&d.type==='forever:theme'&&(d.theme==='light'||d.theme==='dark')){
+root.setAttribute('data-theme',d.theme);syncTheme();if(reduce&&pts)step(0);}
+});
+syncTheme();
+function rnd(a,b){return a+Math.random()*(b-a)}
+function resize(){
+DPR=Math.min(devicePixelRatio||1,2);
+W=cv.clientWidth;H=cv.clientHeight;
+cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+function init(){
+pts=[];for(let i=0;i<N;i++)pts.push({x:rnd(0,1),y:rnd(0,1),vx:rnd(-1,1)*.04,vy:rnd(-1,1)*.04,h:rnd(180,210)});
+}
+function step(t){
+const s=Math.min(W,H);
+for(const p of pts){
+p.x+=p.vx*0.004;p.y+=p.vy*0.004;
+if(p.x<0||p.x>1)p.vx*=-1;if(p.y<0||p.y>1)p.vy*=-1;
+p.x=Math.max(0,Math.min(1,p.x));p.y=Math.max(0,Math.min(1,p.y));
+}
+ctx.fillStyle=C.bg;ctx.fillRect(0,0,W,H);
+// pixel-grid voronoi via coarse cells (cheap), draw as small rects colored by nearest site
+const cell=Math.max(5,Math.floor(s/64));
+const ox=(W-s)/2,oy=(H-s)/2;
+for(let py=0;py<s;py+=cell){
+for(let px=0;px<s;px+=cell){
+const fx=px/s,fy=py/s;let bi=0,bd=9;
+for(let i=0;i<N;i++){
+let dx=pts[i].x-fx,dy=pts[i].y-fy;
+if(mouse){const md=(mouse.x-pts[i].x),mdy=(mouse.y-pts[i].y);}
+const d=dx*dx+dy*dy;if(d<bd){bd=d;bi=i;}
+}
+const p=pts[bi];
+const li=C.cellL+Math.sin(t*0.001+bi)*8+ (1-Math.min(1,bd*6))*20;
+ctx.fillStyle='hsl('+p.h+','+(C.cellS+bi*1.5)+'%,'+li+'%)';
+ctx.fillRect(ox+px,oy+py,cell+0.6,cell+0.6);
+}
+}
+// site dots
+for(const p of pts){ctx.fillStyle=C.dot;ctx.beginPath();ctx.arc(ox+p.x*s,oy+p.y*s,1.6,0,7);ctx.fill();}
+}
+let raf;
+function loop(t){if(!reduce){step(t);}raf=requestAnimationFrame(loop);}
+function start(){cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);}
+addEventListener('resize',()=>{resize();});
+cv.addEventListener('pointermove',e=>{const r=cv.getBoundingClientRect();const s=Math.min(W,H);
+mouse={x:(e.clientX-r.left-(W-s)/2)/s,y:(e.clientY-r.top-(H-s)/2)/s};
+// nudge nearest site toward pointer
+let bi=0,bd=9;for(let i=0;i<N;i++){const d=(pts[i].x-mouse.x)**2+(pts[i].y-mouse.y)**2;if(d<bd){bd=d;bi=i}}
+pts[bi].x+=(mouse.x-pts[bi].x)*.2;pts[bi].y+=(mouse.y-pts[bi].y)*.2;
+});
+cv.addEventListener('pointerleave',()=>mouse=null);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelAnimationFrame(raf);else start();});
+resize();init();if(reduce)step(0);else start();
+})();
+</script>
+</body>
+</html>
