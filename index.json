@@ -5,7 +5,7 @@
  "version": "1.0",
  "counts": {
   "pages": 22,
-  "components": 48,
+  "components": 51,
   "dashboards": 1
  },
  "pages": [
@@ -3664,6 +3664,164 @@
     "preview": "components/solar-flare-pulse/preview.jpg"
    },
    "page": "https://forevercomponents.com/components/cosmic-space/solar-flare-pulse/"
+  },
+  {
+   "slug": "orbiting-planet-system",
+   "title": "Orbiting Planet System",
+   "description": "Four glowing planets orbit a radiant sun on tilted elliptical rings with depth-sorted rendering; the system drifts subtly toward the pointer",
+   "category": "motion",
+   "theme": "dark",
+   "bestFor": [
+    "dark-mode hero sections",
+    "space/sci-fi themed backgrounds",
+    "ambient screensaver panels"
+   ],
+   "style": [
+    "dark",
+    "space",
+    "canvas",
+    "generative",
+    "ambient",
+    "glow",
+    "depth-sort"
+   ],
+   "sections": [
+    "stage"
+   ],
+   "stack": {
+    "format": "single-file-html",
+    "buildStep": false,
+    "libraries": [],
+    "fonts": [
+     "system-ui"
+    ],
+    "features": [
+     "canvas-2d",
+     "pointer-drift",
+     "reduced-motion",
+     "visibility-pause"
+    ]
+   },
+   "credits": [
+    {
+     "label": "Orbiting Planet System — Forever Components",
+     "href": "https://forevercomponents.com/components/cosmic-space/orbiting-planet-system/",
+     "note": "The component this demo is adapted from."
+    }
+   ],
+   "files": {
+    "html": "components/orbiting-planet-system/index.html",
+    "prompt": "components/orbiting-planet-system/PROMPT.md",
+    "preview": "components/orbiting-planet-system/preview.jpg"
+   },
+   "page": "https://forevercomponents.com/components/cosmic-space/orbiting-planet-system/"
+  },
+  {
+   "slug": "tidal-spaghettification",
+   "title": "Tidal Spaghettification",
+   "description": "170 particles arc past a gravity well, stretching into a white-hot filament at perihelion; pointer and click boost the tidal spread",
+   "category": "motion",
+   "theme": "dark",
+   "bestFor": [
+    "dark space or sci-fi hero backgrounds",
+    "physics visualizations",
+    "ambient loading screens"
+   ],
+   "style": [
+    "dark",
+    "space",
+    "canvas",
+    "particles",
+    "physics",
+    "filament",
+    "generative"
+   ],
+   "sections": [
+    "stage"
+   ],
+   "stack": {
+    "format": "single-file-html",
+    "buildStep": false,
+    "libraries": [],
+    "fonts": [
+     "system-ui"
+    ],
+    "features": [
+     "canvas-2d",
+     "particles",
+     "additive-blend",
+     "pointer",
+     "click",
+     "reduced-motion",
+     "visibility-pause"
+    ]
+   },
+   "credits": [
+    {
+     "label": "Tidal Spaghettification — Forever Components",
+     "href": "https://forevercomponents.com/components/cosmic-space/tidal-spaghettification/",
+     "note": "The component this demo is adapted from."
+    }
+   ],
+   "files": {
+    "html": "components/tidal-spaghettification/index.html",
+    "prompt": "components/tidal-spaghettification/PROMPT.md",
+    "preview": "components/tidal-spaghettification/preview.jpg"
+   },
+   "page": "https://forevercomponents.com/components/cosmic-space/tidal-spaghettification/"
+  },
+  {
+   "slug": "voronoi-shatter",
+   "title": "Voronoi Shatter",
+   "description": "14 drifting sites partition the canvas into cool-blue Voronoi mosaic cells; moving the pointer nudges the nearest site toward the cursor",
+   "category": "motion",
+   "theme": "dark",
+   "bestFor": [
+    "dark-theme hero backgrounds",
+    "generative art showcases",
+    "geometric texture layers"
+   ],
+   "style": [
+    "dark",
+    "voronoi",
+    "canvas",
+    "generative",
+    "geometry",
+    "mosaic",
+    "light-ready"
+   ],
+   "sections": [
+    "stage"
+   ],
+   "stack": {
+    "format": "single-file-html",
+    "buildStep": false,
+    "libraries": [],
+    "fonts": [
+     "ui-monospace"
+    ],
+    "features": [
+     "canvas-2d",
+     "voronoi",
+     "pointer",
+     "light-theme",
+     "reduced-motion",
+     "visibility-pause"
+    ]
+   },
+   "credits": [
+    {
+     "label": "Voronoi Shatter — Forever Components",
+     "href": "https://forevercomponents.com/components/generative-geometry/voronoi-shatter/",
+     "note": "The component this demo is adapted from."
+    }
+   ],
+   "files": {
+    "html": "components/voronoi-shatter/index.html",
+    "prompt": "components/voronoi-shatter/PROMPT.md",
+    "preview": "components/voronoi-shatter/preview.jpg"
+   },
+   "page": "https://forevercomponents.com/components/generative-geometry/voronoi-shatter/"
   }
  ],
  "dashboards": [
