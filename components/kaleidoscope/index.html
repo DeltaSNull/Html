@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<!--
+  INSTALANDING.AI · Kaleidoscope
+  slug     kaleidoscope
+  page     https://forevercomponents.com/components/generative-geometry/kaleidoscope/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    :root theme tokens: --gg10-bg (deep plum ground), --gg10-cap (caption),
+            --gg10-fi-* / --gg10-st-* (blob fill/stroke saturation, lightness, alpha).
+            :root[data-theme="light"] carries the light re-theme. Blob colors are read
+            from these tokens once at start and once per theme switch.
+  sections  stage — full-viewport demo; the canvas fills it and a small caption
+            sits bottom-left
+  scripts   one inline IIFE: canvas 2D kaleidoscope — 7 polygon blobs drawn inside one
+            wedge, mirrored 10 ways (SEG=10) with alternating flip; slow rotation
+            t*0.0002 plus a spin impulse (spin+=0.4) on pointerdown that also
+            regenerates the blobs. DPR-aware sizing (DPR capped at 2),
+            visibilitychange pause, prefers-reduced-motion static draw, theme hook
+            (?theme= bootstrap + forever:theme message listener)
+  assets    none: pure canvas 2D
+
+  ADAPTING
+  - Safe to edit: segment count (SEG=10), blob count (M=7), rotation speed
+    (t*0.0002), blob hue range (Math.random()*360), blob size range
+    (0.05+Math.random()*0.1), spin impulse on click (spin+=0.4), theme tokens
+    (:root dark defaults + [data-theme=light] overrides). The
+    <script type="application/json" id="forever-agent-meta"> block lists editable areas,
+    elements to preserve, and known limitations — read it before changing things.
+  - Keep intact: the IIFE wrapper, the prefers-reduced-motion guard, the
+    visibilitychange pause, DPR-aware canvas sizing, and the theme hook.
+  - Blobs must stay inside the mirrored wedge (a within ±0.45·ang, bouncing at
+    ±0.55·ang) or they are clipped away in every segment.
+  - Background color is hardcoded in both CSS and the fillRect — change both to retheme.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="Ten-fold mirrored kaleidoscope of spinning pink-and-magenta polygon blobs slowly rotating on a deep plum field.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kaleidoscope</title>
+<script>
+/* theme hook: the canvas loads the tile with ?theme=light|dark (or stamps data-theme on <html>).
+   Runs before first paint — no dark flash. Standalone default stays dark. */
+(function(){var t=new URLSearchParams(location.search).get('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);})();
+</script>
+<style>
+  /* theme tokens — dark values are the defaults (solid-dark-bg contract);
+     the light re-theme is the [data-theme="light"] block. fi-/st- feed the JS hsla() of each
+     mirrored blob: a bright rim on dark, a darker outline on light. */
+  :root{
+    --gg10-bg:#0c0612; --gg10-cap:#ff9ad1; --gg10-cap-o:.45;
+    --gg10-fi-s:85; --gg10-fi-l:62; --gg10-fi-a:0.85; --gg10-st-s:90; --gg10-st-l:75; --gg10-st-a:0.9;
+  }
+  :root[data-theme="light"]{
+    --gg10-bg:#f6f1f7; --gg10-cap:#d60075; --gg10-cap-o:.8;
+    --gg10-fi-s:64; --gg10-fi-l:58; --gg10-fi-a:0.78; --gg10-st-s:70; --gg10-st-l:38; --gg10-st-a:0.85;
+  }
+  html,body{margin:0;height:100%;overflow:hidden;background:var(--gg10-bg)}
+  .stage{position:relative;width:100%;height:100%;overflow:hidden;background:var(--gg10-bg)}
+  #c{display:block;width:100%;height:100%}
+  #cap{position:fixed;left:8px;bottom:7px;font:11px/1 ui-monospace,monospace;
+       color:var(--gg10-cap);opacity:var(--gg10-cap-o);letter-spacing:.5px;pointer-events:none;user-select:none}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+ "file": "infinite/generative-geometry/10-kaleidoscope.html",
+ "title": "Kaleidoscope",
+ "description": "10-fold mirrored kaleidoscope of rotating polygon blobs on a deep plum background; tap/click spins the pattern and regenerates blobs.",
+ "useWhen": "Dark-mode hero backgrounds, screensavers, generative art showcases, or any ambient loop needing hypnotic symmetry.",
+ "avoidWhen": "Light-background UIs (background hardcoded dark plum). Contexts where users need to focus on text or UI controls.",
+ "agentPrompt": "Change SEG from 10 to 8 for 8-fold symmetry, shift blob hues toward teal by replacing the random hue with a range of 150+Math.random()*80, and slow rotation by changing t*0.0002 to t*0.0001. Theme: dark tokens live in :root, the light variant in :root[data-theme=\"light\"]; ?theme=light or a {type:'forever:theme'} postMessage switches at runtime.",
+ "editableAreas": [
+  "segment count (SEG=10)",
+  "blob count (M=7)",
+  "blob angular range (a within ±0.45·ang, bouncing at ±0.55·ang — must stay inside the mirrored wedge or the blob is clipped away in every segment)",
+  "rotation speed (t*0.0002)",
+  "blob hue range (Math.random()*360)",
+  "blob size range (0.05+Math.random()*0.1)",
+  "spin impulse on click (spin+=0.4)",
+  "theme tokens (:root dark defaults + [data-theme=light] overrides)"
+ ],
+ "preserveElements": [
+  "IIFE wrapper",
+  "prefers-reduced-motion guard (static draw on reduce)",
+  "visibilitychange pause",
+  "DPR-aware canvas sizing",
+  "theme hook (?theme= bootstrap + forever:theme message listener + theme tokens)"
+ ],
+ "knownLimitations": [
+  "Reduced-motion path draws a single static frame but still runs the rAF loop (blobs update silently)",
+  "Background color hardcoded in both CSS and fillRect — must change both to retheme",
+  "Blob hues are fully random on each init; no palette control"
+ ],
+ "tier": "curated",
+ "labels": [
+  "accessible",
+  "copy-paste-safe",
+  "minimal-deps",
+  "mobile-ready",
+  "agent-ready",
+  "light-ready"
+ ],
+ "tags": [
+  "kaleidoscope",
+  "generative",
+  "canvas",
+  "symmetry",
+  "polygon",
+  "ambient",
+  "loop"
+ ]
+}
+</script>
+</head>
+<body>
+<div class="stage" data-section="stage">
+  <canvas id="c"></canvas>
+  <div id="cap">kaleidoscope</div>
+</div>
+<script>
+(function(){
+  const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+  let W,H,DPR,blobs,spin=0;
+  const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  const SEG=10,M=7;
+  // theme: every canvas colour is read from the CSS tokens, once at start and once per switch
+  const root=document.documentElement;
+  const C={bg:'#0c0612',fiS:85,fiL:62,fiA:'0.85',stS:90,stL:75,stA:'0.9'};
+  function syncTheme(){
+    const cs=getComputedStyle(root);
+    C.bg=cs.getPropertyValue('--gg10-bg').trim()||C.bg;
+    C.fiS=parseFloat(cs.getPropertyValue('--gg10-fi-s'))||85;
+    C.fiL=parseFloat(cs.getPropertyValue('--gg10-fi-l'))||62;
+    C.fiA=cs.getPropertyValue('--gg10-fi-a').trim()||C.fiA;
+    C.stS=parseFloat(cs.getPropertyValue('--gg10-st-s'))||90;
+    C.stL=parseFloat(cs.getPropertyValue('--gg10-st-l'))||75;
+    C.stA=cs.getPropertyValue('--gg10-st-a').trim()||C.stA;
+  }
+  addEventListener('message',e=>{const d=e.data;
+    if(d&&d.type==='forever:theme'&&(d.theme==='light'||d.theme==='dark')){
+      root.setAttribute('data-theme',d.theme);syncTheme();if(reduce&&blobs)draw(0);}
+  });
+  syncTheme();
+  function resize(){DPR=Math.min(devicePixelRatio||1,2);W=cv.clientWidth;H=cv.clientHeight;
+    cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);init();}
+  function init(){
+    // blobs live inside the one wedge the mirrors repeat (angle within ±ang/2): a blob outside
+    // it is clipped away in every wedge — that is why the tile used to mount near-blank one time in three
+    const ang=Math.PI*2/SEG;
+    blobs=[];for(let i=0;i<M;i++)blobs.push({
+      r:0.1+Math.random()*0.8,a:(Math.random()-0.5)*ang*0.9,
+      sz:0.05+Math.random()*0.1,vr:(Math.random()-0.5)*0.0006,
+      va:(Math.random()-0.5)*0.002,hue:Math.random()*360,sides:(3+(Math.random()*4|0))});
+  }
+  function drawWedge(t,R){
+    const ang=Math.PI*2/SEG;
+    ctx.save();
+    ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,R*1.5,-ang/2,ang/2);ctx.closePath();ctx.clip();
+    for(const b of blobs){
+      const x=Math.cos(b.a)*b.r*R,y=Math.sin(b.a)*b.r*R;
+      ctx.fillStyle='hsla('+((b.hue+t*0.02)%360)+','+C.fiS+'%,'+C.fiL+'%,'+C.fiA+')';
+      ctx.strokeStyle='hsla('+((b.hue+t*0.02+40)%360)+','+C.stS+'%,'+C.stL+'%,'+C.stA+')';
+      ctx.lineWidth=1.2;
+      ctx.beginPath();
+      const s=b.sz*R;
+      for(let k=0;k<=b.sides;k++){const an=t*0.0008+k/b.sides*Math.PI*2;
+        const px=x+Math.cos(an)*s,py=y+Math.sin(an)*s;k===0?ctx.moveTo(px,py):ctx.lineTo(px,py);}
+      ctx.closePath();ctx.fill();ctx.stroke();
+    }
+    ctx.restore();
+  }
+  function draw(t){
+    ctx.fillStyle=C.bg;ctx.fillRect(0,0,W,H);
+    const ang=Math.PI*2/SEG;
+    for(const b of blobs){b.r+=b.vr;b.a+=b.va;if(b.r<0.08||b.r>0.95)b.vr*=-1;if(Math.abs(b.a)>ang*0.55)b.va*=-1;}
+    const R=Math.min(W,H)*0.5;
+    ctx.save();ctx.translate(W/2,H/2);ctx.rotate(t*0.0002+spin);
+    for(let i=0;i<SEG;i++){
+      ctx.save();ctx.rotate(i*ang);
+      if(i%2)ctx.scale(1,-1);
+      drawWedge(t,R);
+      ctx.restore();
+    }
+    ctx.restore();
+  }
+  let raf;
+  function loop(t){if(!reduce){spin*=0.95;draw(t);}raf=requestAnimationFrame(loop);}
+  function start(){cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);}
+  addEventListener('resize',resize);
+  cv.addEventListener('pointerdown',()=>{spin+=0.4;init();});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelAnimationFrame(raf);else start();});
+  resize();if(reduce)draw(0);else start();
+})();
+</script>
+</body>
+</html>

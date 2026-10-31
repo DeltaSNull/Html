@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<!--
+  INSTALANDING.AI · Digital Rain
+  slug     digital-rain
+  page     https://forevercomponents.com/components/backgrounds/digital-rain/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    :root: --bg-900:#08090d (near-black ground), --text-2:#8a91a8 (caption),
+            --rain-trail:rgba(8,9,13,0.18) (per-frame wash that makes the fading trails),
+            --rain-glyph:#22d3ee (column color), --rain-lead:#aef6ff (bright lead chars),
+            --rain-still-bg / --rain-still-ink (reduced-motion static frame). The
+            :root[data-theme="light"] block carries the light re-theme.
+            --font-display: Space Grotesk via Google Fonts.
+  sections  stage — full-viewport demo; .c06-rain (aria-hidden) holds the canvas,
+            plus a small uppercase caption bottom-left
+  scripts   one inline IIFE: setupCanvas (DPR-aware sizing via ResizeObserver, capped
+            at DPR 2) + runLoop (visibilitychange pause) + render: every other frame
+            (frame%2), each column draws one random katakana/hex glyph at cols[i],
+            occasionally a bright lead char (0.92 threshold), then trails wash.
+            prefers-reduced-motion renders a single static frame instead.
+  assets    Google Fonts stylesheet (Space Grotesk); everything else is canvas-drawn
+
+  ADAPTING
+  - Safe to edit: glyph color (#22d3ee), lead-char color (#aef6ff) and frequency
+    (0.92 threshold), font size divisor (w/26), trail fade opacity (0.18), the
+    GLYPHS array, theme tokens (:root dark defaults + [data-theme=light] overrides). The
+    <script type="application/json" id="forever-agent-meta"> block lists editable areas,
+    elements to preserve, and known limitations — read it before changing things.
+  - Keep intact: the IIFE wrapper, the prefers-reduced-motion static fallback, the
+    visibilitychange pause in runLoop, DPR-aware canvas sizing, and the theme hook
+    (?theme= bootstrap + forever:theme message listener).
+  - Background color is hardcoded in CSS and the canvas fill — edit both to change
+    from near-black.
+  - Motion renders every other frame, so it can feel slightly choppy at low refresh
+    rates; columns stall near the bottom before resetting (0.975 probability).
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="Cyan Matrix-style columns of katakana and hex glyphs fall and trail down a dark canvas with occasional bright white leading characters.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digital Rain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+<script>
+/* theme hook: the canvas loads the tile with ?theme=light|dark (or stamps data-theme on <html>).
+   Runs before first paint — no dark flash. Standalone default stays dark. */
+(function(){var t=new URLSearchParams(location.search).get('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);})();
+</script>
+<style>
+/* theme tokens — dark values are the defaults (solid-dark-bg contract);
+   the light re-theme is the [data-theme="light"] block. --rain-* feed the canvas:
+   the trail wash is the page colour at low alpha, so it must switch with the theme. */
+:root{
+  --bg-900:#08090d;
+  --text-2:#8a91a8; --cap-o:.7;
+  --rain-trail:rgba(8,9,13,0.18); --rain-glyph:#22d3ee; --rain-lead:#aef6ff;
+  --rain-still-bg:#0d0f16; --rain-still-ink:rgba(34,211,238,0.55);
+  --font-display:"Space Grotesk",system-ui,sans-serif;
+}
+:root[data-theme="light"]{
+  --bg-900:#f2f4f6;
+  --text-2:#414a55; --cap-o:.62;
+  --rain-trail:rgba(242,244,246,0.10); --rain-glyph:#0a7686; --rain-lead:#073c46;
+  --rain-still-bg:#eef1f4; --rain-still-ink:rgba(10,118,134,0.75);
+}
+*,*::before,*::after{box-sizing:border-box;}
+html,body{margin:0;height:100%;overflow:hidden;}
+body{background:var(--bg-900);}
+.frame{position:absolute;inset:0;display:grid;place-items:center;}
+.stage{position:relative;width:100%;height:100%;overflow:hidden;background:var(--bg-900);}
+.c06-rain{position:absolute;inset:0;}
+.c06-rain canvas{display:block;width:100%;height:100%;}
+.caption{position:absolute;left:12px;bottom:10px;z-index:5;
+  font-family:var(--font-display);font-size:11px;font-weight:500;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--text-2);opacity:var(--cap-o);pointer-events:none;}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+ "file": "infinite/backgrounds/06-digital-rain.html",
+ "title": "Digital Rain",
+ "description": "Cyan katakana and hex glyphs fall in columns down a dark canvas, leaving fading trails; occasional bright white leading chars evoke the Matrix effect.",
+ "useWhen": "Dark-mode hero backgrounds, hacker/cyberpunk themes, loading screens, tech brand splash pages.",
+ "avoidWhen": "Light-background UIs (background hardcoded near-black). Contexts where constant column motion competes with foreground content.",
+ "agentPrompt": "Change glyph color from cyan (#22d3ee) to neon green (#00ff41), increase font size divisor from 26 to 20 for denser columns, add more katakana to the GLYPHS array. Theme: dark tokens live in :root, the light variant in :root[data-theme=\"light\"]; ?theme=light or a {type:'forever:theme'} postMessage switches at runtime.",
+ "editableAreas": [
+  "glyph color (#22d3ee)",
+  "bright lead-char color (#aef6ff) and frequency (0.92 threshold)",
+  "font size divisor (w/26)",
+  "trail fade opacity (rgba 0.18)",
+  "glyph set (GLYPHS array)",
+  "theme tokens (:root dark defaults + [data-theme=light] overrides)"
+ ],
+ "preserveElements": [
+  "IIFE wrapper",
+  "prefers-reduced-motion guard with static fallback",
+  "visibilitychange pause in runLoop",
+  "DPR-aware canvas sizing",
+  "theme hook (?theme= bootstrap + forever:theme message listener + theme tokens)"
+ ],
+ "knownLimitations": [
+  "Renders every other frame (frame%2) — motion can feel slightly choppy at low refresh rates",
+  "Column reset probability (0.975) means some columns stall near bottom before resetting",
+  "Background color hardcoded in CSS and canvas fill — must edit both to change from near-black"
+ ],
+ "tier": "curated",
+ "labels": [
+  "accessible",
+  "copy-paste-safe",
+  "minimal-deps",
+  "mobile-ready",
+  "animation-heavy",
+  "light-ready"
+ ],
+ "tags": [
+  "matrix",
+  "digital-rain",
+  "canvas",
+  "katakana",
+  "background",
+  "generative",
+  "dark"
+ ]
+}
+</script>
+</head>
+<body>
+<div class="frame">
+  <div class="stage" data-section="stage">
+    <div class="c06-rain" data-c06 aria-hidden="true"><canvas></canvas></div>
+    <span class="caption">Digital Rain</span>
+  </div>
+</div>
+<script>
+(function(){
+  "use strict";
+  var REDUCED=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function setupCanvas(host,draw){
+    var canvas=host.querySelector("canvas"),ctx=canvas.getContext("2d");
+    var dpr=Math.min(window.devicePixelRatio||1,2),w=0,h=0;
+    function resize(){
+      var r=host.getBoundingClientRect();
+      w=Math.max(1,Math.round(r.width));h=Math.max(1,Math.round(r.height));
+      canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      if(draw.onResize) draw.onResize(w,h);
+    }
+    if(window.ResizeObserver){new ResizeObserver(resize).observe(host);}
+    else{window.addEventListener("resize",resize);}
+    resize();
+    return {ctx:ctx,get w(){return w;},get h(){return h;}};
+  }
+
+  function runLoop(tick){
+    var running=false,id=0;
+    function loop(){tick();id=requestAnimationFrame(loop);}
+    function start(){if(running||document.hidden)return;running=true;id=requestAnimationFrame(loop);}
+    function stop(){running=false;cancelAnimationFrame(id);}
+    document.addEventListener("visibilitychange",function(){document.hidden?stop():start();});
+    start();
+  }
+
+  var host=document.querySelector("[data-c06]");
+  if(!host) return;
+  var root=document.documentElement;
+  var GLYPHS="アイウエオカキクケコｱｲｳ0123456789ABCDEF<>/\\=+*".split("");
+  var cols=[],fontSize=14,columns=0,frame=0;
+  // every colour the canvas paints with lives in a CSS token: read once at start
+  // and once per theme switch (never per frame)
+  var C={trail:"rgba(8,9,13,0.18)",glyph:"#22d3ee",lead:"#aef6ff",
+         stillBg:"#0d0f16",stillInk:"rgba(34,211,238,0.55)"};
+  function syncTheme(){
+    var cs=getComputedStyle(root),g=function(n,d){return (cs.getPropertyValue(n)||d).trim();};
+    C.trail=g("--rain-trail","rgba(8,9,13,0.18)");
+    C.glyph=g("--rain-glyph","#22d3ee");
+    C.lead=g("--rain-lead","#aef6ff");
+    C.stillBg=g("--rain-still-bg","#0d0f16");
+    C.stillInk=g("--rain-still-ink","rgba(34,211,238,0.55)");
+    if(!REDUCED&&cv) cv.ctx.clearRect(0,0,cv.w,cv.h);   // drop the old palette's trail wash
+  }
+  addEventListener("message",function(e){
+    var d=e.data;
+    if(d&&d.type==="forever:theme"&&(d.theme==="light"||d.theme==="dark")){
+      root.setAttribute("data-theme",d.theme);syncTheme();if(REDUCED) staticFrame();
+    }
+  });
+  var cv=setupCanvas(host,{onResize:build});
+  syncTheme();
+
+  function build(w,h){
+    fontSize=Math.max(12,Math.round(w/26));
+    columns=Math.ceil(w/fontSize);cols=[];
+    for(var i=0;i<columns;i++) cols.push(Math.random()*(h/fontSize));
+  }
+
+  function render(){
+    frame++;
+    var ctx=cv.ctx,w=cv.w,h=cv.h;
+    ctx.fillStyle=C.trail;ctx.fillRect(0,0,w,h);
+    ctx.font=fontSize+"px 'Space Grotesk', monospace";
+    if(frame%2===0){
+      for(var i=0;i<cols.length;i++){
+        var ch=GLYPHS[(Math.random()*GLYPHS.length)|0];
+        var x=i*fontSize,y=cols[i]*fontSize;
+        ctx.fillStyle=Math.random()>0.92?C.lead:C.glyph;
+        ctx.fillText(ch,x,y);
+        if(y>h&&Math.random()>0.975) cols[i]=0;
+        cols[i]+=1;
+      }
+    }
+  }
+
+  function staticFrame(){
+    build(cv.w,cv.h);
+    var ctx=cv.ctx;
+    ctx.fillStyle=C.stillBg;ctx.fillRect(0,0,cv.w,cv.h);
+    ctx.font=fontSize+"px 'Space Grotesk', monospace";
+    ctx.fillStyle=C.stillInk;
+    for(var i=0;i<cols.length;i+=2){
+      ctx.fillText(GLYPHS[(Math.random()*GLYPHS.length)|0],i*fontSize,(i%6+2)*fontSize);
+    }
+  }
+
+  if(REDUCED){ staticFrame(); return; }
+  runLoop(render);
+})();
+</script>
+</body>
+</html>
