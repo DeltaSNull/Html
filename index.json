@@ -5,7 +5,7 @@
  "version": "1.0",
  "counts": {
   "pages": 22,
-  "components": 51,
+  "components": 54,
   "dashboards": 1
  },
  "pages": [
@@ -3822,6 +3822,160 @@
     "preview": "components/voronoi-shatter/preview.jpg"
    },
    "page": "https://forevercomponents.com/components/generative-geometry/voronoi-shatter/"
+  },
+  {
+   "slug": "kaleidoscope",
+   "title": "Kaleidoscope",
+   "description": "10-fold mirrored kaleidoscope of rotating polygon blobs on a deep plum background; tap/click spins the pattern and regenerates blobs",
+   "category": "motion",
+   "theme": "dark",
+   "bestFor": [
+    "dark-mode hero backgrounds",
+    "screensavers",
+    "generative art showcases",
+    "ambient loops"
+   ],
+   "style": [
+    "dark",
+    "generative",
+    "canvas",
+    "symmetric",
+    "ambient",
+    "interactive"
+   ],
+   "sections": [
+    "stage"
+   ],
+   "stack": {
+    "format": "single-file-html",
+    "buildStep": false,
+    "libraries": [],
+    "fonts": [
+     "system-ui"
+    ],
+    "features": [
+     "canvas-2d",
+     "click-to-spin",
+     "theme-hook",
+     "reduced-motion",
+     "visibility-pause"
+    ]
+   },
+   "credits": [
+    {
+     "label": "Kaleidoscope — Forever Components",
+     "href": "https://forevercomponents.com/components/generative-geometry/kaleidoscope/",
+     "note": "The component this demo is adapted from."
+    }
+   ],
+   "files": {
+    "html": "components/kaleidoscope/index.html",
+    "prompt": "components/kaleidoscope/PROMPT.md",
+    "preview": "components/kaleidoscope/preview.jpg"
+   },
+   "page": "https://forevercomponents.com/components/generative-geometry/kaleidoscope/"
+  },
+  {
+   "slug": "digital-rain",
+   "title": "Digital Rain",
+   "description": "Cyan katakana and hex glyphs fall in columns down a dark canvas, leaving fading trails; occasional bright white leading chars evoke the Matrix effect",
+   "category": "motion",
+   "theme": "dark",
+   "bestFor": [
+    "dark-mode hero backgrounds",
+    "hacker/cyberpunk themes",
+    "loading screens",
+    "tech brand splash pages"
+   ],
+   "style": [
+    "dark",
+    "retro",
+    "cyberpunk",
+    "canvas",
+    "ambient",
+    "motion-heavy"
+   ],
+   "sections": [
+    "stage"
+   ],
+   "stack": {
+    "format": "single-file-html",
+    "buildStep": false,
+    "libraries": [],
+    "fonts": [
+     "Space Grotesk"
+    ],
+    "features": [
+     "canvas-2d",
+     "theme-hook",
+     "reduced-motion",
+     "visibility-pause"
+    ]
+   },
+   "credits": [
+    {
+     "label": "Digital Rain — Forever Components",
+     "href": "https://forevercomponents.com/components/backgrounds/digital-rain/",
+     "note": "The component this demo is adapted from."
+    }
+   ],
+   "files": {
+    "html": "components/digital-rain/index.html",
+    "prompt": "components/digital-rain/PROMPT.md",
+    "preview": "components/digital-rain/preview.jpg"
+   },
+   "page": "https://forevercomponents.com/components/backgrounds/digital-rain/"
+  },
+  {
+   "slug": "vhs-tracking-distortion",
+   "title": "VHS Tracking Distortion",
+   "description": "VHS test-pattern color bars with 46-slice horizontal jitter, random tear events, a rolling tracking bar, and chroma-split REC text on a dark vermillion background",
+   "category": "motion",
+   "theme": "dark",
+   "bestFor": [
+    "retro/lo-fi hero backgrounds",
+    "VHS-aesthetic landing pages",
+    "glitch art screensavers",
+    "80s/90s nostalgia themes"
+   ],
+   "style": [
+    "dark",
+    "retro",
+    "glitch",
+    "vhs",
+    "canvas",
+    "motion-heavy"
+   ],
+   "sections": [
+    "stage"
+   ],
+   "stack": {
+    "format": "single-file-html",
+    "buildStep": false,
+    "libraries": [],
+    "fonts": [
+     "system-ui"
+    ],
+    "features": [
+     "canvas-2d",
+     "self-drawImage-scanlines",
+     "reduced-motion",
+     "visibility-pause"
+    ]
+   },
+   "credits": [
+    {
+     "label": "VHS Tracking Distortion — Forever Components",
+     "href": "https://forevercomponents.com/components/retro-glitch/vhs-tracking-distortion/",
+     "note": "The component this demo is adapted from."
+    }
+   ],
+   "files": {
+    "html": "components/vhs-tracking-distortion/index.html",
+    "prompt": "components/vhs-tracking-distortion/PROMPT.md",
+    "preview": "components/vhs-tracking-distortion/preview.jpg"
+   },
+   "page": "https://forevercomponents.com/components/retro-glitch/vhs-tracking-distortion/"
   }
  ],
  "dashboards": [
