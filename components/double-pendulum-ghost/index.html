@@ -1,0 +1,251 @@
+<!doctype html>
+<!--
+  INSTALANDING.AI · Double Pendulum Ghost
+  slug     double-pendulum-ghost
+  page     https://forevercomponents.com/components/particles-physics/double-pendulum-ghost/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    :root custom properties: --dpg-bg (deep green-black ground),
+            --dpg-accent, --dpg-cap-o, --dpg-rod / --dpg-halo / --dpg-bob1 /
+            --dpg-bob2 / --dpg-core (rod and bob paints), --dpg-blend /
+            --dpg-hue / --dpg-l0 / --dpg-lk / --dpg-ta (ribbon tint and fade for the
+            offscreen trail layer). A [data-theme="light"] block re-points them —
+            the ribbon switches from additive 'lighter' to 'source-over' on the
+            light ground, and the lightness ramp runs in reverse.
+  sections  stage — full-viewport canvas (#dpg-c, tagged data-section="stage") with
+            an offscreen trail canvas for the fading ghost ribbon; .dpg-cap caption
+  scripts   one inline IIFE: RK4 double-pendulum integrator with a whisper of
+            damping, offscreen trail fade (destination-out), theme sync with trail
+            reset, auto re-kick on stillness, pointer nudges velocity, click
+            re-kicks, visibilitychange pause/resume, prefers-reduced-motion static
+            frame, ?theme= bootstrap hook + forever:theme listener
+  assets    none: pure canvas 2D, ui-monospace caption stack
+
+  ADAPTING
+  - Safe to edit: accent hue base (140 in the hsla ribbon strokeStyle), substep
+    count per frame (8 × 0.04 RK4 steps), trail fade alpha (0.012 in the
+    destination-out fill), bob size scales (L*0.04 / L*0.034), damping coefficient
+    (0.99992), initial angle ranges (rekick values), theme tokens (:root dark
+    defaults + [data-theme=light] overrides). The
+    <script type="application/json" id="forever-agent-meta"> block lists editable
+    areas, elements to preserve, and known limitations — read it before changing things.
+  - Keep intact: the RK4 integrator (step function), the offscreen trail canvas
+    (tr/tctx) for the ghost ribbon, visibilitychange pause/resume, the
+    prefers-reduced-motion static fallback, the theme hook, and the demo-v1
+    preview lifecycle (stop attract work on first real input or forever:interactive).
+  - Canvas fills the viewport inside overflow:hidden, so no horizontal scroll.
+    RK4 with 8 substeps per frame is CPU-intensive on low-end devices; the motion
+    is chaotic and intense — not for calm layouts or light backgrounds.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="forever-preview-lifecycle" content="demo-v1">
+<meta name="description" content="An emerald double pendulum swings chaotically, its glowing bob tracing a fading ribbon ghost. Pointer nudges velocity; click re-kicks.">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Double Pendulum Ghost</title>
+<script>
+/* theme hook: the canvas loads the tile with ?theme=light|dark (or stamps data-theme on <html>).
+   Runs before first paint — no dark flash. Standalone default stays dark. */
+(function(){var t=new URLSearchParams(location.search).get('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);})();
+</script>
+<style>
+  /* theme tokens — dark values are the defaults; the light palette is the [data-theme] block.
+     --dpg-blend/-l0/-lk retune the additive ribbon for a light ground (read in syncTheme). */
+  :root{
+    --dpg-bg:#16201A; --dpg-accent:#378651; --dpg-cap-o:.34;
+    --dpg-rod:rgba(55,134,81,0.85); --dpg-halo:rgba(55,134,81,0);
+    --dpg-bob1:rgba(55,134,81,0.9); --dpg-bob2:rgba(224,201,140,0.95); --dpg-core:#ffffff;
+    --dpg-blend:lighter; --dpg-hue:140; --dpg-l0:58; --dpg-lk:1.6; --dpg-ta:0.5;
+  }
+  :root[data-theme="light"]{
+    --dpg-bg:#eef4f0; --dpg-accent:#337b4a; --dpg-cap-o:.62;
+    --dpg-rod:rgba(29,90,53,0.85); --dpg-halo:rgba(51,123,74,0);
+    --dpg-bob1:rgba(51,123,74,0.75); --dpg-bob2:rgba(140,102,20,0.85); --dpg-core:#1a2b21;
+    --dpg-blend:source-over; --dpg-hue:140; --dpg-l0:32; --dpg-lk:-0.9; --dpg-ta:0.72;
+  }
+  html,body{margin:0;height:100%;overflow:hidden;background:var(--dpg-bg);}
+  #dpg-c{display:block;width:100%;height:100%;}
+  .dpg-cap{position:fixed;left:9px;bottom:8px;font:600 10px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.14em;color:var(--dpg-accent);opacity:var(--dpg-cap-o);text-transform:uppercase;
+    pointer-events:none;user-select:none;}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+  "file": "infinite/particles-physics/12-double-pendulum-ghost.html",
+  "title": "Double Pendulum Ghost",
+  "description": "A double pendulum swings chaotically in emerald, tracing a slowly fading color-shifting ribbon ghost on canvas; pointer nudges velocity, click rekicks.",
+  "useWhen": "Dark-mode hero backgrounds, screensavers, science/math-themed portfolios, ambient generative art displays.",
+  "avoidWhen": "Light backgrounds (hardcoded dark #16201A). Contexts requiring calm or subtle motion — the chaotic path is visually intense and unpredictable.",
+  "agentPrompt": "Change the accent hue from emerald to teal by setting the strokeStyle hue base from 140 to 180 and the rod/bob color from #378651 to #80ffee, then slow substeps from 8 to 4 for a lazier swing. Theme: dark tokens live in :root, the light variant in :root[data-theme=\"light\"]; ?theme=light or a {type:'forever:theme'} postMessage switches at runtime.",
+  "editableAreas": [
+    "accent hue base (140 in strokeStyle hsla)",
+    "substep count per frame (s<\\x14>))",
+    "trail fade speed (0.012 in fillStyle alpha)",
+    "bob size scale (L*0.04 / L*0.034)",
+    "damping coefficient (0.99992)",
+    "initial angle range (rekick values)",
+    "theme tokens (:root dark defaults + [data-theme=light] overrides)"
+  ],
+  "preserveElements": [
+    "RK4 integrator (step function)",
+    "offscreen trail canvas (tr/tctx) for ghost ribbon",
+    "visibilitychange pause/resume",
+    "reduced-motion static fallback",
+    "theme hook (?theme= bootstrap + forever:theme message listener + theme tokens)",
+    "demo-v1 preview lifecycle: initialize demoEnabled from window.__foreverPreview and stop attract work on the window forever:interactive event; retain manual feedback, settling, cleanup and explicit sessions"
+  ],
+  "knownLimitations": [
+    "Background color hardcoded in CSS and canvas fill — must edit both to change",
+    "No reduced-motion animation fallback beyond a single static frame",
+    "RK4 with 8 substeps per frame is CPU-intensive on low-end devices",
+    "State remains local to each mounted instance; format/theme remount preserves takeover, not component state."
+  ],
+  "tier": "curated",
+  "labels": [
+    "agent-ready",
+    "mobile-ready",
+    "accessible",
+    "animation-heavy",
+    "copy-paste-safe",
+    "minimal-deps",
+    "light-ready"
+  ],
+  "tags": [
+    "double-pendulum",
+    "physics",
+    "chaos",
+    "trail",
+    "canvas",
+    "glow",
+    "generative"
+  ]
+}
+</script>
+</head>
+<body>
+<canvas id="dpg-c" class="dpg-root" data-section="stage"></canvas>
+<div class="dpg-cap">Double Pendulum Ghost</div>
+<script>
+(function(){
+  let demoEnabled=window.__foreverPreview?.demoEnabled!==false,sessionActive=false,takenOver=window.__foreverPreview?.interactive===true;
+  function stopDemo(){if(!takenOver){sessionActive=false;takenOver=true;}demoEnabled=false;}
+  addEventListener('forever:interactive',stopDemo);
+  document.addEventListener('pointerdown',stopDemo,{capture:true});document.addEventListener('click',stopDemo,{capture:true});document.addEventListener('keydown',e=>{if(e.key!=='Tab')stopDemo();},{capture:true});
+
+  const cv=document.getElementById('dpg-c'),ctx=cv.getContext('2d');
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W,H,DPR,cx,cy,L;
+  // trail layer (offscreen) so the ribbon fades independently of the rods
+  const tr=document.createElement('canvas'),tctx=tr.getContext('2d');
+  // every drawn colour comes from the tokens; a flip re-reads them and clears the stale ribbon
+  const root=document.documentElement, C={};
+  function syncTheme(){
+    const g=n=>{const v=getComputedStyle(root).getPropertyValue(n).trim();return FB[n]||v;};
+    const FB={'--dpg-bg':'#16201A','--dpg-accent':'#378651','--dpg-rod':'rgba(55,134,81,0.85)','--dpg-halo':'rgba(55,134,81,0)','--dpg-bob1':'rgba(55,134,81,0.9)','--dpg-bob2':'rgba(224,201,140,0.95)','--dpg-core':'#ffffff','--dpg-blend':'lighter','--dpg-hue':'140','--dpg-l0':'58','--dpg-lk':'1.6','--dpg-ta':'0.5'};
+    C.bg=g('--dpg-bg');C.rod=g('--dpg-rod');C.halo=g('--dpg-halo');C.accent=g('--dpg-accent');
+    C.bob1=g('--dpg-bob1');C.bob2=g('--dpg-bob2');C.core=g('--dpg-core');C.blend=g('--dpg-blend');
+    C.hue=+g('--dpg-hue');C.l0=+g('--dpg-l0');C.lk=+g('--dpg-lk');C.ta=g('--dpg-ta');
+    if(tr.width){tctx.save();tctx.setTransform(1,0,0,1,0,0);tctx.globalCompositeOperation='copy';
+    tctx.clearRect(0,0,tr.width,tr.height);tctx.restore();}   // old-palette ribbon would linger
+    px=py=null;
+  }
+  addEventListener('message',e=>{const d=e.data;
+    if(d&&d.type==='forever:theme'&&(d.theme==='light'||d.theme==='dark')){
+      root.setAttribute('data-theme',d.theme);syncTheme();
+      if(reduce){draw();stop();}       // static frame: repaint once in the new palette
+    }});
+  function size(){
+    DPR=Math.min(devicePixelRatio||1,2);
+    W=cv.clientWidth;H=cv.clientHeight;
+    cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);
+    tr.width=W*DPR;tr.height=H*DPR;tctx.setTransform(DPR,0,0,DPR,0,0);
+    cx=W/2;cy=H*0.40;L=Math.min(W,H)*0.235;
+  }
+  addEventListener('resize',size);size();
+  // state: angles + angular velocities. exact Lagrangian for equal masses & lengths.
+  const g=9.8,m1=1,m2=1;
+  let a1=2.2,a2=2.5,v1=0,v2=0;
+  function deriv(a1,a2,v1,v2){
+    const d=a1-a2,sd=Math.sin(d),cd=Math.cos(d),den=(m1+m2)-m2*cd*cd;
+    const d1=( m2*L*v1*v1*sd*cd + m2*g*Math.sin(a2)*cd + m2*L*v2*v2*sd - (m1+m2)*g*Math.sin(a1) )/(L*den);
+    const d2=( -m2*L*v2*v2*sd*cd + (m1+m2)*(g*Math.sin(a1)*cd - L*v1*v1*sd - g*Math.sin(a2)) )/(L*den);
+    return [d1,d2];
+  }
+  let px=null,py=null;
+  function tip(a1,a2){
+    return [cx+Math.sin(a1)*L+Math.sin(a2)*L, cy+Math.cos(a1)*L+Math.cos(a2)*L];
+  }
+  function step(h){ // RK4 on full state [a1,a2,v1,v2] — energy-stable, no false decay
+    const f=(A1,A2,V1,V2)=>{const a=deriv(A1,A2,V1,V2);return [V1,V2,a[0],a[1]];};
+    const k1=f(a1,a2,v1,v2);
+    const k2=f(a1+k1[0]*h/2,a2+k1[1]*h/2,v1+k1[2]*h/2,v2+k1[3]*h/2);
+    const k3=f(a1+k2[0]*h/2,a2+k2[1]*h/2,v1+k2[2]*h/2,v2+k2[3]*h/2);
+    const k4=f(a1+k3[0]*h,a2+k3[1]*h,v1+k3[2]*h,v2+k3[3]*h);
+    a1+=h*(k1[0]+2*k2[0]+2*k3[0]+k4[0])/6;
+    a2+=h*(k1[1]+2*k2[1]+2*k3[1]+k4[1])/6;
+    v1+=h*(k1[2]+2*k2[2]+2*k3[2]+k4[2])/6;
+    v2+=h*(k1[3]+2*k2[3]+2*k3[3]+k4[3])/6;
+    v1*=0.99992;v2*=0.99992; // a whisper of damping -> drifts toward rest, then rekicks
+  }
+  function rekick(){ // loop back to stillness then fling off anew
+    a1=Math.PI*(0.55+Math.random()*0.9);a2=Math.PI*(0.55+Math.random()*0.9);
+    v1=(Math.random()-0.5)*0.06;v2=(Math.random()-0.5)*0.06;px=py=null;
+  }
+  cv.addEventListener('pointermove',e=>{ // nudge the chaos
+    const r=cv.getBoundingClientRect();
+    v1+=((e.clientX-r.left)/W-0.5)*0.04;v2+=((e.clientY-r.top)/H-0.5)*0.04;
+  });
+  cv.addEventListener('click',rekick);
+  syncTheme();
+  let hue=0,still=0;
+  function draw(){
+    raf=0;if(document.hidden)return;
+    if(!reduce&&(demoEnabled||sessionActive))for(let s=0;s<8;s++)step(0.04); // substeps = smooth, energy-stable ribbon
+    // fade the trail slowly (the "ghost") — destination-out, so the rgb below is ignored
+    tctx.globalCompositeOperation='destination-out';
+    tctx.fillStyle='rgba(0,0,0,0.012)';tctx.fillRect(0,0,W,H);
+    tctx.globalCompositeOperation=C.blend;
+    const [tx,ty]=tip(a1,a2);
+    if(px!=null){
+      const sp=Math.hypot(tx-px,ty-py);
+      hue=(hue+0.6)%360;
+      tctx.lineCap='round';
+      // accent-tinted ribbon, brighter where the tip moves fast
+      tctx.strokeStyle=`hsla(${C.hue+Math.sin(hue*0.017)*26},${72}%,${C.l0+Math.min(sp,18)*C.lk}%,${C.ta})`;
+      tctx.lineWidth=1.1+Math.min(sp,16)*0.16;
+      tctx.beginPath();tctx.moveTo(px,py);tctx.lineTo(tx,ty);tctx.stroke();
+    }
+    px=tx;py=ty;
+    // detect near-stillness -> rekick
+    const ke=v1*v1+v2*v2;
+    if(demoEnabled&&!reduce&&ke<0.0008){still++;if(still>120){rekick();still=0;}}else still=0;
+    // compose
+    ctx.fillStyle=C.bg;ctx.fillRect(0,0,W,H);
+    ctx.drawImage(tr,0,0,W,H);
+    // rods + bobs
+    const mx=cx+Math.sin(a1)*L,my=cy+Math.cos(a1)*L;
+    ctx.strokeStyle=C.rod;ctx.lineWidth=Math.max(1.4,L*0.012);
+    ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(mx,my);ctx.lineTo(tx,ty);ctx.stroke();
+    function bob(x,y,r,c){const rg=ctx.createRadialGradient(x,y,0,x,y,r*3);
+      rg.addColorStop(0,c);rg.addColorStop(.4,c);rg.addColorStop(1,C.halo);
+      ctx.fillStyle=rg;ctx.beginPath();ctx.arc(x,y,r*3,0,6.29);ctx.fill();
+      ctx.fillStyle=C.core;ctx.beginPath();ctx.arc(x,y,r*0.55,0,6.29);ctx.fill();}
+    ctx.fillStyle=C.accent;ctx.beginPath();ctx.arc(cx,cy,Math.max(2,L*0.02),0,6.29);ctx.fill();
+    bob(mx,my,Math.max(3,L*0.034),C.bob1);
+    bob(tx,ty,Math.max(3.5,L*0.04),C.bob2);
+    if(!reduce&&(demoEnabled||(sessionActive)))start();
+  }
+  let raf=0;
+  function start(){if(!raf&&!document.hidden&&!reduce&&(demoEnabled||(sessionActive)))raf=requestAnimationFrame(draw);}
+  function stop(){cancelAnimationFrame(raf);raf=0;}
+  document.addEventListener('visibilitychange',()=>{document.hidden?stop():start();});
+  if(reduce){a1=2.0;a2=2.7;px=py=null;draw();stop();}else start();
+  ['pointerdown','pointermove','pointerleave','click'].forEach(type=>cv.addEventListener(type,()=>{sessionActive=true;if(reduce){draw();}else start();}));
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,279 @@
+<!doctype html><html lang="en"><head>
+<!--
+  INSTALANDING.AI · Sankey Flow
+  slug     sankey-flow
+  page     https://forevercomponents.com/components/charts-flow/sankey-flow/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    :root custom properties: --ch01-bg/--ch01-glow/--ch01-cap (page), --ch01-c0
+            through --ch01-c4 (ribbon palette, read by JS in syncTheme), --ch01-hub
+            (hub bars), --ch01-rib-a/--ch01-rib-r (ribbon alpha); the
+            :root[data-theme="light"] block re-points every token for the light re-theme
+  sections  stage — #ch01-wrap: full-viewport canvas (.cap caption fixed on top)
+  scripts   head theme-hook IIFE (?theme= bootstrap, runs before first paint) + one
+            body IIFE: synthetic three-stage flow graph (matrices A and B), DPR-aware
+            canvas sizing, layout of node columns and bezier ribbons, staged reveal
+            loop, prefers-reduced-motion guard, visibilitychange stop/start,
+            forever:theme message listener + syncTheme
+  assets    none: all drawing is canvas 2D, system font stack
+
+  ADAPTING
+  - Safe to edit: flow value matrices A and B, color palette (COL array, fed from
+    --ch01-c* tokens), stage reveal timing (t%9 period, /3.6 divisor), pulse opacity
+    range (0.16 + 0.12 amplitude), node bar width (6px in fillRect), theme tokens
+    (:root dark defaults + [data-theme=light] overrides). The
+    <script type="application/json" id="forever-agent-meta"> block lists editable
+    areas, elements to preserve, and known limitations — read it before changing things.
+  - Keep intact: the IIFE wrapper, prefers-reduced-motion guard (reduce variable),
+    visibilitychange stop/start, DPR-aware canvas sizing, the ?theme= theme hook
+    and forever:theme listener, and syncTheme (canvas reads every colour from CSS
+    tokens, so change the tokens, not the literals).
+  - Flow data is synthetic and hardcoded — rebind A/B to real data for production.
+    To retheme the background, change --ch01-bg AND the JS BG default together.
+  - The staged reveal resets on a 9s loop with no pause control.
+  - Note: the meta description tag is truncated mid-word in the original code as
+    delivered ("...show flo"); reproduced as-is.
+-->
+<meta charset="utf-8">
+<meta name="description" content="Animated Sankey diagram on dark teal canvas: ribbons grow stage-by-stage between origins, hubs and outcome bands, pulsing softly to show flo">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sankey Flow</title>
+<script>
+/* theme hook: the canvas loads the tile with ?theme=light|dark (or stamps data-theme on <html>).
+   Runs before first paint — no dark flash. Standalone default stays dark. */
+(function(){var t=new URLSearchParams(location.search).get('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);})();
+</script>
+<style>
+  /* theme tokens — dark values are the defaults (solid-dark-bg contract);
+     the light re-theme is the [data-theme="light"] block. --ch01-c* feed the JS palette. */
+  :root{
+    --ch01-bg:#0a0d12; --ch01-glow:rgba(90,209,160,.10); --ch01-cap:#fff; --ch01-cap-o:.42;
+    --ch01-c0:#5ad1a0; --ch01-c1:#3aa6c9; --ch01-c2:#d8b24a; --ch01-c3:#d8623a; --ch01-c4:#8a7ad8;
+    --ch01-hub:#5ad1a0; --ch01-rib-a:.14; --ch01-rib-r:.30;
+  }
+  :root[data-theme="light"]{
+    --ch01-bg:#f1f4f8; --ch01-glow:rgba(35,126,89,.10); --ch01-cap:#1b2130; --ch01-cap-o:.5;
+    --ch01-c0:#237e59; --ch01-c1:#27768f; --ch01-c2:#866a1d; --ch01-c3:#ba4b25; --ch01-c4:#715dd0;
+    --ch01-hub:#237e59; --ch01-rib-a:.36; --ch01-rib-r:.52;
+  }
+  html,body{margin:0;height:100%;background:var(--ch01-bg);overflow:hidden}
+  #ch01-wrap{position:fixed;inset:0;display:block}
+  #ch01-c{position:absolute;inset:0;width:100%;height:100%;
+    /* static glow, never repaints */
+    box-shadow:inset 0 0 140px var(--ch01-glow)}
+  .cap{position:fixed;left:8px;bottom:7px;font:600 10px/1 ui-monospace,Menlo,monospace;
+    color:var(--ch01-cap);opacity:var(--ch01-cap-o);letter-spacing:.08em;text-transform:uppercase;user-select:none;z-index:2}
+  @media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;animation-iteration-count:1!important}}
+</style><script type="application/json" id="forever-agent-meta">
+{
+ "file": "infinite/charts-flow/01-sankey-flow.html",
+ "title": "Sankey Flow",
+ "description": "Three-stage Sankey diagram on dark canvas: bezier ribbons grow stage-by-stage from origins to hubs to outcomes, pulsing softly in opacity to show flow volume.",
+ "useWhen": "Data visualization contexts needing animated flow diagrams — traffic splits, funnel analysis, budget allocation, network routing dashboards.",
+ "avoidWhen": "Light-color UIs (background hardcoded dark navy). Contexts needing real data binding — values are synthetic constants in the A/B matrices.",
+ "agentPrompt": "Change the flow data by editing matrix A to [[8,2,1],[1,7,2],[2,1,9]] and matrix B to [[5,4,1,1],[1,6,2,2],[1,1,5,5]], then update COL[0] to '#ff6b6b' for a warm accent. Theme: dark tokens live in :root, the light variant in :root[data-theme=\"light\"]; ?theme=light or a {type:'forever:theme'} postMessage switches at runtime.",
+ "editableAreas": [
+  "flow value matrices A and B",
+  "color palette (COL array)",
+  "stage reveal timing (t%9 period, /3.6 divisor)",
+  "pulse opacity range (0.16 + 0.12 amplitude)",
+  "node bar width (6px in fillRect)",
+  "theme tokens (:root dark defaults + [data-theme=light] overrides)"
+ ],
+ "preserveElements": [
+  "IIFE wrapper",
+  "prefers-reduced-motion guard (reduce variable)",
+  "visibilitychange stop/start",
+  "DPR-aware canvas sizing",
+  "theme hook (?theme= bootstrap + forever:theme message listener + theme tokens)"
+ ],
+ "knownLimitations": [
+  "Flow data is hardcoded — no external data binding without refactor",
+  "Background color hardcoded in BG and CSS — must change both to retheme",
+  "Staged reveal resets on a 9s loop with no pause control"
+ ],
+ "tier": "curated",
+ "labels": [
+  "agent-ready",
+  "easy-to-modify",
+  "mobile-ready",
+  "accessible",
+  "copy-paste-safe",
+  "minimal-deps",
+  "light-ready"
+ ],
+ "tags": [
+  "sankey",
+  "flow",
+  "data-viz",
+  "canvas",
+  "ribbon",
+  "chart",
+  "generative"
+ ]
+}
+</script>
+</head>
+<body>
+<div id="ch01-wrap" data-section="stage" role="img" aria-label="Animated alluvial Sankey diagram: synthetic traffic splits across three stages into four outcome bands, with ribbons easing and pulsing to show flow volume.">
+  <canvas id="ch01-c"></canvas>
+</div>
+<div class="cap">Sankey Flow</div>
+<script>
+(function(){
+  "use strict";
+  var reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var cv=document.getElementById('ch01-c'), ctx=cv.getContext('2d');
+  // Constructivist / data-viz palette around the teal accent — filled from tokens in syncTheme
+  var COL=['#5ad1a0','#3aa6c9','#d8b24a','#d8623a','#8a7ad8'];
+  var BG='#0a0d12', HUB='#5ad1a0', RIBA=0.14, RIBR=0.30;   // RIBR = flat alpha under reduced motion
+
+  // ---- theme: every colour the canvas draws with comes from a CSS token ----
+  var root=document.documentElement;
+  function syncTheme(){
+    var cs=getComputedStyle(root);
+    BG=cs.getPropertyValue('--ch01-bg').trim();
+    HUB=cs.getPropertyValue('--ch01-hub').trim();
+    RIBA=parseFloat(cs.getPropertyValue('--ch01-rib-a'))||0.14;
+    RIBR=parseFloat(cs.getPropertyValue('--ch01-rib-r'))||0.30;
+    for(var i=0;i<COL.length;i++) COL[i]=cs.getPropertyValue('--ch01-c'+i).trim();
+    if(nodes){ layout(); if(reduce) draw(2600); }   // node/ribbon colours are baked at layout time
+  }
+  addEventListener('message',function(e){
+    var d=e.data;
+    if(d&&d.type==='forever:theme'&&(d.theme==='light'||d.theme==='dark')){
+      root.setAttribute('data-theme',d.theme); syncTheme();
+    }
+  });
+  syncTheme();
+
+  // ---- synthetic three-stage flow graph (origins -> hubs -> outcomes) ----
+  // value matrix A[origin][hub] and B[hub][outcome]
+  var A=[[7,3,1],[2,6,3],[1,2,8]];                 // 3 origins x 3 hubs
+  var B=[[6,3,1,1],[2,5,2,2],[1,2,4,5]];           // 3 hubs x 4 outcomes
+  function rowSum(r){var s=0,i;for(i=0;i<r.length;i++)s+=r[i];return s;}
+  function colSum(m,c){var s=0,i;for(i=0;i<m.length;i++)s+=m[i][c];return s;}
+  var oV=A.map(rowSum);
+  var hV=[0,1,2].map(function(h){return colSum(A,h);});
+  var cV=[0,1,2,3].map(function(o){return colSum(B,o);});
+  var TOT=oV.reduce(function(a,b){return a+b;},0);
+
+  var W=0,H=0,DPR=Math.min(2,window.devicePixelRatio||1);
+  // geometry caches (recomputed on resize)
+  var colX=[0,0,0,0], nodes=null, ribs=null;
+
+  function nodeColumn(vals,xnorm,gapFrac,colorMode){
+    var n=vals.length, pad=H*0.10, gap=H*gapFrac;
+    var avail=H-pad*2-gap*(n-1);
+    var sum=vals.reduce(function(a,b){return a+b;},0);
+    var y=pad, out=[];
+    for(var i=0;i<n;i++){
+      var h=avail*vals[i]/sum;
+      out.push({x:W*xnorm,y0:y,y1:y+h,cy:y+h/2,col:colorMode(i),
+                fillO:y,fillH:0,fillI:y,fillIH:0}); // running fill cursors
+      y+=h+gap;
+    }
+    return out;
+  }
+
+  function layout(){
+    colX=[W*0.13,W*0.50,W*0.87];
+    var O=nodeColumn(oV,0.13,0.045,function(i){return COL[i];});
+    var Hn=nodeColumn(hV,0.50,0.05,function(){return HUB;});
+    var C=nodeColumn(cV,0.87,0.04,function(i){return COL[(i+1)%COL.length];});
+    nodes={O:O,H:Hn,C:C};
+    // build ribbons: stage1 (O->H) then stage2 (H->C)
+    var list=[],i,j;
+    // reset hub fill cursors for outgoing on right edge separately
+    for(i=0;i<O.length;i++)for(j=0;j<Hn.length;j++){
+      if(A[i][j]<=0)continue;
+      var sh=(O[i].y1-O[i].y0)*A[i][j]/oV[i];
+      var dh=(Hn[j].y1-Hn[j].y0)*A[i][j]/hV[j];
+      list.push(rib(O[i].x,O[i].fillO,sh, Hn[j].x,Hn[j].fillI,dh, O[i].col, A[i][j], 0, i*7+j));
+      O[i].fillO+=sh; Hn[j].fillI+=dh;
+    }
+    for(i=0;i<Hn.length;i++)for(j=0;j<C.length;j++){
+      if(B[i][j]<=0)continue;
+      var sh2=(Hn[i].y1-Hn[i].y0)*B[i][j]/hV[i];
+      var dh2=(C[j].y1-C[j].y0)*B[i][j]/cV[j];
+      list.push(rib(Hn[i].x,Hn[i].fillO,sh2, C[j].x,C[j].fillI,dh2, C[j].col, B[i][j], 1, i*5+j+30));
+      Hn[i].fillO+=sh2; C[j].fillI+=dh2;
+    }
+    ribs=list;
+  }
+  function rib(x0,y0,h0,x1,y1,h1,col,val,stage,seed){
+    return {x0:x0,ya0:y0,yb0:y0+h0, x1:x1,ya1:y1,yb1:y1+h1,
+            col:col,val:val,stage:stage,ph:(seed*0.618)%1};
+  }
+
+  function resize(){
+    W=cv.clientWidth; H=cv.clientHeight;
+    cv.width=Math.max(1,W*DPR); cv.height=Math.max(1,H*DPR);
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    layout();
+  }
+
+  function ease(t){return t<0?0:t>1?1:t*t*(3-2*t);}
+  function hex2rgba(h,a){
+    var n=parseInt(h.slice(1),16);
+    return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+a+')';
+  }
+
+  function ribbon(r,grow,t){
+    // grow 0..1 draws the right edge progressively; t for pulse
+    var x0=r.x0, x1=r.x0+(r.x1-r.x0)*grow;
+    var ya1=r.ya0+(r.ya1-r.ya0)*grow, yb1=r.yb0+(r.yb1-r.yb0)*grow;
+    var mx=(x0+x1)/2;
+    ctx.beginPath();
+    ctx.moveTo(x0,r.ya0);
+    ctx.bezierCurveTo(mx,r.ya0,mx,ya1,x1,ya1);
+    ctx.lineTo(x1,yb1);
+    ctx.bezierCurveTo(mx,yb1,mx,r.yb0,x0,r.yb0);
+    ctx.closePath();
+    var pulse=0.16+0.12*Math.sin(t*1.6+r.ph*6.283);
+    ctx.fillStyle=hex2rgba(r.col, reduce?RIBR:(pulse+RIBA));
+    ctx.fill();
+  }
+
+  function nodeBar(nd){
+    ctx.fillStyle=nd.col;
+    ctx.globalAlpha=0.92;
+    ctx.fillRect(nd.x-3,nd.y0, 6, nd.y1-nd.y0);
+    ctx.globalAlpha=1;
+  }
+
+  function draw(time){
+    ctx.fillStyle=BG; ctx.fillRect(0,0,W,H);
+    var t=time*0.001;
+    // staged reveal: stage0 grows first, stage1 follows
+    var g0=reduce?1:ease((t%9)/3.6);
+    var g1=reduce?1:ease(((t%9)-2.6)/3.6);
+    var i,r;
+    for(i=0;i<ribs.length;i++){
+      r=ribs[i];
+      ribbon(r, r.stage===0?g0:g1, t);
+    }
+    // node bars on top
+    for(i=0;i<nodes.O.length;i++)nodeBar(nodes.O[i]);
+    for(i=0;i<nodes.H.length;i++)nodeBar(nodes.H[i]);
+    for(i=0;i<nodes.C.length;i++)nodeBar(nodes.C[i]);
+  }
+
+  var raf=0, running=false;
+  function loop(ts){ if(!running)return; draw(ts); raf=requestAnimationFrame(loop); }
+  function start(){ if(running||reduce)return; running=true; raf=requestAnimationFrame(loop); }
+  function stop(){ running=false; if(raf)cancelAnimationFrame(raf); raf=0; }
+
+  window.addEventListener('resize',function(){ resize(); if(reduce)draw(2600); });
+  document.addEventListener('visibilitychange',function(){
+    if(document.hidden)stop(); else start();
+  });
+
+  resize();
+  if(reduce){ draw(2600); return; }
+  start();
+})();
+</script>
+</body></html>

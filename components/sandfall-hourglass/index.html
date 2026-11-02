@@ -1,0 +1,262 @@
+<!doctype html>
+<!--
+  INSTALANDING.AI · Sandfall Hourglass
+  slug     sandfall-hourglass
+  page     https://forevercomponents.com/components/particles-physics/sandfall-hourglass/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    :root custom properties: --sfh-bg (near-black amber ground),
+            --sfh-accent (caption/line accent), --sfh-cap-o, --sfh-wash /
+            --sfh-line (glass cavity wash + outline), --sfh-s0..--sfh-s5 (sand
+            shade ramp, read back by syncTheme() into the PAL array). A
+            [data-theme="light"] block re-points every token (warm paper ground,
+            brown-ink sand).
+  sections  stage — full-viewport cellular-automaton hourglass on #sfh-c (canvas,
+            tagged data-section="stage"); .cap caption bottom-left
+  scripts   one inline IIFE: ?theme= bootstrap hook + forever:theme listener,
+            cellular-automaton step()/draw() loop, pre-baked glass background
+            (bakeBg), auto-flip when the falling bulb drains, canvas click reverses
+            gravity, pointermove kicks extra sim steps, visibilitychange
+            pause/resume, prefers-reduced-motion static fast-forward
+  assets    none: pure canvas 2D, system font stack for the caption
+
+  ADAPTING
+  - Safe to edit: sand palette (PAL array, fed from --sfh-s0..--sfh-s5 tokens),
+    grain size divisor (S/110), hourglass neck width (COLS*0.05), bulge width
+    (COLS*0.40), simulation tick rate (acc>=33), auto-flip drain threshold,
+    theme tokens (:root dark defaults + [data-theme=light] overrides). The
+    <script type="application/json" id="forever-agent-meta"> block lists editable
+    areas, elements to preserve, and known limitations — read it before changing things.
+  - Keep intact: the IIFE wrapper, pre-baked bg canvas (bakeBg — critical for
+    per-frame perf), visibilitychange pause/resume, the prefers-reduced-motion
+    static fallback (900-step fast-forward), the theme hook, and the demo-v1
+    preview lifecycle (initialize demoEnabled from window.__foreverPreview, stop
+    attract work on first real input or forever:interactive).
+  - Canvas is width/height 100% of the viewport inside an overflow:hidden body, so
+    there is no horizontal scroll at any viewport width. Per-frame full grid scan
+    is O(COLS*ROWS) — heavy on large viewports with small cell sizes.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="forever-preview-lifecycle" content="demo-v1">
+<meta name="description" content="Amber cellular-automaton sand grains topple through an hourglass cavity and auto-flip when the bulb drains; click reverses gravity.">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sandfall Hourglass</title>
+<script>
+/* theme hook: the canvas loads the tile with ?theme=light|dark (or stamps data-theme on <html>).
+   Runs before first paint – no dark flash. Standalone default stays dark. */
+(function(){var t=new URLSearchParams(location.search).get('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);})();
+</script>
+<style>
+  /* theme tokens – dark values are the defaults; light re-theme in the [data-theme] block.
+     PAL/wash/line are read back by syncTheme() so JS draws with the same palette. */
+  :root{
+    --sfh-bg:#1a120b; --sfh-accent:#e8a44c; --sfh-cap-o:.34;
+    --sfh-wash:rgba(232,164,76,0.04); --sfh-line:rgba(232,164,76,0.30);
+    --sfh-s0:#3a2310; --sfh-s1:#6b3d18; --sfh-s2:#9c5a22; --sfh-s3:#cf8336; --sfh-s4:#e8a44c; --sfh-s5:#f6c878;
+  }
+  :root[data-theme="light"]{
+    --sfh-bg:#f6f2ea; --sfh-accent:#9a5f14; --sfh-cap-o:.62;
+    --sfh-wash:rgba(154,95,20,0.06); --sfh-line:rgba(154,95,20,0.34);
+    --sfh-s0:#e6d3b4; --sfh-s1:#6b3d18; --sfh-s2:#84491a; --sfh-s3:#9e5c1f; --sfh-s4:#b06724; --sfh-s5:#c07a2c;
+  }
+  html,body{margin:0;height:100%;overflow:hidden;background:var(--sfh-bg);}
+  #sfh-c{display:block;width:100%;height:100%;}
+  .cap{position:fixed;left:8px;bottom:7px;font:600 10px/1.2 system-ui,sans-serif;
+    letter-spacing:.09em;color:var(--sfh-accent);opacity:var(--sfh-cap-o);text-transform:uppercase;
+    pointer-events:none;user-select:none;}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+  "file": "infinite/particles-physics/11-sandfall-hourglass.html",
+  "title": "Sandfall Hourglass",
+  "description": "Amber sand grains fall through a cellular-automaton hourglass cavity, piling realistically at the base; initial automatic flips stop after first input; canvas click reverses gravity and lets grains settle.",
+  "useWhen": "Timers, loading screens, meditative ambient displays, or any context needing a satisfying physics loop with no user friction.",
+  "avoidWhen": "Contexts requiring legible overlaid text or light backgrounds — background and palette are hardcoded dark amber. Low-end devices may struggle with the per-frame grid scan.",
+  "agentPrompt": "Change the sand palette to cool blues by replacing PAL with ['#0d1b2a','#1a3a5c','#1e5f8a','#2980b9','#5dade2','#aed6f1'] and set background to #0a0f14. Theme: dark tokens live in :root, the light variant in :root[data-theme=\"light\"]. Keep the canvas/cap markup; do not add libraries.",
+  "editableAreas": [
+    "sand color palette (PAL array)",
+    "grain size divisor (S/110)",
+    "hourglass neck width (COLS*0.05)",
+    "hourglass bulge width (COLS*0.40)",
+    "simulation tick rate (acc>=33)",
+    "auto-flip drain threshold (drained<\\x14>)",
+    "theme tokens (:root dark defaults + [data-theme=light] overrides)"
+  ],
+  "preserveElements": [
+    "pre-baked bg canvas (bakeBg) — critical for per-frame perf",
+    "visibilitychange pause/resume",
+    "prefers-reduced-motion static fallback (900 step fast-forward)",
+    "IIFE wrapper",
+    "theme hook (?theme= bootstrap + forever:theme message listener + theme tokens)",
+    "demo-v1 preview lifecycle: initialize demoEnabled from window.__foreverPreview and stop attract work on first real input (pointerdown/click/keydown/Tab) or forever:interactive."
+  ],
+  "knownLimitations": [
+    "Per-frame full grid scan is O(COLS*ROWS) — heavy on large viewports with small cell sizes",
+    "Hourglass shape is purely rectangular mask math — cannot produce curved glass silhouette",
+    "pointermove kick only adds extra simulation steps, not a true pointer interaction",
+    "State remains local to each mounted instance; format/theme remount preserves takeover, not component state."
+  ],
+  "tier": "curated",
+  "labels": [
+    "accessible",
+    "copy-paste-safe",
+    "minimal-deps",
+    "mobile-ready",
+    "animation-heavy",
+    "light-ready"
+  ],
+  "tags": [
+    "sand",
+    "cellular-automaton",
+    "physics",
+    "hourglass",
+    "particles",
+    "canvas",
+    "generative"
+  ]
+}
+</script>
+</head>
+<body>
+<canvas id="sfh-c" class="sfh-root" data-section="stage"></canvas>
+<div class="cap">Sandfall Hourglass</div>
+<script>
+(function(){
+  let demoEnabled=window.__foreverPreview?.demoEnabled!==false,sessionActive=false,takenOver=window.__foreverPreview?.interactive===true;
+  function stopDemo(){if(!takenOver){sessionActive=false;takenOver=true;}demoEnabled=false;}
+  addEventListener('forever:interactive',stopDemo);
+  document.addEventListener('pointerdown',stopDemo,{capture:true});document.addEventListener('click',stopDemo,{capture:true});document.addEventListener('keydown',e=>{if(e.key==='Tab')stopDemo();},{capture:true});
+
+  const cv=document.getElementById('sfh-c'),ctx=cv.getContext('2d');
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // cellular grid: 0 empty, 1..N sand shade. Hourglass mask carved into grid.
+  let W,H,DPR,COLS,ROWS,cell,grid,mask,offx,offy;
+  const PAL=[];                          // sand shades — filled from --sfh-s0..s5 in syncTheme
+  // every colour JS paints comes from the tokens; a theme flip re-reads them and re-bakes the cache
+  const root=document.documentElement, C={};
+  function syncTheme(){
+    const cs=getComputedStyle(root);
+    C.bg=cs.getPropertyValue('--sfh-bg').trim();
+    C.wash=cs.getPropertyValue('--sfh-wash').trim();
+    C.line=cs.getPropertyValue('--sfh-line').trim();
+    for(let i=0;i<6;i++) PAL[i]=cs.getPropertyValue('--sfh-s'+i).trim();
+    if(mask){ bakeBg(); if(reduce) draw(); }   // invalidate the pre-baked glass layer
+  }
+  addEventListener('message',e=>{const d=e.data;
+    if(d&&d.type==='forever:theme'&&(d.theme==='light'||d.theme==='dark')){root.setAttribute('data-theme',d.theme);syncTheme();}});
+  // static layers (wash + outline) baked once per resize — mask never changes per frame
+  const bg=document.createElement('canvas'),bgx=bg.getContext('2d');
+  function build(){
+    DPR=Math.min(devicePixelRatio||1,2);
+    W=cv.clientWidth;H=cv.clientHeight;
+    cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);
+    const S=Math.min(W,H);
+    cell=Math.max(2,Math.round(S/110));            // grain size scales with frame
+    COLS=Math.floor(W/cell);ROWS=Math.floor(H/cell);
+    offx=(W-COLS*cell)/2;offy=(H-ROWS*cell)/2;
+    grid=new Int8Array(COLS*ROWS);
+    mask=new Uint8Array(COLS*ROWS);                // 1 = inside glass cavity
+    const mx=COLS/2, neck=Math.max(1.4,COLS*0.05), bulge=COLS*0.40;
+    for(let y=0;y<ROWS;y++){
+      const v=y/(ROWS-1), tn=Math.abs(v-0.5)*2;    // 0 at neck, 1 at ends
+      const halfW=neck+(bulge-neck)*Math.pow(tn,1.35);
+      for(let x=0;x<COLS;x++){
+        if(Math.abs(x-mx)<=halfW) mask[y*COLS+x]=1;
+      }
+    }
+    // fill the top bulb with sand grains
+    for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){
+      const i=y*COLS+x;
+      if(mask[i] && y < ROWS*0.46) grid[i]=1+((x*7+y*3)%5);
+    }
+    bakeBg();
+  }
+  // pre-render the static glass cavity wash + outline once (was redrawn every frame)
+  function bakeBg(){
+    bg.width=W*DPR;bg.height=H*DPR;bgx.setTransform(DPR,0,0,DPR,0,0);
+    bgx.clearRect(0,0,W,H);
+    bgx.fillStyle=C.wash;
+    for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++)if(mask[y*COLS+x])
+      bgx.fillRect(offx+x*cell,offy+y*cell,cell,cell);
+    bgx.strokeStyle=C.line;bgx.lineWidth=1;
+    bgx.beginPath();
+    for(let y=0;y<ROWS;y++){
+      let lx=-1,rx=-1;
+      for(let x=0;x<COLS;x++){const m=mask[y*COLS+x];if(m){if(lx<0)lx=x;rx=x;}}
+      if(lx<0)continue;
+      const py=offy+y*cell+cell/2;
+      bgx.moveTo(offx+lx*cell,py-cell/2);bgx.lineTo(offx+lx*cell,py+cell/2);
+      bgx.moveTo(offx+(rx+1)*cell,py-cell/2);bgx.lineTo(offx+(rx+1)*cell,py+cell/2);
+    }
+    bgx.stroke();
+  }
+  syncTheme();addEventListener('resize',build);build();
+  let flip=0,dir=1,kick=0,moved=1;                        // dir: gravity sign
+  cv.addEventListener('pointermove',()=>{kick=6;});
+  cv.addEventListener('click',()=>{dir*=-1;});
+
+  function step(){
+    moved=0;const gy = dir>0?1:-1;
+    const y0 = dir>0?ROWS-2:1, y1=dir>0?-1:ROWS, dy=dir>0?-1:1;
+    const odd = (flip&1);                            // alternate scan bias for symmetry
+    for(let y=y0; y!==y1; y+=dy){
+      for(let k=0;k<COLS;k++){
+        const x = odd? COLS-1-k : k;
+        const i=y*COLS+x, below=i+gy*COLS;
+        const v=grid[i];if(!v) continue;
+        if(mask[below] && !grid[below]){ grid[below]=v; grid[i]=0;moved++; continue; }
+        // angle-of-repose toppling: slide diagonally into empty neighbour
+        const dl=below-1, dr=below+1;
+        const cl=(x>0)&&mask[dl]&&!grid[dl]&&!grid[i-1];
+        const cr=(x<COLS-1)&&mask[dr]&&!grid[dr]&&!grid[i+1];
+        if(cl&&cr){if((x+y+flip)&1){grid[dl]=v;}else{grid[dr]=v;} grid[i]=0;moved++; }
+        else if(cl){ grid[dl]=v; grid[i]=0;moved++; }
+        else if(cr){ grid[dr]=v; grid[i]=0;moved++; }
+      }
+    }
+    flip++;
+    // auto-flip the frame once the falling bulb has mostly drained
+    if(demoEnabled&&!reduce&&flip%4===0){
+      let top=0,bot=0;
+      for(let y=0;y<ROWS;y++){const row=y<ROWS/2;for(let x=0;x<COLS;x++)if(grid[y*COLS+x]){row?top++:bot++;}}
+      const drained = dir>0? top : bot;
+      const settled = dir>0? bot : top;
+      if(drained<2 && settled>4){ dir*=-1; }
+    }
+  }
+  function draw(){
+    ctx.fillStyle=C.bg;ctx.fillRect(0,0,W,H);
+    // static glass cavity wash (pre-rendered, was a full-grid fillRect loop per frame)
+    ctx.drawImage(bg,0,0,W,H);
+    // grains (dynamic)
+    for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){
+      const v=grid[y*COLS+x];if(!v) continue;
+      ctx.fillStyle=PAL[v];
+      ctx.fillRect(offx+x*cell,offy+y*cell,cell-0.4,cell-0.4);
+    }
+    // static glass outline pre-rendered into bg above
+  }
+
+  let raf=0,acc=0,last=0;
+  function frame(t){
+    raf=0;if(document.hidden)return;
+    const d=last?t-last:16;last=t;acc+=d;
+    let n=0;
+    while(acc>=33&& n<3){ step();if(kick>0){step();kick--;} acc-=33;n++;}
+    draw();
+    if(!reduce&&(demoEnabled||(sessionActive&&moved>0)))start();
+  }
+  function start(){if(!raf&&!document.hidden&&!reduce&&(demoEnabled||(sessionActive&&moved>0)))raf=requestAnimationFrame(frame);}
+  function stop(){cancelAnimationFrame(raf);raf=0;}
+  document.addEventListener('visibilitychange',()=>{if(reduce)return;document.hidden?stop():start();})
+  if(reduce){for(let s=0;s<900;s++) step(); draw(); }
+  else start();
+  ['pointerdown','pointermove','pointerleave','click'].forEach(type=>cv.addEventListener(type,()=>{sessionActive=true;stopDemo();}));
+})();
+</script>
+</body>
+</html>

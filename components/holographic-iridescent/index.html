@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<!--
+  INSTALANDING.AI · Holographic Iridescent
+  slug     holographic-iridescent
+  page     https://forevercomponents.com/components/cards/holographic-iridescent/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    :root custom properties: --text-0/--text-1 (ink), --accent-iris,
+            --border-mid, --r-md, --space-1/--space-6, --font-display (Space Grotesk)
+            and --font-body (Inter) via Google Fonts, --ease-linear, --cap-o,
+            --c08-page-a/--c08-page-b (page gradient), --c08-card-a/--c08-card-b
+            (card gradient), --c08-sheen-blend and --c08-sheen-1/2/3 (warm sheen),
+            --c08-grain, --c08-foil-glow; the :root[data-theme="light"] block re-points
+            every token for the light re-theme
+  sections  stage — #c08-stage: full-viewport tilt demo with the holo card (.c08-holo),
+            sheen, grain, conic foil chip, title/body copy, fixed caption
+  scripts   head theme-hook IIFE (?theme= bootstrap, runs before first paint) + one
+            body IIFE: pointer/tilt system (--c08-rx/--c08-ry/--c08-sheen), idle drift
+            loop, keyboard tilt, visibilitychange stop/start, demo-v1 preview lifecycle
+            (forever:interactive), forever:theme message listener
+  assets    none local: Google Fonts stylesheet (Space Grotesk, Inter)
+
+  ADAPTING
+  - Safe to edit: max tilt angle (var max=12), sheen gradient colors
+    (--c08-sheen-1/2/3), foil chip conic-gradient colors, idle drift speed
+    (t+=0.011), card dimensions (46vmin/59vmin, max 230x296px), theme tokens
+    (:root dark defaults + [data-theme=light] overrides). The
+    <script type="application/json" id="forever-agent-meta"> block lists editable
+    areas, elements to preserve, and known limitations — read it before changing things.
+  - Keep intact: the --c08-rx/--c08-ry/--c08-sheen tilt system, IIFE wrapper,
+    visibilitychange stop/start, prefers-reduced-motion guard, the ?theme= theme
+    hook and forever:theme message listener, the demo-v1 preview lifecycle
+    (forever:interactive stops attract work; manual feedback settles after), and
+    pointer/touch takeover with keyboard access.
+  - Light theme ships via ?theme=light or a forever:theme postMessage; the standalone
+    default is the dark warm-iridescent look. Sheen uses mix-blend-mode:color-dodge,
+    which renders differently on non-dark grounds.
+  - Drifts idly until the first deliberate input, which stops the demo loop while
+    manual feedback keeps working.
+-->
+<html lang="en">
+<head>
+<meta name="forever-preview-lifecycle" content="demo-v1">
+<meta charset="UTF-8">
+<meta name="description" content="3D-tilting trading card with a warm iridescent sheen, conic foil chip and grain that shift with pointer position or drift idly.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Holographic Iridescent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600&family=Inter:wght@400&display=swap" rel="stylesheet">
+<script>
+/* theme hook: the canvas loads the tile with ?theme=light|dark (or stamps data-theme on <html>).
+   Runs before first paint — no dark flash. Standalone default stays dark. */
+(function(){var t=new URLSearchParams(location.search).get('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);})();
+</script>
+<style>
+  /* theme tokens — dark values are the defaults (solid-dark-bg contract);
+     the light re-theme is the [data-theme="light"] block */
+  :root{
+    --text-0:#f4f6fb; --text-1:#c7ccdb;
+    --accent-iris:#EBD5A2;
+    --border-mid:rgba(255,255,255,0.12); --r-md:14px;
+    --space-1:4px; --space-6:24px;
+    --font-display:"Space Grotesk",system-ui,sans-serif;
+    --font-body:"Inter",system-ui,sans-serif;
+    --ease-linear:linear;
+    --cap-o:.4;
+    --c08-page-a:#101019; --c08-page-b:#08090d;
+    --c08-card-a:#14131c; --c08-card-b:#0a0a12;
+    --c08-sheen-blend:color-dodge;
+    --c08-sheen-1:rgba(216,208,151,0.55); --c08-sheen-2:rgba(188,182,169,0.6); --c08-sheen-3:rgba(235,213,162,0.55);
+    --c08-grain:rgba(255,255,255,0.05);
+    --c08-foil-glow:rgba(235,213,162,0.7);
+  }
+  :root[data-theme="light"]{
+    --text-0:#1b2130; --text-1:#606d95;
+    --accent-iris:#8b6a1e;
+    --border-mid:rgba(20,24,38,0.12);
+    --cap-o:.55;
+    --c08-page-a:#eef1f6; --c08-page-b:#f2f4f8;
+    --c08-card-a:#ffffff; --c08-card-b:#eef0f5;
+    --c08-sheen-blend:multiply;
+    --c08-sheen-1:rgba(122,113,46,0.5); --c08-sheen-2:rgba(118,109,92,0.42); --c08-sheen-3:rgba(139,106,30,0.5);
+    --c08-grain:rgba(20,24,38,0.05);
+    --c08-foil-glow:rgba(139,106,30,0.45);
+  }
+  *,*::before,*::after{box-sizing:border-box;}
+  html,body{margin:0;height:100%;overflow:hidden;background:var(--c08-page-b);}
+  html,body{background:radial-gradient(80% 70% at 50% 30%,var(--c08-page-a),var(--c08-page-b));
+    font-family:var(--font-body);}
+  #c08-stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+    perspective:1100px;}
+  .c08-holo{position:relative;width:46vmin;height:59vmin;max-width:230px;max-height:296px;
+    border-radius:var(--r-md);transform-style:preserve-3d;
+    transform:rotateX(var(--c08-rx,0deg)) rotateY(var(--c08-ry,0deg));
+    transition:transform 110ms var(--ease-linear);cursor:pointer;overflow:hidden;
+    border:1px solid var(--border-mid);background:linear-gradient(160deg,var(--c08-card-a),var(--c08-card-b));}
+  .c08-holo__sheen{position:absolute;inset:-2px;
+    background:linear-gradient(115deg,transparent 0%,rgba(235,213,162,0.0) 18%,
+      var(--c08-sheen-1) 38%,var(--c08-sheen-2) 50%,var(--c08-sheen-3) 62%,transparent 82%);
+    background-size:240% 240%;background-position:var(--c08-sheen,50%) 50%;
+    mix-blend-mode:var(--c08-sheen-blend);opacity:0.85;
+    transition:background-position 110ms var(--ease-linear);}
+  .c08-holo__grain{position:absolute;inset:0;
+    background-image:repeating-linear-gradient(115deg,var(--c08-grain) 0 2px,transparent 2px 5px);
+    mix-blend-mode:overlay;opacity:0.5;}
+  .c08-holo__foil{position:absolute;top:18px;left:18px;width:44px;height:44px;border-radius:12px;
+    background:conic-gradient(from 0deg,#D8D097,#EBD5A2,#BCB6A9,#D8D097);
+    box-shadow:0 0 18px -2px var(--c08-foil-glow);}
+  .c08-holo__body{position:absolute;inset:0;padding:var(--space-6);
+    display:flex;flex-direction:column;justify-content:flex-end;}
+  .c08-holo__t{font-family:var(--font-display);font-weight:600;font-size:18px;color:var(--text-0);
+    margin:0 0 var(--space-1);letter-spacing:-0.01em;}
+  .c08-holo__p{font-size:12px;color:var(--text-1);margin:0;}
+  .cap{position:fixed;left:10px;bottom:8px;color:var(--accent-iris);opacity:var(--cap-o);
+    font-family:var(--font-body);font-size:11px;letter-spacing:.08em;text-transform:uppercase;}
+  @media (prefers-reduced-motion:reduce){.c08-holo,.c08-holo__sheen{transition-duration:.001ms;}}
+  .c08-holo:focus-visible{outline:2px solid var(--text-0);outline-offset:4px;}
+@media(max-width:300px){.c08-holo{width:70vmin;height:74vmin}.c08-holo__body{padding:12px}.c08-holo__t{font-size:16px}.c08-holo__p{font-size:12px}.c08-holo__foil{top:12px;left:12px;width:30px;height:30px}}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+ "file": "infinite/cards/08-holographic-iridescent.html",
+ "title": "Holographic Iridescent",
+ "description": "A 3D-tilting card with a warm iridescent sheen and conic foil chip that shift with pointer position; drifts idly until first deliberate input.",
+ "useWhen": "Product cards, trading card showcases, premium UI hero elements needing a luxury tactile feel.",
+ "avoidWhen": "Light backgrounds (dark gradient hardcoded). Contexts where constant motion competes with surrounding content.",
+ "agentPrompt": "Adjust the existing palette tokens and effect parameters while preserving manual control. First deliberate input stops idle demo work while manual feedback finishes. Keep demo-v1 lifecycle marker, __foreverPreview.demoEnabled initialization and forever:interactive handler. Preserve reduced motion, visibility suspension and theme switching.",
+ "editableAreas": [
+  "max tilt angle (var max=12)",
+  "sheen gradient colors (rgba values in .c08-holo__sheen)",
+  "foil chip colors (conic-gradient in .c08-holo__foil)",
+  "idle drift speed (t+=0.011)",
+  "card dimensions (46vmin/59vmin)",
+  "theme tokens (:root dark defaults + [data-theme=light] overrides)"
+ ],
+ "preserveElements": [
+  "CSS custom property tilt system (--c08-rx/--c08-ry/--c08-sheen)",
+  "IIFE wrapper",
+  "visibilitychange stop/start",
+  "prefers-reduced-motion guard",
+  "theme hook (?theme= bootstrap + forever:theme message listener + theme tokens)",
+  "sticky demo-v1 preview lifecycle; stop attract work, retain manual feedback and settling",
+  "pointer/touch takeover, keyboard access and visibility suspension",
+  "demo-v1 preview lifecycle: initialize demoEnabled from window.__foreverPreview and stop attract work on the window forever:interactive event; retain manual feedback, settling, cleanup and explicit sessions"
+ ],
+ "knownLimitations": [
+  "Background dark gradient is hardcoded in body CSS — must edit to use on light pages",
+  "Sheen uses mix-blend-mode:color-dodge which may render differently on non-dark backgrounds",
+  "Control state is local to each mount; format changes preserve preview takeover but create a fresh source instance.",
+  "State remains local to each mounted instance; format/theme remount preserves takeover, not component values."
+ ],
+ "tier": "curated",
+ "labels": [
+  "agent-ready",
+  "easy-to-modify",
+  "mobile-ready",
+  "accessible",
+  "copy-paste-safe",
+  "minimal-deps",
+  "light-ready"
+ ],
+ "tags": [
+  "holographic",
+  "card",
+  "tilt",
+  "iridescent",
+  "foil",
+  "pointer",
+  "3d"
+ ]
+}
+</script>
+</head>
+<body>
+<div id="c08-stage" data-section="stage">
+  <div class="c08-holo" tabindex="0" aria-label="Holographic iridescent card">
+    <div class="c08-holo__sheen"></div>
+    <div class="c08-holo__grain"></div>
+    <div class="c08-holo__foil"></div>
+    <div class="c08-holo__body">
+      <h3 class="c08-holo__t">Holo Foil</h3>
+      <p class="c08-holo__p">Tilt to shift the rainbow.</p>
+    </div>
+  </div>
+</div>
+<div class="cap">Holographic Iridescent</div>
+<script>
+(function(){
+  "use strict";
+  var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var card=document.querySelector(".c08-holo");
+  var max=12, hovering=false, raf=0, t=0;
+  function apply(px,py){
+    card.style.setProperty("--c08-ry",((px-0.5)*max*2).toFixed(2)+"deg");
+    card.style.setProperty("--c08-rx",((0.5-py)*max*2).toFixed(2)+"deg");
+    card.style.setProperty("--c08-sheen",(px*100).toFixed(1)+"%");
+  }
+  function point(e){
+    hovering=true;
+    var r=card.getBoundingClientRect();
+    apply((e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height);
+  }
+  card.addEventListener("pointermove",point);
+  card.addEventListener("pointerdown",point);
+  card.addEventListener("pointerleave",function(){hovering=false;});
+  var demoEnabled=window.__foreverPreview?.demoEnabled!==false;
+  function stopDemo(){demoEnabled=false;stop();}
+  addEventListener("forever:interactive",stopDemo);
+  document.addEventListener("pointerdown",stopDemo,{capture:true});
+  document.addEventListener("click",stopDemo,{capture:true});
+  var px=.5,py=.5;
+  card.addEventListener("keydown",function(e){
+    if(!/^Arrow(Left|Right|Up|Down)$/.test(e.key))return;e.preventDefault();stopDemo();
+    px=Math.max(0,Math.min(1,px+(e.key==="ArrowRight"?.08:e.key==="ArrowLeft"?-.08:0)));
+    py=Math.max(0,Math.min(1,py+(e.key==="ArrowDown"?.08:e.key==="ArrowUp"?-.08:0)));apply(px,py);
+  });
+  function loop(){
+    if(!demoEnabled||document.hidden)return;
+    t+=0.011;
+    if(!hovering)apply(0.5+Math.sin(t)*0.42,0.5+Math.cos(t*0.7)*0.3);
+    raf=requestAnimationFrame(loop);
+  }
+  function start(){if(!raf&&!reduce&&demoEnabled&&!document.hidden)loop();}
+  function stop(){cancelAnimationFrame(raf);raf=0;}
+  document.addEventListener("visibilitychange",function(){document.hidden?stop():start();});
+  // live re-theme: the canvas broadcasts {type:'forever:theme', theme:'light'|'dark'}
+  addEventListener("message",function(e){
+    var d=e.data;
+    if(d&&d.type==="forever:theme"&&(d.theme==="light"||d.theme==="dark"))document.documentElement.setAttribute("data-theme",d.theme);
+  });
+  apply(.5,.5);if(!reduce)start();
+})();
+</script>
+</body>
+</html>
