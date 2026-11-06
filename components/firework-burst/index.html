@@ -1,0 +1,139 @@
+<!doctype html>
+<!--
+  INSTALANDING.AI · Firework Burst
+  slug     firework-burst
+  page     https://forevercomponents.com/components/particles-physics/firework-burst/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    no :root tokens — background hardcoded near-black (#06060f); hue palette
+            (hues: [10, 45, 200, 280, 330, 140]) lives in the script
+  sections  stage — full-viewport canvas (#c02-canvas); glowing spark bursts are the
+            whole page
+  scripts   one inline IIFE: burst() spawns 28–44 sparks per burst (capped at 110
+            live particles), gravity + drag + fade per frame, auto-launches until
+            first input, click spawns bursts, demo-v1 preview lifecycle, DPR-aware
+            sizing, visibilitychange pause
+  assets    none: pure canvas 2D
+
+  ADAPTING
+  - Safe to edit: hue palette (hues array), particle count per burst (n: 28 +
+    random*16), gravity (vy += 0.035), fade decay (p.life -= 0.014), trail
+    opacity (fill alpha 0.22). The forever-agent-meta JSON block lists editable
+    areas, elements to preserve, and known limitations — read it before changing
+    things.
+  - Keep intact: canvas sizing helper (resize handles devicePixelRatio), particle
+    lifecycle (burst creates particles; step removes expired ones), reduced-motion
+    guard (single burst then stop), particle cap check (parts.length < 110),
+    demo-v1 preview lifecycle.
+  - Background is hardcoded near-black (#06060f); repoint the CSS and the trail
+    fill to change it. Reduced-motion path fires a single static burst then stops
+    — no ongoing animation.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="forever-preview-lifecycle" content="demo-v1">
+<meta name="description" content="Radial bursts of colorful glowing sparks explode, fall under gravity and fade against a near-black sky, with extra bursts on click.">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Firework Burst</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#06060f}
+  #c02-canvas{display:block;width:100%;height:100%}
+  .cap{position:fixed;right:8px;bottom:7px;font:600 10px/1 ui-monospace,Menlo,monospace;
+    color:#ffd76b;opacity:.5;letter-spacing:.08em;text-transform:uppercase;user-select:none}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+ "file": "infinite/particles-physics/02-firework-burst.html",
+ "title": "Firework Burst",
+ "description": "Colorful glowing sparks burst radially, fall under gravity, and fade against a dark sky. Initial automatic launches stop after first input; canvas clicks create bursts that finish fading.",
+ "useWhen": "Dark-theme hero backgrounds, celebration screens, loading states that benefit from festive ambient motion.",
+ "avoidWhen": "Light backgrounds (sky hardcoded near-black). Contexts where motion competes with readable content or users may have motion sensitivity.",
+ "agentPrompt": "Change the hue palette to warm golds only by setting hues=[40,45,50,55,60], increase particle count per burst by changing n=28+(Math.random()*16|0) to n=50+(Math.random()*20|0).",
+ "editableAreas": [
+  "hue palette (hues array)",
+  "particle count per burst (n=28 base)",
+  "gravity strength (vy+=0.035)",
+  "fade speed (p.life-=0.014)",
+  "auto-launch interval (30+random*40)"
+ ],
+ "preserveElements": [
+  "visibilitychange pause/play guard",
+  "DPR-aware canvas sizing",
+  "particle cap check (parts.length<110)",
+  "reduced-motion guard (reduce flag)",
+  "demo-v1 preview lifecycle: initialize demoEnabled from window.__foreverPreview and stop attract work on the window forever:interactive event; retain manual feedback, settling, cleanup and explicit sessions"
+ ],
+ "knownLimitations": [
+  "Reduced-motion path fires a single static burst then stops — no ongoing animation, which may look broken rather than calm",
+  "Background color hardcoded in CSS (#06060f) — must edit to change from near-black",
+  "State remains local to each mounted instance; format/theme remount preserves takeover, not component values."
+ ],
+ "tier": "curated",
+ "labels": [
+  "mobile-ready",
+  "accessible",
+  "copy-paste-safe",
+  "minimal-deps"
+ ],
+ "tags": [
+  "fireworks",
+  "particles",
+  "canvas",
+  "physics",
+  "gravity",
+  "burst",
+  "generative"
+ ]
+}
+</script>
+</head>
+<body>
+<canvas id="c02-canvas" class="c02-root" data-section="stage"></canvas>
+<div class="cap">Firework Burst</div>
+<script>
+(function(){
+  let demoEnabled=window.__foreverPreview?.demoEnabled!==false,sessionActive=false,takenOver=window.__foreverPreview?.interactive===true;
+  function stopDemo(){if(!takenOver){sessionActive=false;takenOver=true;}demoEnabled=false;}
+  addEventListener('forever:interactive',stopDemo);
+  document.addEventListener('pointerdown',stopDemo,{capture:true});document.addEventListener('click',stopDemo,{capture:true});document.addEventListener('keydown',e=>{if(e.key!=='Tab')stopDemo();},{capture:true});
+
+const cv=document.getElementById('c02-canvas'),x=cv.getContext('2d');
+let W,H,DPR,parts=[],t=0,nextLaunch=0,reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const hues=[10,45,200,280,330,140];
+function size(){DPR=Math.min(2,devicePixelRatio||1);W=cv.clientWidth;H=cv.clientHeight;
+  cv.width=W*DPR;cv.height=H*DPR;x.setTransform(DPR,0,0,DPR,0,0);}
+addEventListener('resize',size);size();
+function burst(cx,cy){
+  const hue=hues[(Math.random()*hues.length)|0],n=28+(Math.random()*16|0);
+  for(let i=0;i<n&&parts.length<110;i++){const a=(i/n)*6.283+Math.random()*0.2,sp=1+Math.random()*2.6;
+    parts.push({x:cx,y:cy,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:1,
+      hue:hue+(Math.random()*30-15),r:1+Math.random()*1.6});}
+}
+cv.addEventListener('pointerdown',e=>{const r=cv.getBoundingClientRect();burst(e.clientX-r.left,e.clientY-r.top);});
+function step(){
+  x.fillStyle='rgba(6,6,15,0.22)';x.fillRect(0,0,W,H);
+  t++;
+  if(demoEnabled&&!reduce&&t>nextLaunch&&parts.length<110){nextLaunch=t+30+(Math.random()*40|0);
+    burst(W*(0.25+Math.random()*0.5),H*(0.2+Math.random()*0.45));}
+  for(let i=parts.length-1;i>=0;i--){const p=parts[i];
+    p.vy+=0.035;p.vx*=0.985;p.vy*=0.985;p.x+=p.vx;p.y+=p.vy;p.life-=0.014;
+    if(p.life<=0){parts.splice(i,1);continue;}
+    x.globalAlpha=Math.max(0,p.life);
+    x.fillStyle='hsl('+p.hue+',95%,'+(55+p.life*15)+'%)';
+    x.beginPath();x.arc(p.x,p.y,p.r*p.life+0.4,0,7);x.fill();
+  }
+  x.globalAlpha=1;
+}
+let raf=0;function loop(){raf=0;if(document.hidden)return;step();if(!reduce&&(demoEnabled||(parts.length>0)))play();}
+function play(){if(!raf&&!document.hidden){if(reduce){step();return;}raf=requestAnimationFrame(loop);}}
+function stop(){cancelAnimationFrame(raf);raf=0;}
+document.addEventListener('visibilitychange',()=>document.hidden?stop():play());
+if(reduce)burst(W/2,H/2);['pointerdown','pointermove','pointerleave','click'].forEach(type=>cv.addEventListener(type,()=>{sessionActive=true;play();}));
+play();
+})();
+</script>
+</body>
+</html>
