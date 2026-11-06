@@ -5,7 +5,7 @@
   "version": "1.0",
   "counts": {
     "pages": 22,
-    "components": 60,
+    "components": 63,
     "dashboards": 1
   },
   "pages": [
@@ -4280,6 +4280,157 @@
         "preview": "components/stacked-peeking-cards/preview.jpg"
       },
       "page": "https://forevercomponents.com/components/cards/stacked-peeking-cards/"
+    },
+    {
+      "slug": "firework-burst",
+      "title": "Firework Burst",
+      "description": "Colorful glowing sparks burst radially, fall under gravity, and fade against a near-black sky; clicks launch new bursts and auto-launches stop after first input",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "dark-theme hero backgrounds",
+        "celebration screens",
+        "festive ambient motion"
+      ],
+      "style": [
+        "dark",
+        "particles",
+        "canvas",
+        "celebration",
+        "burst",
+        "ambient",
+        "interactive"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas-2d",
+          "pointer-interaction",
+          "click",
+          "reduced-motion",
+          "mobile-ready"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Firework Burst — Forever Components",
+          "href": "https://forevercomponents.com/components/particles-physics/firework-burst/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/firework-burst/index.html",
+        "prompt": "components/firework-burst/PROMPT.md",
+        "preview": "components/firework-burst/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/particles-physics/firework-burst/"
+    },
+    {
+      "slug": "metaball-fluid",
+      "title": "Metaball Fluid",
+      "description": "Seven hot-pink gooey metaball blobs drift and merge via a high-contrast canvas threshold; the cursor adds an attracting blob that pulls them toward the pointer",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "dark playful hero sections",
+        "loading screens",
+        "soft organic ambient backgrounds"
+      ],
+      "style": [
+        "dark",
+        "gooey",
+        "organic",
+        "fluid",
+        "blob",
+        "canvas",
+        "ambient"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas-2d",
+          "pointer-interaction",
+          "theme-switch",
+          "light-theme",
+          "reduced-motion",
+          "mobile-ready"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Metaball Fluid — Forever Components",
+          "href": "https://forevercomponents.com/components/particles-physics/metaball-blob/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/metaball-fluid/index.html",
+        "prompt": "components/metaball-fluid/PROMPT.md",
+        "preview": "components/metaball-fluid/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/particles-physics/metaball-blob/"
+    },
+    {
+      "slug": "comet-streak-loop",
+      "title": "Comet Streak Loop",
+      "description": "Cyan and violet comets with glowing heads and gradient tails streak diagonally across a twinkling dark starfield; click spawns an extra comet (up to 5)",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "dark hero backgrounds",
+        "space or sci-fi themes",
+        "ambient loop screensavers"
+      ],
+      "style": [
+        "dark",
+        "space",
+        "canvas",
+        "streak",
+        "ambient",
+        "loop",
+        "background"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas-2d",
+          "pointer-interaction",
+          "click",
+          "reduced-motion",
+          "mobile-ready"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Comet Streak Loop — Forever Components",
+          "href": "https://forevercomponents.com/components/cosmic-space/comet-streak-loop/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/comet-streak-loop/index.html",
+        "prompt": "components/comet-streak-loop/PROMPT.md",
+        "preview": "components/comet-streak-loop/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/cosmic-space/comet-streak-loop/"
     }
   ],
   "dashboards": [
