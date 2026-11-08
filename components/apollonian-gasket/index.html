@@ -1,0 +1,248 @@
+<!doctype html>
+<!--
+  INSTALANDING.AI · Apollonian Gasket
+  slug     apollonian-gasket
+  page     https://forevercomponents.com/components/generative-geometry/apollonian-gasket/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    :root tokens — --apg-bg (dark navy #0d1b2a), --apg-cap (caption),
+            --apg-c0 / --apg-c1 (ends of the depth ramp the ring strokes
+            interpolate along), --apg-fill-a (shallow-fill alpha), --apg-vig /
+            --apg-vig-a (vignette wash); a [data-theme="light"] block repoints them
+  sections  stage — full-viewport canvas (#apg-c); recursive Apollonian circle
+            packing breathes through a slow infinite zoom, gold to blue by depth
+  scripts   one inline IIFE: Descartes' theorem builds the tangent-circle
+            gasket (MAX recursion depth 7, curvature cutoff 900), slow breathing
+            zoom with depth fade-in, pointer/click nudge, vignette, visibilitychange
+            pause/resume, reduced-motion static frame, DPR-aware sizing,
+            ?theme= / forever:theme message theme hook
+  assets    none: pure canvas 2D
+
+  ADAPTING
+  - Safe to edit: zoom speed (t*0.0009), max recursion depth (MAX=7), color
+    gradient per depth (cr/cg/cb formula), curvature cutoff (c4.b>900), nudge
+    strength on click (nudge=1.6), theme tokens. The forever-agent-meta JSON
+    block lists editable areas, elements to preserve, and known limitations —
+    read it before changing things.
+  - Keep intact: IIFE wrapper, DPR-aware canvas sizing, visibilitychange
+    pause/start, prefers-reduced-motion static-frame guard, theme hook.
+  - Background is hardcoded dark navy (#0d1b2a) in both CSS and the canvas
+    fillStyle — change both to retheme. Depth-fade bands shift if MAX is
+    changed without recalibrating visD. Hundreds of arc calls per frame —
+    heavier on low-end devices at high DPR.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="Apollonian circle packing of nested tangent rings in gold-to-blue tones, breathing through a slow infinite zoom with vignette.">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Apollonian Gasket</title>
+<script>
+/* theme hook: the canvas loads the tile with ?theme=light|dark (or stamps data-theme on <html>).
+   Runs before first paint — no dark flash. Standalone default stays dark. */
+(function(){var t=new URLSearchParams(location.search).get('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);})();
+</script>
+<style>
+  /* theme tokens — dark values are the defaults (solid-dark-bg contract);
+     the light re-theme lives in the one [data-theme="light"] block. --apg-c0/--apg-c1 are the
+     ends of the depth ramp the ring strokes interpolate along. */
+  :root{
+    --apg-bg:#0d1b2a; --apg-cap:#e0a458; --apg-cap-o:.34;
+    --apg-c0:224,164,88; --apg-c1:114,124,208; --apg-fill-a:0.06;
+    --apg-vig:13,27,42; --apg-vig-a:0.9;
+  }
+  :root[data-theme="light"]{
+    --apg-bg:#eef4f9; --apg-cap:#7a4a0e; --apg-cap-o:.7;
+    --apg-c0:104,62,10; --apg-c1:34,46,124; --apg-fill-a:0.05;
+    --apg-vig:238,244,249; --apg-vig-a:0.5;
+  }
+  html,body{margin:0;height:100%;overflow:hidden;background:var(--apg-bg);}
+  #apg-c{display:block;width:100%;height:100%;}
+  .apg-cap{position:fixed;left:8px;bottom:7px;font:600 10px/1.2 system-ui,sans-serif;
+       letter-spacing:.14em;color:var(--apg-cap);opacity:var(--apg-cap-o);text-transform:uppercase;
+       pointer-events:none;user-select:none;}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+ "file": "infinite/generative-geometry/11-apollonian-gasket.html",
+ "title": "Apollonian Gasket",
+ "description": "Recursive Apollonian circle packing with infinite slow zoom; circles shift from gold to blue by depth, with vignette and pointer/click nudge.",
+ "useWhen": "Math/science landing pages, generative art backdrops, contemplative infinite-zoom fractal backgrounds.",
+ "avoidWhen": "Contexts needing legible overlaid text — the constant zoom and vignette compete with reading. Low-end devices may stutter.",
+ "agentPrompt": "Change the color palette from gold-to-blue to magenta-to-cyan by editing the cr/cg/cb formula: set cr=Math.round(220-heat*80), cg=Math.round(60+heat*140), cb=Math.round(180+heat*60). Theme: dark tokens live in :root, the light variant in :root[data-theme=\"light\"]; ?theme=light or a {type:'forever:theme'} postMessage switches at runtime.",
+ "editableAreas": [
+  "zoom speed (t*0.0009)",
+  "max recursion depth (MAX=7)",
+  "color gradient per depth (cr/cg/cb formula)",
+  "curvature cutoff (c4.b>900)",
+  "nudge strength on click (nudge=1.6)",
+  "theme tokens (:root dark defaults + [data-theme=light] overrides)"
+ ],
+ "preserveElements": [
+  "IIFE wrapper",
+  "DPR-aware canvas sizing",
+  "visibilitychange pause/start",
+  "prefers-reduced-motion static-frame guard",
+  "theme hook (?theme= bootstrap + forever:theme message listener + theme tokens)"
+ ],
+ "knownLimitations": [
+  "Hundreds of arc calls per frame — heavier on low-end devices at high DPR",
+  "Background color hardcoded in both CSS and canvas fillStyle — must change both to retheme",
+  "Depth-fade bands shift if MAX recursion depth is changed without recalibrating visD"
+ ],
+ "tier": "curated",
+ "labels": [
+  "accessible",
+  "copy-paste-safe",
+  "minimal-deps",
+  "mobile-ready",
+  "animation-heavy",
+  "light-ready"
+ ],
+ "tags": [
+  "apollonian",
+  "circle-packing",
+  "generative",
+  "fractal",
+  "geometry",
+  "zoom",
+  "canvas"
+ ]
+}
+</script>
+</head>
+<body>
+<canvas id="apg-c" data-section="stage"></canvas>
+<div class="apg-cap">Apollonian Gasket</div>
+<script>
+(function(){
+  const cv=document.getElementById('apg-c'),ctx=cv.getContext('2d');
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // theme: bg, the two ends of the depth colour ramp, the shallow-fill alpha and the
+  // vignette wash are all read from the CSS tokens (once, and again on a theme flip).
+  const root=document.documentElement;
+  const C={bg:'#0d1b2a',c0:[224,164,88],c1:[114,124,208],fa:'0.06',vig:'13,27,42',vigA:'0.9'};
+  function tokDef(n){var m=document.querySelector('style').textContent.match(new RegExp(n+'\\s*:\\s*([^;}]+)'));return m?m[1].trim():'';}  // dark :root default, for engines that read '' from a fresh frame
+  function syncTheme(){
+    const cs=getComputedStyle(root),s=n=>cs.getPropertyValue(n).trim()||tokDef(n),
+          rgb=n=>{const v=s(n);return v?v.split(',').map(Number):null;};
+    C.bg=s('--apg-bg')||C.bg;
+    C.c0=rgb('--apg-c0')||C.c0;C.c1=rgb('--apg-c1')||C.c1;
+    C.fa=s('--apg-fill-a')||C.fa;
+    C.vig=s('--apg-vig')||C.vig;C.vigA=s('--apg-vig-a')||C.vigA;
+  }
+  addEventListener('message',e=>{const d=e.data;
+    if(d&&d.type==='forever:theme'&&(d.theme==='light'||d.theme==='dark')){
+      root.setAttribute('data-theme',d.theme);syncTheme();if(reduce&&W)draw();}
+  });
+  syncTheme();
+  let W,H,DPR,cx,cy,R;
+  function size(){
+    DPR=Math.min(devicePixelRatio||1,2);
+    W=cv.clientWidth;H=cv.clientHeight;
+    cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);
+    cx=W/2;cy=H/2;R=Math.min(W,H)*0.46;
+  }
+  addEventListener('resize',size);size();
+
+  // Circle = {b:curvature(1/r), x,y:center(curvature-weighted complex b*z), d:depth}
+  const circles=[];
+  function curv(b,x,y,d){return {b:b,x:x,y:y,d:d};}
+  // Descartes: given three mutually tangent circles, find the 4th (two solutions)
+  function descartes(c1,c2,c3){
+    const b4=c1.b+c2.b+c3.b+2*Math.sqrt(Math.abs(c1.b*c2.b+c2.b*c3.b+c3.b*c1.b));
+    // complex Descartes for center*curvature
+    const z1x=c1.x*c1.b,z1y=c1.y*c1.b,z2x=c2.x*c2.b,z2y=c2.y*c2.b,z3x=c3.x*c3.b,z3y=c3.y*c3.b;
+    const sx=z1x+z2x+z3x,sy=z1y+z2y+z3y;
+    // sqrt of (z1z2+z2z3+z3z1) in complex
+    const px=(z1x*z2x-z1y*z2y)+(z2x*z3x-z2y*z3y)+(z3x*z1x-z3y*z1y);
+    const py=(z1x*z2y+z1y*z2x)+(z2x*z3y+z2y*z3x)+(z3x*z1y+z3y*z1x);
+    const m=Math.sqrt(px*px+py*py),rt=Math.sqrt((m+px)/2),it=(py<0?-1:1)*Math.sqrt((m-px)/2);
+    const z4x=(sx+2*rt)/b4,z4y=(sy+2*it)/b4;
+    return curv(b4,z4x,z4y,0);
+  }
+  function build(c1,c2,c3,depth,maxd){
+    if(depth>maxd)return;
+    const c4=descartes(c1,c2,c3);
+    if(c4.b>900||!isFinite(c4.x))return;
+    c4.d=depth;circles.push(c4);
+    build(c1,c2,c4,depth+1,maxd);
+    build(c1,c3,c4,depth+1,maxd);
+    build(c2,c3,c4,depth+1,maxd);
+  }
+  function gasket(){
+    circles.length=0;
+    // outer bounding circle (negative curvature), two inner kissing circles
+    const b0=-1, b1=2, b2=2;
+    const o=curv(b0,0,0,0), a=curv(b1,-0.5,0,0), b=curv(b2,0.5,0,0);
+    circles.push(o,a,b);
+    const seed=descartes(o,a,b); // bottom triple-tangent (and its mirror via -y)
+    [seed,curv(seed.b,seed.x,-seed.y,0)].forEach(s=>{s.d=1;circles.push(s);});
+    const seeds=[seed,curv(seed.b,seed.x,-seed.y,1)];
+    const MAX=7;
+    seeds.forEach(s=>{
+      build(o,a,s,2,MAX);build(o,b,s,2,MAX);build(a,b,s,2,MAX);
+    });
+  }
+  gasket();
+  let maxDepth=0;circles.forEach(c=>{if(c.d>maxDepth)maxDepth=c.d;});
+
+  let t=0,nudge=0;
+  cv.addEventListener('pointermove',()=>{nudge=1;});
+  cv.addEventListener('click',()=>{nudge=1.6;});
+
+  function draw(){
+    ctx.fillStyle=C.bg;ctx.fillRect(0,0,W,H);
+    // slow breathing zoom 1.0 -> ~2.4 then loop, with depth fade-in keyed to zoom
+    const phase=(t*0.0009)%1;
+    const zoom=1+Math.pow(phase,1.3)*2.6+nudge*0.25;
+    const visD=1+phase*maxDepth*1.15; // depth front advances with zoom
+    nudge*=0.93;
+    ctx.save();ctx.translate(cx,cy);
+    // gentle drift toward a packing gap as we zoom in
+    ctx.translate(0,R*0.46*(zoom-1));
+    ctx.scale(zoom,zoom);
+    circles.forEach(c=>{
+      const r=Math.abs(1/c.b)*R;
+      if(r*zoom<0.35)return;
+      const x=c.x*R,y=c.y*R;
+      let a;
+      if(c.b<0){a=0.5;} // outer ring always visible
+      else{
+        const fd=visD-c.d; if(fd<=0)return;
+        a=Math.min(1,fd)*0.92;
+      }
+      const heat=c.b<0?0:Math.min(1,c.d/6);
+      // accent -> cool stroke gradient by depth
+      const cr=Math.round(C.c0[0]+heat*(C.c1[0]-C.c0[0])),
+            cg=Math.round(C.c0[1]+heat*(C.c1[1]-C.c0[1])),
+            cb=Math.round(C.c0[2]+heat*(C.c1[2]-C.c0[2]));
+      ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
+      ctx.globalAlpha=a;
+      ctx.lineWidth=Math.max(0.4,(0.9-c.d*0.08))/zoom;
+      ctx.strokeStyle='rgb('+cr+','+cg+','+cb+')';
+      // faint fill on shallow circles for body
+      if(c.b>0&&c.d<3){
+        ctx.fillStyle='rgba('+cr+','+cg+','+cb+','+C.fa+')';
+        ctx.fill();
+      }
+      ctx.stroke();
+    });
+    ctx.restore();ctx.globalAlpha=1;
+    // vignette to sink edges
+    const g=ctx.createRadialGradient(cx,cy,R*0.5,cx,cy,R*1.5);
+    g.addColorStop(0,'rgba('+C.vig+',0)');g.addColorStop(1,'rgba('+C.vig+','+C.vigA+')');
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  }
+  function frame(){t+=16;draw();raf=requestAnimationFrame(frame);}
+  let raf=0;
+  function start(){if(!raf)raf=requestAnimationFrame(frame);}
+  function stop(){cancelAnimationFrame(raf);raf=0;}
+  document.addEventListener('visibilitychange',()=>{document.hidden?stop():start();});
+  if(reduce){t=300;draw();}else start();
+})();
+</script>
+</body>
+</html>

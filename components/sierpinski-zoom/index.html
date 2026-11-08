@@ -1,0 +1,177 @@
+<!doctype html>
+<!--
+  INSTALANDING.AI · Sierpinski Zoom
+  slug     sierpinski-zoom
+  page     https://forevercomponents.com/components/generative-geometry/sierpinski-zoom/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    :root tokens — --sz-bg (dark brown #120c06), --sz-cap (caption),
+            --sz-c0 / --sz-c1 (ends of the size hue ramp the fractal stroke
+            interpolates along), --sz-fill-a (shallow-fill alpha); a
+            [data-theme="light"] block repoints them
+  sections  stage — full-viewport canvas (#sz-c); the Sierpinski triangle
+            fractal endlessly zooms into itself with rainbow-cycling hues
+  scripts   one inline IIFE: recursive tri() draws the fractal, seamless
+            scale wrap (Math.pow(2,z) with modulo period), click bursts zoom
+            speed, visibilitychange pause, reduced-motion static frame,
+            DPR-aware sizing, ?theme= / forever:theme message theme hook
+  assets    none: pure canvas 2D
+
+  ADAPTING
+  - Safe to edit: zoom period (period=6000), fractal recursion depth (depth=6),
+    base triangle size (s*0.62), hue formula (t*0.03+size*0.5+depth*40),
+    slow rotation amplitude (Math.sin*0.05), background color (#120c06),
+    theme tokens. The forever-agent-meta JSON block lists editable areas,
+    elements to preserve, and known limitations — read it before changing things.
+  - Keep intact: seamless scale wrap, IIFE wrapper, visibilitychange pause,
+    prefers-reduced-motion guard with static fallback, theme hook.
+  - Background is hardcoded dark brown (#120c06) in both CSS and the frame
+    fill — change both to retheme. depth>7 may stutter on low-end devices.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="A Sierpinski triangle fractal endlessly zooms into itself with rainbow-cycling hues, in a seamless self-similar loop.">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sierpinski Zoom</title>
+<script>
+/* theme hook: the canvas loads the tile with ?theme=light|dark (or stamps data-theme on <html>).
+   Runs before first paint — no dark flash. Standalone default stays dark. */
+(function(){var t=new URLSearchParams(location.search).get('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);})();
+</script>
+<style>
+  /* theme tokens — dark values are the defaults (solid-dark-bg contract);
+     the light re-theme lives in the one [data-theme="light"] block. --sz-c0/--sz-c1 are the
+     ends of the size hue ramp the fractal stroke interpolates along. */
+  :root{
+    --sz-bg:#120c06; --sz-cap:#d8c08a; --sz-cap-o:.34;
+    --sz-c0:18,192,100; --sz-c1:230,190,50; --sz-fill-a:0.05;
+  }
+  :root[data-theme="light"]{
+    --sz-bg:#f6efe1; --sz-cap:#6b4d0c; --sz-cap-o:.7;
+    --sz-c0:6,128,66; --sz-c1:146,102,8; --sz-fill-a:0.05;
+  }
+  html,body{margin:0;height:100%;overflow:hidden;background:var(--sz-bg);}
+  #sz-c{display:block;width:100%;height:100%;}
+  .sz-cap{position:fixed;left:8px;bottom:7px;font:600 10px/1.2 system-ui,sans-serif;
+       letter-spacing:.14em;color:var(--sz-cap);opacity:var(--sz-cap-o);text-transform:uppercase;
+       pointer-events:none;user-select:none;}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+ "file": "infinite/generative-geometry/08-sierpinski-zoom.html",
+ "title": "Sierpinski Zoom",
+ "description": "A Sierpinski triangle fractal endlessly zooms into itself with rainbow-cycling hues in a seamless self-similar loop. Tap to burst the zoom speed.",
+ "useWhen": "Dark ambient backgrounds, math/generative-art showcases, screensaver-style displays needing perpetual motion.",
+ "avoidWhen": "Light backgrounds (hardcoded dark brown canvas). Contexts where constant high-motion competes with readable content.",
+ "agentPrompt": "Change the zoom period to 4000 for faster cycling, set depth from 6 to 7 for finer detail, and shift base hue by adding 120 to the hue calculation so colors start in the green range. Theme: dark tokens live in :root, the light variant in :root[data-theme=\"light\"]; ?theme=light or a {type:'forever:theme'} postMessage switches at runtime.",
+ "editableAreas": [
+  "zoom period (period=6000)",
+  "fractal recursion depth (depth=6)",
+  "base triangle size (s*0.62)",
+  "hue formula (t*0.03+size*0.5+depth*40)",
+  "slow rotation amplitude (Math.sin*0.05)",
+  "background color (#120c06)",
+  "theme tokens (:root dark defaults + [data-theme=light] overrides)"
+ ],
+ "preserveElements": [
+  "seamless scale wrap (Math.pow(2,z) with modulo period)",
+  "IIFE wrapper",
+  "visibilitychange pause",
+  "prefers-reduced-motion guard with static fallback",
+  "theme hook (?theme= bootstrap + forever:theme message listener + theme tokens)"
+ ],
+ "knownLimitations": [
+  "Recursive canvas fill calls — depth>7 may stutter on low-end devices",
+  "Background color is hardcoded in both CSS and JS fillRect — must change both",
+  "No aria label on canvas element"
+ ],
+ "tier": "curated",
+ "labels": [
+  "mobile-ready",
+  "accessible",
+  "copy-paste-safe",
+  "minimal-deps",
+  "animation-heavy",
+  "light-ready"
+ ],
+ "tags": [
+  "fractal",
+  "sierpinski",
+  "zoom",
+  "generative",
+  "recursive",
+  "rainbow",
+  "canvas"
+ ]
+}
+</script>
+</head>
+<body>
+<canvas id="sz-c" data-section="stage"></canvas>
+<div class="sz-cap">Sierpinski Zoom</div>
+<script>
+(function(){
+  const cv=document.getElementById('sz-c'),ctx=cv.getContext('2d');
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // theme: bg, the two ends of the size hue ramp, the shallow-fill alpha.
+  // read from CSS tokens (once, and again on a theme flip).
+  const root=document.documentElement;
+  const C={bg:'#120c06',c0:[18,192,100],c1:[230,190,50],fa:'0.05'};
+  function tokDef(n){var m=document.querySelector('style').textContent.match(new RegExp(n+'\\s*:\\s*([^;}]+)'));return m?m[1].trim():'';}
+  function syncTheme(){
+    const cs=getComputedStyle(root),s=n=>cs.getPropertyValue(n).trim()||tokDef(n),
+          rgb=n=>{const v=s(n);return v?v.split(',').map(Number):null;};
+    C.bg=s('--sz-bg')||C.bg;
+    C.c0=rgb('--sz-c0')||C.c0;C.c1=rgb('--sz-c1')||C.c1;
+    C.fa=s('--sz-fill-a')||C.fa;
+  }
+ addEventListener('message',e=>{const d=e.data;
+   if(d&&d.type==='forever:theme'&&(d.theme==='light'||d.theme==='dark')){
+     root.setAttribute('data-theme',d.theme);syncTheme();if(reduce&&W)draw(0);}
+ });
+ syncTheme();
+ let W,H,DPR,period=6000,depth=6;
+ function size(){
+   DPR=Math.min(devicePixelRatio||1,2);
+   W=cv.clientWidth;H=cv.clientHeight;
+   cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);
+ }
+ addEventListener('resize',size);size();
+ let burst=0;
+ cv.addEventListener('click',()=>{burst=1.8;});
+ function draw(t){
+   const s=Math.min(W,H)*0.62;
+   const z=((t%period)/period+burst*0.9)%1;
+   burst*=0.97;
+   const scale=Math.pow(2,z);
+   ctx.fillStyle=C.bg;ctx.fillRect(0,0,W,H);
+   ctx.save();ctx.translate(W/2,H*0.52);ctx.rotate(Math.sin(t*0.0002)*0.05);ctx.scale(scale,scale);
+   function tri(x,y,size,d){
+     const h=size*Math.sqrt(3)/2;
+     ctx.beginPath();
+     ctx.moveTo(x,y-h/2);ctx.lineTo(x+size/2,y+h/2);ctx.lineTo(x-size/2,y+h/2);ctx.closePath();
+     const hue=(t*0.03+size*0.5+d*40)%360;
+     const cr=Math.round(C.c0[0]+(hue/360)*(C.c1[0]-C.c0[0])),cg=Math.round(C.c0[1]+(hue/360)*(C.c1[1]-C.c0[1])),cb=Math.round(C.c0[2]+(hue/360)*(C.c1[2]-C.c0[2]));
+     ctx.strokeStyle='hsl('+hue+',80%,60%)';ctx.lineWidth=Math.max(0.5,2.5-d*0.3);
+     ctx.fillStyle='rgba('+cr+','+cg+','+cb+','+C.fa+')';
+     ctx.fill();ctx.stroke();
+     if(d<depth){
+       tri(x,y-h/4,size/2,d+1);
+       tri(x-size/4,y+h/4,size/2,d+1);
+       tri(x+size/4,y+h/4,size/2,d+1);
+     }
+   }
+   tri(0,0,s,0);ctx.restore();
+ }
+ let raf=0;
+ function start(){raf=requestAnimationFrame(function f(t){draw(t);raf=requestAnimationFrame(f);});}
+ function stop(){cancelAnimationFrame(raf);raf=0;}
+ document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelAnimationFrame(raf);else start();});
+ if(reduce){t=600;draw(0);}else start();
+})();
+</script>
+</body>
+</html>

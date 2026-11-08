@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<!--
+  INSTALANDING.AI · Lightning Bolt
+  slug     lightning-bolt
+  page     https://forevercomponents.com/components/organic-nature/lightning-bolt/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    none in :root — the sky gradient (#201d1a → #0a0908), bolt colors
+            (#AE6147 rust glow, #f5efe6 warm white, #ffffff core) and flash
+            tint (rgba(196,132,110,...)) are hardcoded in the script; the caption
+            color (#e8ddd0) lives in CSS
+  sections  stage — full-viewport canvas (#c); jagged lightning bolts with
+            branching forks strike randomly down a dark storm sky; the screen
+            flashes rust-white on each strike; tap to trigger instantly
+  scripts   one inline IIFE: makeBolt() builds a 14-segment jagged path with
+            random branches, strike() fires it with flash + afterglow, an
+            rAF loop paints the sky gradient and fading bolt, visibilitychange
+            pause, reduced-motion branch, DPR-aware sizing
+  assets    none: pure canvas 2D
+
+  ADAPTING
+  - Safe to edit: bolt color (path calls '#AE6147', '#f5efe6', '#ffffff'),
+    branch probability (Math.random()<0.35), auto-strike interval
+    (timer=26+Math.random()*44 frames), bolt jaggedness (W*0.16 spread),
+    flash intensity (flash*0.28), bolt segment count (steps=14). The
+    forever-agent-meta JSON block lists editable areas, elements to preserve,
+    and known limitations — read it before changing things.
+  - Keep intact: visibilitychange pause/resume, prefers-reduced-motion guard,
+    DPR-aware canvas sizing, globalCompositeOperation "lighter" for the glow.
+  - Background is hardcoded dark navy in the script's sky gradient — change
+    both gradient stops to retheme. Rapid flashing on strike is a
+    photosensitivity risk; reduced-motion only slows the fade.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="Jagged warm-white lightning bolts with rust-glowing branching forks strike randomly down a dark storm-sky gradient, screen flashes; tap to trigger a strike.">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lightning Bolt</title>
+<style>
+html,body{margin:0;height:100%;background:#0a0908}
+#c{display:block;width:100%;height:100%}
+.cap{position:fixed;left:8px;bottom:7px;font:600 10px/1 ui-sans-serif,system-ui,sans-serif;
+letter-spacing:.08em;text-transform:uppercase;color:#e8ddd0;opacity:.34;user-select:none}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+"file":"infinite/organic-nature/05-lightning-bolt.html",
+"title":"Lightning Bolt",
+"description":"Jagged lightning bolts with branching forks strike randomly down a dark storm-sky canvas; screen flashes rust-white on each strike. Tap to trigger instantly.",
+"useWhen":"Dark-themed hero backgrounds, storm or energy themes, dramatic loading screens or idle screensavers.",
+"avoidWhen":"Light-background UIs (sky hardcoded dark navy). Contexts where sudden bright flashes are a photosensitivity concern.",
+"agentPrompt":"Change bolt color to gold by replacing '#AE6147' with '#ffaa00' and '#f5efe6' with '#fff0a0', and increase branch probability from 0.35 to 0.55.",
+"editableAreas": [
+"bolt color (path calls: '#AE6147', '#f5efe6', '#ffffff')",
+"branch probability (Math.random()<0.35)",
+"auto-strike interval (40+Math.random()*120)",
+"bolt jaggedness (W*0.16 spread)",
+"flash intensity (flash*0.28)",
+"bolt segment count (steps=14)"
+],
+"preserveElements": [
+"visibilitychange pause/resume",
+"prefers-reduced-motion guard",
+"DPR-aware canvas sizing",
+"globalCompositeOperation='lighter' for glow effect"
+],
+"knownLimitations": [
+"Rapid flashing on strike could be a photosensitivity risk — no opt-out beyond reduced-motion slowing the fade",
+"Background color hardcoded in CSS; must edit to change from dark navy",
+"Single bolt at a time — no simultaneous multi-bolt support"
+],
+"tier":"curated",
+"labels": [
+"mobile-ready",
+"accessible",
+"copy-paste-safe",
+"minimal-deps",
+"easy-to-modify"
+],
+"tags": [
+"lightning",
+"canvas",
+"storm",
+"generative",
+"branches",
+"flash",
+"nature"
+]
+}
+</script>
+</head>
+<body>
+<canvas id="c" data-section="stage"></canvas>
+<div class="cap">Lightning Bolt · tap</div>
+<script>
+(function(){
+const cv=document.getElementById('c'),x=cv.getContext('2d');
+let W,H,DPR,raf,bolt=null,flash=0,timer=0,glow={x:0,y:0,a:0};
+const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+function size(){DPR=Math.min(devicePixelRatio||1,2);W=cv.clientWidth;H=cv.clientHeight;
+cv.width=W*DPR;cv.height=H*DPR;x.setTransform(DPR,0,0,DPR,0,0);}
+addEventListener('resize',size);size();
+function makeBolt(sx){
+const segs=[{x:sx,y:0}];let cx=sx,cy=0;
+const steps=14;
+for(let i=1;i<=steps;i++){
+cy=(i/steps)*H;
+cx+=(Math.random()-0.5)*W*0.16;
+cx=Math.max(W*0.1,Math.min(W*0.9,cx));
+segs.push({x:cx,y:cy});
+}
+// branches
+const br=[];
+for(let i=3;i<segs.length-2;i++){if(Math.random()<0.35){
+let bx=segs[i].x,by=segs[i].y;const b=[{x:bx,y:by}];
+for(let k=0;k<4;k++){bx+=(Math.random()-0.3)*W*0.12;by+=H*0.06;b.push({x:bx,y:by});}
+br.push(b);
+}}
+return {main:segs,branches:br,life:1};
+}
+function strike(sx){bolt=makeBolt(sx==null?W*(0.3+Math.random()*0.4):sx);flash=1;
+const tip=bolt.main[bolt.main.length-1];glow={x:tip.x,y:H*0.6,a:1};}   // lingering afterglow where it struck
+cv.addEventListener('pointerdown',e=>{const r=cv.getBoundingClientRect();strike(e.clientX-r.left);});
+function path(seg,lw,a,col){
+x.beginPath();x.moveTo(seg[0].x,seg[0].y);
+for(let i=1;i<seg.length;i++)x.lineTo(seg[i].x,seg[i].y);
+x.strokeStyle=col;x.lineWidth=lw;x.globalAlpha=a;
+x.lineJoin='round';x.lineCap='round';x.stroke();
+}
+function frame(){
+x.globalCompositeOperation='source-over';x.globalAlpha=1;
+const g=x.createLinearGradient(0,0,0,H);
+g.addColorStop(0,'#201d1a');g.addColorStop(1,'#0a0908');
+x.fillStyle=g;x.fillRect(0,0,W,H);
+if(flash>0){x.fillStyle=`rgba(196,132,110,${flash*0.28})`;x.fillRect(0,0,W,H);flash-=reduce?0.06:0.08;}
+// a storm, not a wait: the first bolt lands on the first frame, the next every 0.4–1.2s —
+// a coin-flip every 0.7–2.7s left the tile an empty dark sky nine frames in ten (audit: flat)
+if(!reduce){timer--;if(timer<=0&&!bolt){strike();timer=26+Math.random()*44;}}
+else{timer--;if(timer<=0){strike();timer=120;}}
+if(glow.a>0.02){
+const rg=x.createRadialGradient(glow.x,glow.y,0,glow.x,glow.y,H*0.75);
+rg.addColorStop(0,`rgba(196,120,90,${glow.a*0.55})`);rg.addColorStop(0.5,`rgba(174,97,71,${glow.a*0.18})`);rg.addColorStop(1,`rgba(174,97,71,0)`);
+x.fillStyle=rg;x.fillRect(0,0,W,H);glow.a*=reduce?0.9:0.985;   // ~3s afterglow bridges the gap to the next strike
+}
+if(bolt){
+x.globalCompositeOperation='lighter';
+const a=bolt.life;
+path(bolt.main,8,a*0.25,'#AE6147');
+path(bolt.main,3,a*0.9,'#f5efe6');
+path(bolt.main,1.2,a,'#ffffff');
+for(const b of bolt.branches)path(b,1.6,a*0.7,'#efe6da');
+x.globalCompositeOperation='source-over';x.globalAlpha=1;
+bolt.life-=reduce?0.04:0.045;
+if(bolt.life<=0)bolt=null;
+}
+raf=requestAnimationFrame(frame);
+}
+raf=requestAnimationFrame(frame);
+document.addEventListener('visibilitychange',()=>{
+if(document.hidden)cancelAnimationFrame(raf);else raf=requestAnimationFrame(frame);
+});
+})();
+</script>
+</body>
+</html>

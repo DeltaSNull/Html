@@ -5,7 +5,7 @@
   "version": "1.0",
   "counts": {
     "pages": 22,
-    "components": 63,
+    "components": 69,
     "dashboards": 1
   },
   "pages": [
@@ -4431,6 +4431,315 @@
         "preview": "components/comet-streak-loop/preview.jpg"
       },
       "page": "https://forevercomponents.com/components/cosmic-space/comet-streak-loop/"
+    },
+    {
+      "slug": "sierpinski-zoom",
+      "title": "Sierpinski Zoom",
+      "description": "A Sierpinski triangle fractal endlessly zooms into itself with rainbow-cycling hues in a seamless self-similar loop; tap to burst the zoom speed",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "dark ambient backgrounds",
+        "math or generative-art showcases",
+        "screensaver-style displays needing perpetual motion"
+      ],
+      "style": [
+        "dark",
+        "fractal",
+        "canvas",
+        "zoom",
+        "generative",
+        "rainbow",
+        "recursive"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas-2d",
+          "recursive-fractal",
+          "click",
+          "reduced-motion",
+          "theme-hook",
+          "mobile-ready"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Sierpinski Zoom — Forever Components",
+          "href": "https://forevercomponents.com/components/generative-geometry/sierpinski-zoom/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/sierpinski-zoom/index.html",
+        "prompt": "components/sierpinski-zoom/PROMPT.md",
+        "preview": "components/sierpinski-zoom/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/generative-geometry/sierpinski-zoom/"
+    },
+    {
+      "slug": "apollonian-gasket",
+      "title": "Apollonian Gasket",
+      "description": "Recursive Apollonian circle packing with infinite slow zoom; circles shift from gold to blue by depth, with vignette and pointer/click nudge",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "math or science landing pages",
+        "generative art backdrops",
+        "contemplative infinite-zoom fractal backgrounds"
+      ],
+      "style": [
+        "dark",
+        "fractal",
+        "canvas",
+        "geometry",
+        "circle-packing",
+        "zoom",
+        "generative"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas-2d",
+          "descartes-packing",
+          "pointer-interaction",
+          "click",
+          "reduced-motion",
+          "theme-hook",
+          "mobile-ready"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Apollonian Gasket — Forever Components",
+          "href": "https://forevercomponents.com/components/generative-geometry/apollonian-gasket/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/apollonian-gasket/index.html",
+        "prompt": "components/apollonian-gasket/PROMPT.md",
+        "preview": "components/apollonian-gasket/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/generative-geometry/apollonian-gasket/"
+    },
+    {
+      "slug": "hilbert-weave",
+      "title": "Hilbert Weave",
+      "description": "A Hilbert space-filling curve draws itself as a glowing teal-to-violet ribbon with a leading spark, cycling through orders 2–5 and looping continuously",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "generative art backgrounds",
+        "math or algorithm showcase sections",
+        "dark-themed hero panels needing ambient geometric motion"
+      ],
+      "style": [
+        "dark",
+        "fractal",
+        "canvas",
+        "space-filling",
+        "generative",
+        "ribbon",
+        "teal"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas-2d",
+          "hilbert-curve",
+          "pointer-interaction",
+          "click",
+          "reduced-motion",
+          "theme-hook",
+          "mobile-ready"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Hilbert Weave — Forever Components",
+          "href": "https://forevercomponents.com/components/generative-geometry/hilbert-weave/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/hilbert-weave/index.html",
+        "prompt": "components/hilbert-weave/PROMPT.md",
+        "preview": "components/hilbert-weave/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/generative-geometry/hilbert-weave/"
+    },
+    {
+      "slug": "flickering-fire",
+      "title": "Flickering Fire",
+      "description": "Additive-blended ember particles rise from a glowing orange base, flickering like a real flame; cursor pans left/right to fan the fire sideways",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "dark hero backgrounds",
+        "seasonal or campfire scenes",
+        "atmospheric gaming or campaign pages"
+      ],
+      "style": [
+        "dark",
+        "fire",
+        "canvas",
+        "particles",
+        "additive-blend",
+        "organic",
+        "ambient",
+        "pointer"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas-2d",
+          "particle-system",
+          "pointer-interaction",
+          "reduced-motion",
+          "theme-hook",
+          "mobile-ready"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Flickering Fire — Forever Components",
+          "href": "https://forevercomponents.com/components/organic-nature/flickering-fire/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/flickering-fire/index.html",
+        "prompt": "components/flickering-fire/PROMPT.md",
+        "preview": "components/flickering-fire/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/organic-nature/flickering-fire/"
+    },
+    {
+      "slug": "lightning-bolt",
+      "title": "Lightning Bolt",
+      "description": "Jagged lightning bolts with branching forks strike randomly down a dark storm-sky canvas; screen flashes rust-white on each strike, tap to trigger instantly",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "dark hero backgrounds",
+        "storm or energy themes",
+        "dramatic loading screens or idle screensavers"
+      ],
+      "style": [
+        "dark",
+        "lightning",
+        "canvas",
+        "storm",
+        "generative",
+        "branches",
+        "flash",
+        "nature"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas-2d",
+          "generative-bolt",
+          "click",
+          "reduced-motion",
+          "mobile-ready"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Lightning Bolt — Forever Components",
+          "href": "https://forevercomponents.com/components/organic-nature/lightning-bolt/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/lightning-bolt/index.html",
+        "prompt": "components/lightning-bolt/PROMPT.md",
+        "preview": "components/lightning-bolt/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/organic-nature/lightning-bolt/"
+    },
+    {
+      "slug": "julia-morph",
+      "title": "Julia Morph",
+      "description": "Julia set fractal whose complex constant traces a slow Lissajous loop, morphing green filaments between connected and dendritic forms over ~70 seconds",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "dark hero backgrounds",
+        "generative art displays",
+        "screensavers or slow ambient complexity without user interaction"
+      ],
+      "style": [
+        "dark",
+        "fractal",
+        "canvas",
+        "julia-set",
+        "generative",
+        "pixel-loop",
+        "morphing",
+        "ambient"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas-2d",
+          "escape-time-fractal",
+          "reduced-motion",
+          "theme-hook",
+          "mobile-ready"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Julia Morph — Forever Components",
+          "href": "https://forevercomponents.com/components/fractals-automata/julia-morph/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/julia-morph/index.html",
+        "prompt": "components/julia-morph/PROMPT.md",
+        "preview": "components/julia-morph/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/fractals-automata/julia-morph/"
     }
   ],
   "dashboards": [
