@@ -1,0 +1,236 @@
+<!doctype html>
+<!--
+  INSTALANDING.AI · Bubble Pack
+  slug     bubble-pack
+  page     https://forevercomponents.com/components/charts-flow/bubble-pack/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    :root custom properties: --bg/--accent (page), --ch07-c0 through
+            --ch07-c3 (category palette, read by JS in syncTheme), --ch07-text/
+            --ch07-hud/--ch07-panel (HUD + tooltip); the
+            :root[data-theme="light"] block re-points every token for the light
+            re-theme
+  sections  stage — #ch07-stage: full-viewport canvas with HUD (total value +
+            category legend) and hover/touch tooltip, caption fixed bottom-left
+  scripts   head theme-hook IIFE (?theme= bootstrap, runs before first paint) +
+            one body IIFE: 64 bubbles seeded by random value, gravity pull toward
+            center with breathing pulse, pairwise collision resolution, DPR-aware
+            canvas sizing, hover/touch tooltips, prefers-reduced-motion guard,
+            visibilitychange stop/start, syncTheme
+  assets    none: all drawing is canvas 2D, system font stack
+
+  ADAPTING
+  - Safe to edit: accent hue (--accent and --ch07-c0 in :root), palette colors
+    (CATS array), bubble count (N=64), gravity strength (0.02 pull toward
+    center), breathing pulse amplitude (0.5) and speed (1.4). The
+    <script type="application/json" id="forever-agent-meta"> block lists editable
+    areas, elements to preserve, and known limitations — read it before changing
+    things.
+  - Keep intact: gravity, collision resolution, and settle logic; the theme hook
+    and syncTheme(); the prefers-reduced-motion guard; the hover tooltip and
+    touch tooltip.
+  - Bubble data is synthetic and random — rebind seed() to real values for
+    production. Labels appear only on hover/tap; no persistent text and no
+    keyboard navigation (tooltip is pointer-only). Add ?theme=light to the URL
+    for the light re-theme.
+  - Note: the meta description tag is truncated mid-word in the original code
+    as delivered ("...pulling towar"); reproduced as-is.
+  - Fixes applied while adapting (the code as delivered could not run as-is):
+    the bubble array was written with a hyphenated identifier (ch07-data, a
+    syntax error) — renamed to ch07Data; step() read d.cx/d.cy, which the
+    bubble objects do not carry — corrected to d.x/d.y; syncTheme() read
+    --ch07-c(index+1), shifting every category one colour over — corrected to
+    --ch07-c(index) so each category reads its own token.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="Circle-packing bubble chart where mint, teal, amber and coral circles settle together under gentle gravity, the largest values pulling towar">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bubble Pack</title>
+<script>
+/* theme hook: the canvas loads the tile with ?theme=light|dark (or stamps data-theme on <html>).
+Runs before first paint — no dark flash. Standalone default stays dark. */
+(function(){var t=new URLSearchParams(location.search).get('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);})();
+</script>
+<style>
+:root{--bg:#0a0d12;--accent:#5ad1a0;--ch07-cap:#fff;--ch07-cap-o:.42;--ch07-cross:rgba(217,210,196,0.07);--ch07-vig0:rgba(90,209,160,0.05);--ch07-vig1:rgba(10,13,18,0);--ch07-c0:#5ad1a0;--ch07-c1:#2f9e7e;--ch07-c2:#e7a13b;--ch07-c3:#e06a5a;--ch07-text:#f4f6f8;--ch07-cap-soft:#bfe8d8;--ch07-grid:rgba(255,255,255,0.02);--ch07-hud:#9aa7b4;--ch07-panel:rgba(13,17,23,0.72);--ch07-panel-line:rgba(255,255,255,0.08);--ch07-bar-track:rgba(255,255,255,0.06);--ch07-swatch:rgba(0,0,0,0.06);--ch07-swatch-line:rgba(255,255,255,0.18);} /* dark = defaults; JS re-reads these in syncTheme() */
+:root[data-theme="light"]{--bg:#f1f4f8;--accent:#237e59;--ch07-cap:#1b2130;--ch07-cap-o:.5;--ch07-cross:rgba(40,50,60,0.10);--ch07-vig0:rgba(35,126,89,0.06);--ch07-vig1:rgba(241,244,248,0);--ch07-c0:#2c9e6f;--ch07-c1:#237e59;--ch07-c2:#e9a33b;--ch07-c3:#e0604f;--ch07-text:#1b2130;--ch07-cap-soft:#9db8a9;--ch07-grid:rgba(0,0,0,0.04);--ch07-hud:#5b6a77;--ch07-panel:rgba(255,255,255,0.86);--ch07-panel-line:rgba(0,0,0,0.08);--ch07-bar-track:rgba(0,0,0,0.06);--ch07-swatch:rgba(255,255,255,0.55);--ch07-swatch-line:rgba(0,0,0,0.16);}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);overflow:hidden}
+#ch07-stage{position:fixed;inset:0;display:block}
+#ch07-c{position:absolute;inset:0;width:100%;height:100%}
+.cap{position:fixed;left:8px;bottom:7px;font:600 10px/1 ui-monospace,Menlo,monospace;color:var(--ch07-cap);opacity:var(--ch07-cap-o);letter-spacing:.08em;text-transform:uppercase;user-select:none}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;animation-iteration-count:1!important}}
+.hud{position:fixed;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;gap:16px;color:var(--ch07-hud);font:500 11px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;pointer-events:none;user-select:none;opacity:0;transition:opacity .6s ease}
+.hud.on{opacity:1}
+.hud .metric{display:flex;gap:6px}
+.hud b{color:var(--ch07-text);font-weight:650}
+.hud .legend{display:flex;gap:12px;flex-wrap:wrap;justify-content:flex-end}
+.hud .legend span{display:flex;align-items:center;gap:5px}
+.swatch{width:9px;height:9px;border-radius:50%;background:var(--c);border:1px solid var(--ch07-swatch-line)}
+@media(max-width:640px){.hud{top:8px;left:8px;right:8px;font-size:10px;gap:8px}.hud .legend{gap:7px}}
+.tooltip{position:fixed;pointer-events:none;background:var(--ch07-panel);color:var(--ch07-text);border:1px solid var(--ch07-panel-line);border-radius:8px;padding:7px 10px;font:500 11px/1.35 system-ui,-apple-system,"Segoe UI",sans-serif;opacity:0;transform:translateY(3px);transition:opacity .12s ease,transform .12s ease;max-width:230px;backdrop-filter:blur(6px);box-shadow:0 6px 22px rgba(0,0,0,0.18)}
+.tooltip.on{opacity:1;transform:translateY(0)}
+.tooltip b{display:block;font-size:12px}
+.tooltip .bar{height:5px;border-radius:99px;background:var(--ch07-bar-track);margin-top:6px;overflow:hidden}
+.tooltip .bar i{display:block;height:100%;background:var(--c,#5ad1a0)}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+"file":"infinite/charts-flow/07-bubble-pack.html",
+"title":"Bubble Pack",
+"description":"A calming circle-packed bubble chart: 64 bubbles settle into place under gentle gravity, collisions and a breathing pulse, with hover tooltips, touch support and theme-aware colors.",
+"useWhen":"Dashboard highlights, portfolio or market overviews, and anywhere you need a gentle, non-numeric-at-a-glance summary of relative values with a premium feel.",
+"avoidWhen":"Where precise values or comparisons matter — labels only appear on hover, and small bubbles become hard to read or tap on compact screens.",
+"agentPrompt":"Change the accent hue by updating --accent and --ch07-c0 in :root to a new color, then update the CATS palette (mint, teal, amber, coral) to matching tones so legend swatches stay consistent.",
+"editableAreas": [
+"accent hue (--accent and --ch07-c0)",
+"palette colors (CATS array)",
+"bubble count (N=64)",
+"gravity strength (0.02 pull toward center)",
+"breathing pulse amplitude (0.5) and speed (1.4)"
+],
+"preserveElements": [
+"gravity, collision resolution, and settle logic",
+"theme hook and syncTheme()",
+"prefers-reduced-motion guard",
+"hover tooltip and touch tooltip"
+],
+"knownLimitations": [
+"Labels only appear on hover or tap — no persistent text",
+"Bubble radius minimum is 1.2px; on dense clusters the smallest circles are hard to target",
+"No keyboard navigation — tooltip is pointer-only"
+],
+"tier":"curated",
+"labels": [
+"accessible",
+"mobile-ready",
+"copy-paste-safe",
+"minimal-deps",
+"agent-ready"
+],
+"tags": [
+"bubble-chart",
+"circle-packing",
+"charts",
+"canvas",
+"tooltip",
+"gravity",
+"data-viz"
+]
+}
+</script>
+</head>
+<body>
+<div id="ch07-stage" data-section="stage">
+<canvas id="ch07-c"></canvas>
+<div class="hud" id="ch07-hud">
+<div class="metric"><span>Total value</span><b id="ch07-total"></b><span>·</span><span id="ch07-count"></span></div>
+<div class="legend" id="ch07-legend"></div>
+</div>
+<div class="tooltip" id="ch07-tip"></div>
+<div class="cap">Bubble Pack</div>
+</div>
+<script>
+(function(){
+const cv=document.getElementById('ch07-c'),ctx=cv.getContext('2d');
+const tip=document.getElementById('ch07-tip'),hud=document.getElementById('ch07-hud');
+const totalEl=document.getElementById('ch07-total'),countEl=document.getElementById('ch07-count');
+const legendEl=document.getElementById('ch07-legend');
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const CATS=[
+{name:'Mint',col:'#5ad1a0',base:'#5ad1a0'},
+{name:'Teal',col:'#2f9e7e',base:'#2f9e7e'},
+{name:'Amber',col:'#e7a13b',base:'#e7a13b'},
+{name:'Coral',col:'#e06a5a',base:'#e06a5a'}
+];
+const N=64,pad=3;let W,H,DPR,cx,cy;
+let ch07Data=[];
+function syncTheme(){const cs=getComputedStyle(document.documentElement);CATS.forEach(c=>{c.col=cs.getPropertyValue('--ch07-c'+CATS.indexOf(c)).trim()||c.base;});}
+function size(){DPR=Math.min(devicePixelRatio||1,2);W=cv.clientWidth;H=cv.clientHeight;cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);cx=W/2;cy=H/2;}
+addEventListener('resize',()=>{size();seed();});
+function seed(){const maxR=Math.min(W,H)*0.085;ch07Data=[];let total=0;
+for(let i=0;i<N;i++){const cat=CATS[i%CATS.length];const v=18+Math.pow(Math.random(),2.2)*182;
+const r=Math.max(1.2,Math.sqrt(v)*maxR/13.5);
+const a=Math.random()*Math.PI*2,dist=Math.random()*Math.min(W,H)*0.22;
+ch07Data.push({x:cx+Math.cos(a)*dist,y:cy+Math.sin(a)*dist,vx:0,vy:0,r,cat,val:v,phase:Math.random()*Math.PI*2});total+=v;}
+ch07Data.sort((a,b)=>b.r-a.r);
+totalEl.textContent=Math.round(total).toLocaleString();countEl.textContent=N+' bubbles';
+legendEl.innerHTML=CATS.map(c=>'<span><i class="swatch" style="--c:'+c.col+'"></i>'+c.name+'</span>').join('');
+}
+function step(){
+for(let i=0;i<ch07Data.length;i++){const d=ch07Data[i];const dx=d.x-cx;const dy=d.y-cy;
+const s=1+0.5*Math.sin(t*1.4+d.phase);const rx=clamp(dx*s,-200,200);const ry=clamp(dy*s,-200,200);
+d.vx+=(rx*0.02-d.vx)*0.12;d.vy+=(ry*0.02-d.vy)*0.12;
+d.x+=d.vx;d.y+=d.vy;}
+for(let i=0;i<ch07Data.length;i++){const a=ch07Data[i];
+for(let j=i+1;j<ch07Data.length;j++){const b=ch07Data[j];
+const dx=b.x-a.x,dy=b.y-a.y,dist=Math.hypot(dx,dy)||0.001,min=a.r+b.r+pad;
+if(dist<min){const push=(min-dist)/2,nx=dx/dist,ny=dy/dist;
+a.x-=nx*push;a.y-=ny*push;b.x+=nx*push;b.y+=ny*push;}}}
+for(const d of ch07Data){d.x=clamp(d.x,d.r, W-d.r);d.y=clamp(d.y,d.r,H-d.r);}
+}
+function draw(){
+ctx.clearRect(0,0,W,H);
+ctx.save();ctx.globalAlpha=0.5;ctx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--ch07-cross').trim();
+for(let x=0;x<W;x+=48){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+for(let y=0;y<H;y+=48){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+ctx.restore();
+const g=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.max(W,H)*0.7);
+g.addColorStop(0,getComputedStyle(document.documentElement).getPropertyValue('--ch07-vig0').trim());
+g.addColorStop(1,getComputedStyle(document.documentElement).getPropertyValue('--ch07-vig1').trim());
+ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+for(const d of ch07Data){
+ctx.beginPath();ctx.arc(d.x,d.y,d.r,0,Math.PI*2);ctx.fillStyle=d.cat.col;ctx.fill();
+ctx.beginPath();ctx.arc(d.x-d.r*0.28,d.y-d.r*0.30,d.r*0.30,0,Math.PI*2);
+ctx.fillStyle='rgba(255,255,255,0.22)';ctx.fill();
+ctx.beginPath();ctx.arc(d.x,d.y,d.r,0,Math.PI*2);
+ctx.strokeStyle='rgba(255,255,255,0.10)';ctx.lineWidth=1;ctx.stroke();
+if(d.r>22){ctx.fillStyle='rgba(255,255,255,0.92)';ctx.font='600 11px system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(d.cat.name,d.x,d.y);}
+}
+}
+let t=0,raf=0,hover=null;
+function frame(){
+if(!reduce)t+=0.016;
+step();draw();
+if(!reduce)raf=requestAnimationFrame(frame);
+}
+function start(){if(!raf&&!reduce)raf=requestAnimationFrame(frame);}
+function stop(){cancelAnimationFrame(raf);raf=0;}
+document.addEventListener('visibilitychange',()=>{document.hidden?stop():start();});
+function showTip(d,x,y){
+const pct=Math.round(d.val/200*100);
+tip.innerHTML='<b>'+d.cat.name+' bubble</b>Value '+Math.round(d.val)+' · '+pct+'% of max<span class="bar"><i style="--c:'+d.cat.col+';width:'+pct+'%"></i></span>';
+tip.classList.add('on');positionTip(x,y);
+}
+function positionTip(x,y){
+const r=tip.getBoundingClientRect();let lx=x+14,ly=y+14;
+if(lx+r.width>innerWidth-8)lx=x-r.width-14;
+if(ly+r.height>innerHeight-8)ly=y-r.height-14;
+tip.style.left=lx+'px';tip.style.top=ly+'px';
+}
+function hideTip(){tip.classList.remove('on');hover=null;}
+cv.addEventListener('pointermove',e=>{
+const r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
+let found=null;
+for(let i=ch07Data.length-1;i>=0;i--){const d=ch07Data[i];
+if(Math.hypot(d.x-x,d.y-y)<=d.r){found=d;break;}}
+if(found){hover=found;showTip(found,e.clientX,e.clientY);cv.style.cursor='pointer';}
+else hideTip();
+});
+cv.addEventListener('pointerleave',hideTip);
+cv.addEventListener('click',e=>{
+if(!hover)return;const r=cv.getBoundingClientRect();
+showTip(hover,e.clientX,e.clientY);positionTip(e.clientX,e.clientY);
+});
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+size();seed();syncTheme();hud.classList.add('on');
+if(reduce){step();draw();}else start();
+})();
+</script>
+</body>
+</html>
