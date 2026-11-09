@@ -5,7 +5,7 @@
   "version": "1.0",
   "counts": {
     "pages": 22,
-    "components": 69,
+    "components": 72,
     "dashboards": 1
   },
   "pages": [
@@ -4740,6 +4740,147 @@
         "preview": "components/julia-morph/preview.jpg"
       },
       "page": "https://forevercomponents.com/components/fractals-automata/julia-morph/"
+    },
+    {
+      "slug": "copper-bars",
+      "title": "Copper Bars",
+      "description": "Six glossy multicolor raster bars bob sinusoidally over a twinkling starfield with specular sheen and scanline overlay",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "retro/demoscene hero sections",
+        "80s aesthetic backgrounds",
+        "loading screens needing ambient colour motion"
+      ],
+      "style": [
+        "dark",
+        "retro",
+        "demoscene",
+        "canvas",
+        "ambient",
+        "scanlines"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas",
+          "pointer-interaction",
+          "reduced-motion"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Copper Bars — Forever Components",
+          "href": "https://forevercomponents.com/components/retro-glitch/copper-bars/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/copper-bars/index.html",
+        "prompt": "components/copper-bars/PROMPT.md",
+        "preview": "components/copper-bars/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/retro-glitch/copper-bars/"
+    },
+    {
+      "slug": "rotozoom-texture",
+      "title": "Rotozoom Texture",
+      "description": "Chunky-pixel violet-and-cyan checker texture rotates and breathes in a continuous demoscene rotozoom; cursor drifts the plane, click boosts zoom",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "retro/demoscene hero backgrounds",
+        "glitch-aesthetic loading screens",
+        "generative art displays needing hypnotic ambient motion"
+      ],
+      "style": [
+        "dark",
+        "retro",
+        "demoscene",
+        "pixel",
+        "generative",
+        "canvas"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas",
+          "pointer-interaction",
+          "reduced-motion"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Rotozoom Texture — Forever Components",
+          "href": "https://forevercomponents.com/components/retro-glitch/rotozoom-texture/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/rotozoom-texture/index.html",
+        "prompt": "components/rotozoom-texture/PROMPT.md",
+        "preview": "components/rotozoom-texture/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/retro-glitch/rotozoom-texture/"
+    },
+    {
+      "slug": "bubble-pack",
+      "title": "Bubble Pack",
+      "description": "64 mint/teal/amber/coral circles settle under gravity with collision physics; size encodes value, with hover tooltips and theme-aware colors",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "dashboard highlights",
+        "portfolio or market overviews",
+        "relative-value summaries"
+      ],
+      "style": [
+        "dark",
+        "data-viz",
+        "canvas",
+        "ambient"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas",
+          "tooltip",
+          "gravity-physics",
+          "theme-aware",
+          "reduced-motion"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Bubble Pack — Forever Components",
+          "href": "https://forevercomponents.com/components/charts-flow/bubble-pack/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/bubble-pack/index.html",
+        "prompt": "components/bubble-pack/PROMPT.md",
+        "preview": "components/bubble-pack/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/charts-flow/bubble-pack/"
     }
   ],
   "dashboards": [
