@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<!--
+  INSTALANDING.AI · Water Ripple
+  slug     water-ripple
+  page     https://forevercomponents.com/components/organic-nature/water-ripple/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    :root custom properties: --c08-bg (deep teal ground), --c08-ring
+            (S% L% pair of the JS hue cycle), --c08-pond, --c08-cap / --c08-cap-o
+            (caption), --c08-line; the :root[data-theme="light"] block re-points
+            every token for the light re-theme
+  sections  stage — full-viewport canvas (#c08-c) with caption bottom-left and
+            hint bottom-right
+  scripts   head theme-hook IIFE (?theme= bootstrap, runs before first paint) +
+            one body IIFE: concentric ripple rings expand and fade; auto-drops
+            every 900ms, pointer movement stirs ripples, click drops a stone,
+            DPR-aware canvas sizing, prefers-reduced-motion guard,
+            visibilitychange stop/start, syncTheme
+  assets    none: all drawing is canvas 2D, system font stack
+
+  ADAPTING
+  - Safe to edit: ripple count cap (24), ripple speed (2.4), decay (0.96),
+    drop interval (900ms), ripple colour tokens (--c08-ring, --c08-pond,
+    --c08-cap). The <script type="application/json" id="forever-agent-meta">
+    block lists editable areas, elements to preserve, and known limitations —
+    read it before changing things.
+  - Keep intact: canvas sizing/resize, the visibilitychange stop/start guard,
+    the prefers-reduced-motion check, the theme hook and syncTheme(), the frame
+    loop structure (demo, interactionUntil), and the demo-v1 preview lifecycle
+    (demoEnabled from window.__foreverPreview, forever:interactive takeover).
+  - The canvas is tagged data-section="stage" (added while adapting); canvas
+    and captions are position:fixed, so the stage fills the viewport.
+    Background is deep teal by default (#07272b); add ?theme=light to the URL
+    for the light re-theme. The spawn cap (16 pending drops) and the loop cap
+    (24 live ripples) are different numbers — raising one without the other
+    changes click responsiveness.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="Concentric blue ripple rings expand and fade across a deep teal pond. Move your pointer to stir ripples, click to drop a stone.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Water Ripple</title>
+<script>
+/* theme hook: the canvas loads the tile with ?theme=light|dark (or stamps data-theme on <html>).
+   Runs before first paint — no dark flash. Standalone default stays dark. */
+(function(){var t=new URLSearchParams(location.search).get('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);})();
+</script>
+<meta name="forever-preview-lifecycle" content="demo-v1">
+<style>
+  /* theme tokens — dark values are the defaults (solid-dark-bg contract);
+     the light re-theme is the [data-theme="light"] block.
+     --c08-ring is the "S% L%" pair of the JS colour cycle: bright on dark, inked-in on light. */
+  :root{--c08-bg:#07272b; --c08-ring:90% 62%; --c08-pond:#0e4d57; --c08-cap:#9fd8de; --c08-cap-o:.4; --c08-line:rgba(150,220,230,.05);}
+  :root[data-theme="light"]{--c08-bg:#eef6f7; --c08-ring:80% 30%; --c08-pond:#bfe0e4; --c08-cap:#14505a; --c08-cap-o:.5; --c08-line:rgba(20,80,90,.07);}
+  html,body{margin:0;height:100%;overflow:hidden;background:var(--c08-bg);}
+  #c08-c{position:fixed;inset:0;display:block;width:100%;height:100%;}
+  .cap{position:fixed;left:10px;bottom:8px;color:var(--c08-cap);opacity:var(--c08-cap-o);
+    font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-family:system-ui,-apple-system,sans-serif;}
+  .ce-label{position:fixed;right:10px;bottom:8px;color:var(--c08-cap);opacity:var(--c08-cap-o);font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-family:system-ui,-apple-system,sans-serif;}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+ "file": "infinite/organic-nature/08-water-ripple.html",
+ "title": "Water Ripple",
+ "description": "Concentric blue ripple rings expand and fade across a deep teal pond. Move your pointer to stir ripples, click to drop a stone.",
+ "useWhen": "Calm hero backgrounds, spa or wellness pages, nature-themed intros, or anywhere a gentle, organic texture is wanted.",
+ "avoidWhen": "Data-dense pages, text-heavy layouts, or anywhere legibility over the animation matters.",
+ "agentPrompt": "Make ripples denser by reducing the drop interval to 600ms, increase max ripples to 32, and slow the decay to 0.97. Theme: dark tokens live in :root, the light variant in :root[data-theme=\"light\"]; ?theme=light or a {type:'forever:theme'} postMessage switches at runtime.",
+ "editableAreas": [
+  "ripple count cap (24)",
+  "ripple speed (2.4)",
+  "decay (0.96)",
+  "drop interval (900ms)",
+  "ripple colour tokens (--c08-ring, --c08-pond, --c08-cap)"
+ ],
+ "preserveElements": [
+  "canvas sizing/resize",
+  "visibilitychange stop/start guard",
+  "prefers-reduced-motion check",
+  "IIFE-style scoped constants",
+  "frame loop structure (demo, interactionUntil)",
+  "theme hook (?theme= bootstrap + forever:theme message listener + theme tokens)",
+  "demo-v1 preview lifecycle: initialize demoEnabled from window.__foreverPreview and stop attract work on the window forever:interactive event; retain manual feedback, settling, cleanup and explicit sessions"
+ ],
+ "knownLimitations": [
+  "No reduced-motion fallback beyond a static frame",
+  "Background colour hardcoded in CSS — must edit to change from deep teal",
+  "Ripple count cap (24) may clip rapid clicking",
+  "State remains local to each mounted instance; format/theme remount preserves takeover, not component values."
+ ],
+ "tier": "curated",
+ "labels": [
+  "agent-ready",
+  "easy-to-modify",
+  "mobile-ready",
+  "accessible",
+  "copy-paste-safe",
+  "minimal-deps",
+  "light-ready"
+ ],
+ "tags": [
+  "water",
+  "ripple",
+  "pond",
+  "interactive",
+  "calm",
+  "organic",
+  "nature"
+ ]
+}
+</script>
+</head>
+<body>
+<canvas id="c08-c" data-section="stage"></canvas>
+<div class="cap">Water Ripple</div>
+<div class="ce-label">move to stir · click to drop a stone</div>
+<script>
+(function(){
+  const c=document.getElementById('c08-c'),x=c.getContext('2d');
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let demo=window.__foreverPreview?.demoEnabled!==false,interactionUntil=0;
+  function takeover(){demo=false;interactionUntil=performance.now()+1100;if(!document.hidden)start();}
+  window.addEventListener('forever:interactive',takeover);
+  document.addEventListener('pointerdown',takeover,{capture:true,once:true});
+  document.addEventListener('keydown',e=>{if(['Enter',' ','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))takeover();},{capture:true,once:true});
+  document.addEventListener('pointermove',()=>{if(!demo){interactionUntil=performance.now()+1100;if(!document.hidden)start();}},{passive:true});
+  const docEl=document.documentElement;
+  let W,H,dpr,dropInterval=900,rippleTimer=0;
+  let ringSL='90% 62%',pond='#0e4d57';
+  function syncTheme(){
+    const cs=getComputedStyle(docEl);
+    ringSL=cs.getPropertyValue('--c08-ring').trim()||'90% 62%';
+    pond=cs.getPropertyValue('--c08-pond').trim()||'#0e4d57';
+  }
+  // live re-theme: the canvas broadcasts {type:'forever:theme', theme:'light'|'dark'}
+  addEventListener('message',e=>{const d=e.data;
+    if(d&&d.type==='forever:theme'&&(d.theme==='light'||d.theme==='dark')){
+      docEl.setAttribute('data-theme',d.theme);syncTheme();}});
+  syncTheme();
+  function resize(){
+    dpr=Math.min(devicePixelRatio||1,2);
+    W=innerWidth;H=innerHeight;
+    c.width=W*dpr;c.height=H*dpr;
+    c.style.width=W+'px';c.style.height=H+'px';
+    x.setTransform(dpr,0,0,dpr,0,0);
+  }
+  addEventListener('resize',resize);resize();
+  const R=[];
+  function spawnDrop(px,py,strength=1){
+    if(R.length>16)return;
+    R.push({x:px,y:py,r:2,a:0.6*strength,hue:195+Math.random()*20});
+  }
+  for(let i=0;i<12;i++)spawnDrop(Math.random()*W,Math.random()*H,Math.random()*2+1);
+  let lastX=-9999,lastY=-9999,lastT=0;
+  addEventListener('pointermove',e=>{
+    const now=performance.now();
+    if(now-lastT>28&&lastX>-1){
+      const dx=e.clientX-lastX,dy=e.clientY-lastY;
+      const d=Math.hypot(dx,dy);
+      if(d>12)spawnDrop(e.clientX,e.clientY,Math.min(1.4,d/60));
+    }
+    lastX=e.clientX;lastY=e.clientY;lastT=now;
+  },{passive:true});
+  addEventListener('pointerdown',e=>{spawnDrop(e.clientX,e.clientY,2);});
+  let raf,tLast=performance.now();
+  function loop(){
+    if(demo||performance.now()<interactionUntil){
+    const now=performance.now(),dt=Math.min((now-tLast)/16.7,3);tLast=now;
+    rippleTimer+=dt*16.7;
+    if(rippleTimer>dropInterval&&R.length<24){rippleTimer=0;spawnDrop(Math.random()*W,Math.random()*H,1+Math.random());}
+    x.clearRect(0,0,W,H);
+    for(let i=R.length-1;i>=0;i--){
+      const p=R[i];
+      p.r+=2.4*dt;p.a*=Math.pow(0.96,dt);
+      if(p.a<0.02||p.r>Math.max(W,H)*0.75){R.splice(i,1);continue;}
+      const rr=p.r;
+      x.beginPath();
+      x.strokeStyle=`hsl(${p.hue} ${ringSL} / ${p.a.toFixed(3)})`;
+      x.lineWidth=1.5;
+      x.arc(p.x,p.y,rr,0,7);
+      x.stroke();
+      x.beginPath();
+      x.strokeStyle=`hsl(${p.hue} ${ringSL} / ${(p.a*0.35).toFixed(3)})`;
+      x.lineWidth=3;
+      x.arc(p.x,p.y,rr*0.85,0,7);
+      x.stroke();
+    }
+    if(demo||performance.now()<interactionUntil)raf=requestAnimationFrame(loop);else raf=0;
+    }
+  }
+  function start(){if(!raf&&!reduce&&(demo||performance.now()<interactionUntil))loop();}
+  function stop(){cancelAnimationFrame(raf);raf=0;}
+  document.addEventListener('visibilitychange',()=>document.hidden?stop():start());
+  if(reduce){tLast=performance.now();loop();cancelAnimationFrame(raf);raf=0;}else start();
+})();
+</script>
+</body>
+</html>

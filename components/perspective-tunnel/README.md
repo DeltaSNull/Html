@@ -1,0 +1,27 @@
+# Perspective Tunnel
+
+18 neon rings recede through a CSS 3D perspective tunnel, cycling rainbow hues and rotating as they rush toward the viewer; pointer X steers the spin rate. Theme-aware (dark default, light via `?theme=light`).
+
+![Perspective Tunnel](preview.jpg)
+
+**Open it:** [`index.html`](index.html) runs straight from disk — one file, every asset inlined, no build step.
+
+**Build it yourself:** [`PROMPT.md`](PROMPT.md) is the one-shot brief this file was built from. Paste it into any AI builder or coding agent.
+
+| | |
+| --- | --- |
+| Best for | dark-mode hero backgrounds, sci-fi or cyberpunk themes, immersive loading screens or intros |
+| Style | dark, tunnel, 3d, css-3d, perspective, neon, rainbow, loop |
+| Sections | stage |
+| Libraries | none — plain HTML, CSS and a small script |
+| Fonts | system-ui (caption) |
+| Uses | css-3d, interactive, perspective, theme-aware, reduced-motion |
+| Size | ~10 KB · brief ~700 tokens |
+
+The demo region is tagged `data-section`, and the file opens with a header comment that maps its design tokens, sections and scripts, and lists what breaks when you edit it. Read that first. The `<script type="application/json" id="forever-agent-meta">` block in `<head>` carries the component's agent-ready metadata: editable areas, elements to preserve, and known limitations.
+
+## Built on
+
+- [Perspective Tunnel — Forever Components](https://forevercomponents.com/components/css-3d/perspective-tunnel/) — the component this demo is adapted from
+
+Keep this attribution if you redistribute the component; the original's own terms apply to the parts taken from it.

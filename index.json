@@ -5,7 +5,7 @@
   "version": "1.0",
   "counts": {
     "pages": 22,
-    "components": 72,
+    "components": 75,
     "dashboards": 1
   },
   "pages": [
@@ -4881,6 +4881,159 @@
         "preview": "components/bubble-pack/preview.jpg"
       },
       "page": "https://forevercomponents.com/components/charts-flow/bubble-pack/"
+    },
+    {
+      "slug": "smoke-vortex-street",
+      "title": "Smoke Vortex Street",
+      "description": "Drifting smoke particles curl through an alternating vortex street, glowing as you stir them with your pointer; click for a burst",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "ambient hero backgrounds",
+        "meditation or nature-themed pages",
+        "atmospheric intros"
+      ],
+      "style": [
+        "dark",
+        "smoke",
+        "vortex",
+        "particles",
+        "physics",
+        "fluid",
+        "interactive",
+        "ambient"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas",
+          "interactive",
+          "vortex-field",
+          "theme-aware",
+          "reduced-motion"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Smoke Vortex Street — Forever Components",
+          "href": "https://forevercomponents.com/components/particles-physics/smoke-vortex-street/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/smoke-vortex-street/index.html",
+        "prompt": "components/smoke-vortex-street/PROMPT.md",
+        "preview": "components/smoke-vortex-street/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/particles-physics/smoke-vortex-street/"
+    },
+    {
+      "slug": "water-ripple",
+      "title": "Water Ripple",
+      "description": "Concentric ripples expand and fade across a deep teal pond; move your pointer to stir ripples, click to drop a stone",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "calm hero backgrounds",
+        "spa or wellness pages",
+        "nature-themed intros"
+      ],
+      "style": [
+        "dark",
+        "water",
+        "ripple",
+        "pond",
+        "interactive",
+        "calm",
+        "organic",
+        "nature"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas",
+          "interactive",
+          "ripples",
+          "theme-aware",
+          "reduced-motion"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Water Ripple — Forever Components",
+          "href": "https://forevercomponents.com/components/organic-nature/water-ripple/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/water-ripple/index.html",
+        "prompt": "components/water-ripple/PROMPT.md",
+        "preview": "components/water-ripple/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/organic-nature/water-ripple/"
+    },
+    {
+      "slug": "perspective-tunnel",
+      "title": "Perspective Tunnel",
+      "description": "18 neon rings recede through a CSS 3D perspective tunnel, cycling rainbow hues and rotating as they rush toward the viewer; pointer X steers the spin rate",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "dark-mode hero backgrounds",
+        "sci-fi or cyberpunk themes",
+        "immersive loading screens or intros"
+      ],
+      "style": [
+        "dark",
+        "tunnel",
+        "3d",
+        "css-3d",
+        "perspective",
+        "neon",
+        "rainbow",
+        "loop"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "css-3d",
+          "interactive",
+          "perspective",
+          "theme-aware",
+          "reduced-motion"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Perspective Tunnel — Forever Components",
+          "href": "https://forevercomponents.com/components/css-3d/perspective-tunnel/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/perspective-tunnel/index.html",
+        "prompt": "components/perspective-tunnel/PROMPT.md",
+        "preview": "components/perspective-tunnel/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/css-3d/perspective-tunnel/"
     }
   ],
   "dashboards": [

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<!--
+  INSTALANDING.AI · Smoke Vortex Street
+  slug     smoke-vortex-street
+  page     https://forevercomponents.com/components/particles-physics/smoke-vortex-street/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    :root custom properties: --c02-bg (ground), --c02-smoke (S% L% pair
+            of the JS hue cycle), --c02-edge (particle edge strokes), --c02-cap /
+            --c02-cap-o (caption), --c02-line; the :root[data-theme="light"] block
+            re-points every token for the light re-theme
+  sections  stage — full-viewport canvas (#c02-c) with caption bottom-left and
+            hint bottom-right
+  scripts   head theme-hook IIFE (?theme= bootstrap, runs before first paint) +
+            one body IIFE: 190 smoke particles ride an alternating vortex street
+            (sine/cosine vector field), pointer stir (160px radius) + click burst,
+            DPR-aware canvas sizing, hue drift, prefers-reduced-motion guard,
+            visibilitychange stop/start, syncTheme
+  assets    none: all drawing is canvas 2D, system font stack
+
+  ADAPTING
+  - Safe to edit: particle count (N=190), vortex field coefficients (0.006,
+    0.7, 22), particle size (2 + p.s*14), hue speed (0.25), smoke colour tokens
+    (--c02-smoke, --c02-edge). The <script type="application/json"
+    id="forever-agent-meta"> block lists editable areas, elements to preserve,
+    and known limitations — read it before changing things.
+  - Keep intact: canvas sizing/resize, the visibilitychange stop/start guard,
+    the prefers-reduced-motion check, the theme hook and syncTheme(), the frame
+    loop structure (demo, interactionUntil), and the demo-v1 preview lifecycle
+    (demoEnabled from window.__foreverPreview, forever:interactive takeover).
+  - The canvas is tagged data-section="stage" (added while adapting); canvas
+    and captions are position:fixed, so the stage fills the viewport.
+    Background is dark by default (#07080d); add ?theme=light to the URL for
+    the light re-theme. Pointer stir radius is fixed at 160px — not responsive
+    to canvas size.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="Swirling smoke particles ride an alternating vortex street, drifting, curling and glowing as you stir them with your pointer. Click for a burst.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smoke Vortex Street</title>
+<script>
+/* theme hook: the canvas loads the tile with ?theme=light|dark (or stamps data-theme on <html>).
+   Runs before first paint — no dark flash. Standalone default stays dark. */
+(function(){var t=new URLSearchParams(location.search).get('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);})();
+</script>
+<meta name="forever-preview-lifecycle" content="demo-v1">
+<style>
+  /* theme tokens — dark values are the defaults (solid-dark-bg contract);
+     the light re-theme is the [data-theme="light"] block.
+     --c02-ring is the "S% L%" pair of the JS colour cycle: bright on dark, inked-in on light. */
+  :root{--c02-bg:#07080d; --c02-smoke:88% 58%; --c02-edge:#9d9aa0; --c02-cap:#9d9aa0; --c02-cap-o:.36; --c02-line:rgba(150,150,158,.06);}
+  :root[data-theme="light"]{--c02-bg:#f4f6fa; --c02-smoke:80% 30%; --c02-edge:#3a3f4a; --c02-cap:#3a3f4a; --c02-cap-o:.5; --c02-line:rgba(60,70,90,.08);}
+  html,body{margin:0;height:100%;overflow:hidden;background:var(--c02-bg);}
+  #c02-c{position:fixed;inset:0;display:block;width:100%;height:100%;}
+  .cap{position:fixed;left:10px;bottom:8px;color:var(--c02-cap);opacity:var(--c02-cap-o);
+    font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-family:system-ui,-apple-system,sans-serif;}
+  .ce-label{position:fixed;right:10px;bottom:8px;color:var(--c02-cap);opacity:var(--c02-cap-o);font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-family:system-ui,-apple-system,sans-serif;}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+ "file": "infinite/particles-physics/02-smoke-vortex-street.html",
+ "title": "Smoke Vortex Street",
+ "description": "Drifting smoke particles curl through an alternating vortex street, glowing as you stir them with your pointer. Click for a burst.",
+ "useWhen": "Ambient hero backgrounds, meditation or nature-themed pages, atmospheric intros, or anywhere a calm, living texture is wanted.",
+ "avoidWhen": "Data-dense pages, text-heavy layouts, or anywhere legibility over the animation matters.",
+ "agentPrompt": "Make the smoke denser by increasing N to 260, slow the hue drift to 0.15, and widen the pointer stir radius to 220. Theme: dark tokens live in :root, the light variant in :root[data-theme=\"light\"]; ?theme=light or a {type:'forever:theme'} postMessage switches at runtime.",
+ "editableAreas": [
+  "N=190 particle count",
+  "vortex field coefficients (0.006, 0.7, 22)",
+  "particle size (2 + p.s*14)",
+  "hue speed (0.25)",
+  "smoke colour tokens (--c02-smoke, --c02-edge)"
+ ],
+ "preserveElements": [
+  "canvas sizing/resize",
+  "visibilitychange stop/start guard",
+  "prefers-reduced-motion check",
+  "IIFE-style scoped constants",
+  "frame loop structure (demo, interactionUntil)",
+  "theme hook (?theme= bootstrap + forever:theme message listener + theme tokens)",
+  "demo-v1 preview lifecycle: initialize demoEnabled from window.__foreverPreview and stop attract work on the window forever:interactive event; retain manual feedback, settling, cleanup and explicit sessions"
+ ],
+ "knownLimitations": [
+  "No reduced-motion fallback beyond a static frame",
+  "Background colour hardcoded in CSS — must edit to change from dark",
+  "Pointer stir radius fixed at 160px — not responsive to canvas size",
+  "State remains local to each mounted instance; format/theme remount preserves takeover, not component values."
+ ],
+ "tier": "curated",
+ "labels": [
+  "agent-ready",
+  "easy-to-modify",
+  "mobile-ready",
+  "accessible",
+  "copy-paste-safe",
+  "minimal-deps",
+  "light-ready"
+ ],
+ "tags": [
+  "smoke",
+  "vortex",
+  "particles",
+  "physics",
+  "fluid",
+  "interactive",
+  "ambient"
+ ]
+}
+</script>
+</head>
+<body>
+<canvas id="c02-c" data-section="stage"></canvas>
+<div class="cap">Smoke Vortex Street</div>
+<div class="ce-label">move to stir · click for a burst</div>
+<script>
+(function(){
+  const canvas=document.getElementById('c02-c'),ctx=canvas.getContext('2d');
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let demo=window.__foreverPreview?.demoEnabled!==false,interactionUntil=0;
+  function takeover(){demo=false;interactionUntil=performance.now()+1100;if(!document.hidden)start();}
+  window.addEventListener('forever:interactive',takeover);
+  document.addEventListener('pointerdown',takeover,{capture:true,once:true});
+  document.addEventListener('keydown',e=>{if(['Enter',' ','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))takeover();},{capture:true,once:true});
+  document.addEventListener('pointermove',()=>{if(!demo){interactionUntil=performance.now()+1100;if(!document.hidden)start();}},{passive:true});
+  const docEl=document.documentElement;
+  const TAU=Math.PI*2;
+  let W,H;
+  let smokeSL='88% 58%',edge='#9d9aa0';
+  function syncTheme(){
+    const cs=getComputedStyle(docEl);
+    smokeSL=cs.getPropertyValue('--c02-smoke').trim()||'88% 58%';
+    edge=cs.getPropertyValue('--c02-edge').trim()||'#9d9aa0';
+  }
+  // live re-theme: the canvas broadcasts {type:'forever:theme', theme:'light'|'dark'}
+  addEventListener('message',e=>{const d=e.data;
+    if(d&&d.type==='forever:theme'&&(d.theme==='light'||d.theme==='dark')){
+      docEl.setAttribute('data-theme',d.theme);syncTheme();}});
+  syncTheme();
+  function resize(){
+    const dpr=Math.min(devicePixelRatio||1,2);
+    W=innerWidth;H=innerHeight;
+    canvas.width=W*dpr;canvas.height=H*dpr;
+    canvas.style.width=W+'px';canvas.style.height=H+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  addEventListener('resize',resize);resize();
+  // ---- tiny vector field: alternating street vortices + gentle drift ----
+  function field(x,y,t){
+    const u=Math.sin(y*0.006+t*0.7)*22+Math.cos((x+y)*0.002-t*0.3)*10;
+    const v=Math.sin(x*0.006-t*0.7)*22+Math.sin((x-y)*0.002+t*0.3)*10;
+    return [u,v];
+  }
+  const N=190, P=[];
+  for(let i=0;i<N;i++)P.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,a:Math.random()*TAU,age:Math.random()*8,life:6+Math.random()*6,s:0.3+Math.random()*0.7});
+  let pointer={x:-9999,y:-9999,vx:0,vy:0,lastX:0,lastY:0,down:false};
+  addEventListener('pointermove',e=>{pointer.vx=e.clientX-pointer.lastX;pointer.vy=e.clientY-pointer.lastY;pointer.lastX=e.clientX;pointer.lastY=e.clientY;pointer.x=e.clientX;pointer.y=e.clientY;},{passive:true});
+  addEventListener('pointerleave',()=>{pointer.x=-9999;pointer.y=-9999;});
+  addEventListener('pointerdown',e=>{pointer.down=true;burst(e.clientX,e.clientY);});
+  addEventListener('pointerup',()=>pointer.down=false);
+  function burst(x,y){for(let i=0;i<26;i++){const a=Math.random()*TAU,sp=2+Math.random()*5;P.push({x,y,a,age:0,life:1+Math.random()*1.5,s:0.6+Math.random()*0.9,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp});}if(P.length>520)P.splice(0,P.length-520);}
+  let raf,tLast=performance.now(),hue=140;
+  function loop(){
+    if(demo||performance.now()<interactionUntil){
+    const now=performance.now(),dt=Math.min((now-tLast)/16.7,3);tLast=now;
+    hue=(hue+0.25)%360;
+    ctx.clearRect(0,0,W,H);
+    for(const p of P){
+      const f=field(p.x,p.y,now/1000);
+      p.vx=(p.vx||0)*0.92+f[0]*0.04;
+      p.vy=(p.vy||0)*0.92+f[1]*0.04;
+      const dx=p.x-pointer.x,dy=p.y-pointer.y,d2=dx*dx+dy*dy;
+      if(d2<160*160){const d=Math.sqrt(d2)||1;const f2=(1-d/160)*2.2;
+        p.vx+=dx/d*f2+pointer.vx*0.12;p.vy+=dy/d*f2+pointer.vy*0.12;}
+      if(pointer.down){const dx2=p.x-pointer.x,dy2=p.y-pointer.y,d22=dx2*dx2+dy2*dy2;
+        if(d22<110*110){const d=Math.sqrt(d22)||1;p.vx+=dx2/d*0.8;p.vy+=dy2/d*0.8;}}
+      p.x+=p.vx*dt;p.y+=p.vy*dt;p.age+=dt/60;
+      if(p.x<-20)p.x=W+20;if(p.x>W+20)p.x=-20;
+      if(p.y<-20)p.y=H+20;if(p.y>H+20)p.y=-20;
+      if(p.age>p.life){p.x=Math.random()*W;p.y=Math.random()*H;p.age=0;p.life=6+Math.random()*6;p.vx=0;p.vy=0;}
+      const fade=Math.sin(Math.PI*Math.min(p.age/p.life,1));
+      const a=0.05+0.5*fade;
+      const r=2+p.s*14*fade;
+      const h=(hue+p.age*22)%360;
+      ctx.beginPath();
+      ctx.fillStyle=`hsl(${h} ${smokeSL} / ${a.toFixed(3)})`;
+      ctx.arc(p.x,p.y,r,0,TAU);
+      ctx.fill();
+      ctx.strokeStyle=edge;
+      ctx.globalAlpha=0.25*fade;
+      ctx.lineWidth=0.6;
+      ctx.beginPath();
+      ctx.moveTo(p.x,p.y);
+      ctx.lineTo(p.x-Math.cos(p.a)*r*1.8,p.y-Math.sin(p.a)*r*1.8);
+      ctx.stroke();
+      ctx.globalAlpha=1;
+    }
+    if(demo||performance.now()<interactionUntil)raf=requestAnimationFrame(loop);else raf=0;
+    }
+  }
+  function start(){if(!raf&&!reduce&&(demo||performance.now()<interactionUntil))loop();}
+  function stop(){cancelAnimationFrame(raf);raf=0;}
+  document.addEventListener('visibilitychange',()=>document.hidden?stop():start());
+  if(reduce){tLast=performance.now();loop();cancelAnimationFrame(raf);raf=0;}else start();
+  if(reduce){
+    ctx.clearRect(0,0,W,H);
+    for(let i=0;i<60;i++){
+      const x=Math.random()*W,y=Math.random()*H,r=3+Math.random()*12;
+      ctx.beginPath();
+      ctx.fillStyle=`hsl(${(hue+i*4)%360} ${smokeSL} / 0.24)`;
+      ctx.arc(x,y,r,0,TAU);
+      ctx.fill();
+      ctx.strokeStyle=edge;
+      ctx.globalAlpha=0.25;
+      ctx.lineWidth=0.6;
+      ctx.beginPath();
+      ctx.moveTo(x,y);
+      ctx.lineTo(x-r*1.2,y-r*0.6);
+      ctx.stroke();
+      ctx.globalAlpha=1;
+    }
+  }
+  addEventListener('message',e=>{
+    const d=e.data;
+    if(d&&d.type==='forever:theme'){docEl.setAttribute('data-theme',d.theme);syncTheme();}
+  });
+})();
+</script>
+</body>
+</html>
