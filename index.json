@@ -5,7 +5,7 @@
   "version": "1.0",
   "counts": {
     "pages": 22,
-    "components": 75,
+    "components": 78,
     "dashboards": 1
   },
   "pages": [
@@ -5034,6 +5034,159 @@
         "preview": "components/perspective-tunnel/preview.jpg"
       },
       "page": "https://forevercomponents.com/components/css-3d/perspective-tunnel/"
+    },
+    {
+      "slug": "gravity-dot-rain",
+      "title": "Gravity Dot Rain",
+      "description": "Multicolored dots fall under gravity with motion trails, bounce off the floor, and scatter away from the cursor on a dark navy canvas",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "dark-mode hero backgrounds",
+        "loading screens",
+        "ambient screensaver effects"
+      ],
+      "style": [
+        "dark",
+        "particles",
+        "gravity",
+        "rain",
+        "canvas",
+        "physics",
+        "interactive",
+        "ambient"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas",
+          "interactive",
+          "gravity-physics",
+          "theme-aware",
+          "reduced-motion"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Gravity Dot Rain — Forever Components",
+          "href": "https://forevercomponents.com/components/particles-physics/gravity-dot-rain/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/gravity-dot-rain/index.html",
+        "prompt": "components/gravity-dot-rain/PROMPT.md",
+        "preview": "components/gravity-dot-rain/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/particles-physics/gravity-dot-rain/"
+    },
+    {
+      "slug": "confetti-cannon",
+      "title": "Confetti Cannon",
+      "description": "Ochre festival-paper confetti fires from the bottom corners, tumbling and flipping as it falls; click for a burst at the cursor",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "celebration moments",
+        "success screens",
+        "gamification rewards",
+        "party or event landing pages"
+      ],
+      "style": [
+        "dark",
+        "confetti",
+        "celebration",
+        "particles",
+        "canvas",
+        "physics",
+        "interactive",
+        "burst"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas",
+          "interactive",
+          "confetti-physics",
+          "theme-aware",
+          "reduced-motion"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Confetti Cannon — Forever Components",
+          "href": "https://forevercomponents.com/components/particles-physics/confetti-cannon/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/confetti-cannon/index.html",
+        "prompt": "components/confetti-cannon/PROMPT.md",
+        "preview": "components/confetti-cannon/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/particles-physics/confetti-cannon/"
+    },
+    {
+      "slug": "ringed-planet-rotate",
+      "title": "Ringed Planet Rotate",
+      "description": "Amber gas giant with tilted Saturn-like rings slowly rotates over a twinkling starfield; pointermove adjusts ring tilt and light angle dynamically",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "space or sci-fi hero backgrounds",
+        "ambient screensavers",
+        "dark-mode landing sections needing slow cosmic motion"
+      ],
+      "style": [
+        "dark",
+        "planet",
+        "space",
+        "rings",
+        "canvas",
+        "ambient",
+        "pointer",
+        "generative"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas",
+          "interactive",
+          "planet-render",
+          "reduced-motion"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Ringed Planet Rotate — Forever Components",
+          "href": "https://forevercomponents.com/components/cosmic-space/ringed-planet-rotate/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/ringed-planet-rotate/index.html",
+        "prompt": "components/ringed-planet-rotate/PROMPT.md",
+        "preview": "components/ringed-planet-rotate/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/cosmic-space/ringed-planet-rotate/"
     }
   ],
   "dashboards": [

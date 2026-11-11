@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<!--
+  INSTALANDING.AI · Confetti Cannon
+  slug     confetti-cannon
+  page     https://forevercomponents.com/components/particles-physics/confetti-cannon/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    :root custom properties: --c03-bg (ground), --c03-cap / --c03-cap-o
+            (caption), --c03-pal (comma list feeding the JS palette); the
+            :root[data-theme="light"] block re-points every token for the
+            light re-theme
+  sections  stage — full-viewport canvas (#c03-canvas) with caption bottom-left
+  scripts   head theme-hook IIFE (?theme= bootstrap, runs before first paint) +
+            one body IIFE: confetti rectangles auto-fire from the bottom corners
+            and burst at the cursor, tumble and flip as they fall, DPR-aware
+            canvas sizing, prefers-reduced-motion branch (single static burst
+            pre-rolled 20 steps), visibilitychange stop/play, syncTheme
+  assets    none: all drawing is canvas 2D, system monospace caption
+
+  ADAPTING
+  - Safe to edit: colour palette (pal array), gravity constant (0.13), particle
+    count per burst (18 + random*10), auto-fire interval (55 + random*30
+    ticks), paper size (width 6–10px; height 4–7px), theme tokens (:root dark
+    defaults + [data-theme=light] overrides). The
+    <script type="application/json" id="forever-agent-meta"> block lists
+    editable areas, elements to preserve, and known limitations — read it
+    before changing things.
+  - Keep intact: the visibilitychange stop/play guard, the reduced-motion
+    branch, DPR-aware canvas sizing, the 110-particle cap (auto launches stop
+    adding once 100 particles are present), the theme hook (?theme= bootstrap
+    + forever:theme message listener + theme tokens), and the demo-v1 preview
+    lifecycle (demoEnabled from window.__foreverPreview, forever:interactive
+    takeover).
+  - The canvas is tagged data-section="stage" (added while adapting); canvas
+    and caption are position:fixed, so the stage fills the viewport.
+    Background is dark brown by default (#241D14); add ?theme=light to the URL
+    for the light re-theme.
+  - Auto-fires from the corners continuously — remove the t>next block for
+    click-only production use. The canvas has no aria role, so the click
+    interaction is invisible to assistive tech.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="forever-preview-lifecycle" content="demo-v1">
+<meta name="description" content="Bright confetti rectangles fire from the bottom corners, tumbling and flipping as they fall, with a click-triggered burst at the cursor.">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Confetti Cannon</title>
+<script>
+/* theme hook: the canvas loads the tile with ?theme=light|dark (or stamps data-theme on <html>).
+   Runs before first paint — no dark flash. Standalone default stays dark. */
+(function(){var t=new URLSearchParams(location.search).get('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);})();
+</script>
+<style>
+  /* theme tokens — dark values are the defaults (solid-dark-bg contract);
+    the light re-theme is the [data-theme="light"] block. --c03-pal feeds the JS confetti. */
+  :root{
+    --c03-bg:#241D14; --c03-cap:#B29234; --c03-cap-o:.5;
+    --c03-pal:#B29234,#ffd166,#06d6a0,#A19A87,#C08459,#ff9f1c;
+  }
+  :root[data-theme="light"]{
+    --c03-bg:#f6f1e8; --c03-cap:#836b26; --c03-cap-o:.6;
+    --c03-pal:#a68831,#b88000,#049f77,#918973,#bc7c4e,#c97400;
+  }
+  html,body{margin:0;height:100%;overflow:hidden;background:var(--c03-bg)}
+  #c03-canvas{display:block;width:100%;height:100%}
+  .cap{position:fixed;left:8px;bottom:7px;font:600 10px/1 ui-monospace,Menlo,monospace;
+    color:var(--c03-cap);opacity:var(--c03-cap-o);letter-spacing:.08em;text-transform:uppercase;user-select:none}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+  "file": "infinite/particles-physics/03-confetti-cannon.html",
+  "title": "Confetti Cannon",
+  "description": "Ochre festival-paper palette: broad confetti rectangles fire from bottom corners, tumble and flip. First input stops automatic launches; a manual burst keeps its finite cleanup. Reduced motion starts with a populated paper field.",
+  "useWhen": "Celebration moments, success screens, gamification rewards, party or event landing pages.",
+  "avoidWhen": "Productivity or focused reading contexts — constant auto-firing is highly distracting. Remove the auto-fire interval for production click-only use.",
+  "agentPrompt": "Change the palette to pastels by replacing pal with ['#ffb3c6','#ffd6a5','#caffbf','#A19A87','#f8d8b4','#ffcf9f'], and increase gravity from 0.13 to 0.18 for faster fall. Theme: dark tokens live in :root, the light variant in :root[data-theme=\"light\"]; ?theme=light or a {type:'forever:theme'} postMessage switches at runtime.",
+  "editableAreas": [
+    "color palette (pal array)",
+    "gravity constant (0.13)",
+    "particle count per burst (18 + random*10)",
+    "auto-fire interval (55 + random*30 ticks)",
+    "paper size (width 6-10px; height 4-7px)",
+    "theme tokens (:root dark defaults + [data-theme=light] overrides)"
+  ],
+  "preserveElements": [
+    "visibilitychange stop/play guard",
+    "reduced-motion branch (single static burst pre-rolled 20 steps)",
+    "DPR-aware canvas sizing",
+    "110-particle cap; auto launches stop adding once 100 particles are present",
+    "theme hook (?theme= bootstrap + forever:theme message listener + theme tokens)",
+    "demo-v1 preview lifecycle: initialize demoEnabled from window.__foreverPreview and stop attract work on the window forever:interactive event; retain manual feedback, settling, cleanup and explicit sessions"
+  ],
+  "knownLimitations": [
+    "Auto-fires from corners continuously — remove the t>next block for click-only production use",
+    "Particle cap (110) can cause burst suppression under heavy click-spam",
+    "No aria role on canvas — click interaction is invisible to assistive tech",
+    "State remains local to each mounted instance; format/theme remount preserves takeover, not component values."
+  ],
+  "tier": "curated",
+  "labels": [
+    "mobile-ready",
+    "accessible",
+    "copy-paste-safe",
+    "minimal-deps",
+    "animation-heavy",
+    "light-ready"
+  ],
+  "tags": [
+    "confetti",
+    "particles",
+    "canvas",
+    "physics",
+    "celebration",
+    "burst",
+    "click"
+  ]
+}
+</script>
+</head>
+<body>
+<canvas id="c03-canvas" class="c03-root" data-section="stage"></canvas>
+<div class="cap">Confetti Cannon</div>
+<script>
+(function(){
+  let demoEnabled=window.__foreverPreview?.demoEnabled!==false,sessionActive=false,takenOver=window.__foreverPreview?.interactive===true;
+  function stopDemo(){if(!takenOver){sessionActive=false;takenOver=true;}demoEnabled=false;}
+  addEventListener('forever:interactive',stopDemo);
+  document.addEventListener('pointerdown',stopDemo,{capture:true});document.addEventListener('click',stopDemo,{capture:true});document.addEventListener('keydown',e=>{if(e.key!=='Tab')stopDemo();},{capture:true});
+
+  const cv=document.getElementById('c03-canvas'),x=cv.getContext('2d');
+  let W,H,DPR,bits=[],t=0,next=0,reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  const root=document.documentElement;
+  let pal=['#B29234'];
+  function syncTheme(){   // JS-drawn colours read the token; each bit stores a palette index so a switch recolours live
+    pal=getComputedStyle(root).getPropertyValue('--c03-pal').split(',').map(v=>v.trim());}
+  // live re-theme: the canvas broadcasts {type:'forever:theme', theme:'light'|'dark'}
+  addEventListener('message',e=>{const d=e.data;
+    if(d&&d.type==='forever:theme'&&(d.theme==='light'||d.theme==='dark')){root.setAttribute('data-theme',d.theme);syncTheme();}});
+  syncTheme();
+  function size(){DPR=Math.min(2,devicePixelRatio||1);W=cv.clientWidth;H=cv.clientHeight;
+    cv.width=W*DPR;cv.height=H*DPR;x.setTransform(DPR,0,0,DPR,0,0);}
+  addEventListener('resize',size);size();
+  function fire(ox,oy,dir){
+    const n=18+(Math.random()*10|0);
+    for(let i=0;i<n&&bits.length<110;i++){const a=(-Math.PI/2)+dir+(Math.random()-0.5)*1.0,sp=5+Math.random()*5;
+      bits.push({x:ox,y:oy,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,
+        w:6+Math.random()*4,h:4+Math.random()*3,rot:Math.random()*6,vr:(Math.random()-0.5)*0.4,
+        ci:(Math.random()*pal.length)|0,life:1,sw:Math.random()*6});}
+}
+cv.addEventListener('pointerdown',e=>{const r=cv.getBoundingClientRect();
+  fire(e.clientX-r.left,e.clientY-r.top,0);});
+function step(){
+  x.clearRect(0,0,W,H);t++;
+  if(demoEnabled&&!reduce&&t>next&&bits.length<100){next=t+55+(Math.random()*30|0);
+    fire(12,H-12,0.7);fire(W-12,H-12,-0.7);}
+  for(let i=bits.length-1;i>=0;i--){const b=bits[i];
+    b.vy+=0.13;b.vx*=0.99;b.x+=b.vx;b.y+=b.vy;b.rot+=b.vr;b.sw+=0.12;b.life-=0.006;
+    if(b.y>H+12||b.life<=0){bits.splice(i,1);continue;}
+    x.save();x.translate(b.x,b.y);x.rotate(b.rot);
+    const sx=Math.cos(b.sw);x.scale(sx,1);
+    x.globalAlpha=Math.max(0,Math.min(1,b.life*1.4));x.fillStyle=pal[b.ci];
+    x.fillRect(-b.w/2,-b.h/2,b.w,b.h);x.restore();
+  }
+  x.globalAlpha=1;
+}
+let raf=0;function loop(){raf=0;if(document.hidden)return;step();if(!reduce&&(demoEnabled||(bits.length>0)))play();}
+function play(){if(!raf&&!document.hidden){if(reduce){step();return;}raf=requestAnimationFrame(loop);}}
+function stop(){cancelAnimationFrame(raf);raf=0;}
+document.addEventListener('visibilitychange',()=>document.hidden?stop():play());
+if(reduce){fire(W/2,H,0);for(let i=0;i<20;i++)step();}['pointerdown','pointermove','pointerleave','click'].forEach(type=>cv.addEventListener(type,()=>{sessionActive=true;play();}));
+play();
+})();
+</script>
+</body>
+</html>
