@@ -1,0 +1,207 @@
+<!doctype html>
+<!--
+  INSTALANDING.AI · Phyllotaxis Sunflower
+  slug     phyllotaxis-sunflower
+  page     https://forevercomponents.com/components/organic-nature/phyllotaxis-sunflower/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    :root custom properties: --phs-bg (dark brown ground #1a1206),
+            --phs-cap / --phs-cap-o (caption), --phs-g0 / --phs-g1 /
+            --phs-g2 (radial ground gradient), --phs-blend (lighter glow
+            stack), --phs-a (seed opacity), --phs-nuc (nucleus glow),
+            --phs-h0 / --phs-h1 / --phs-s0 / --phs-s1 / --phs-l0 /
+            --phs-l1 (seed hsl ramp), --phs-sd / --phs-ld (crisp-core
+            offset); a [data-theme="light"] block repoints them for a
+            pale ground with a dark-on-cream ramp
+  sections  stage — full-viewport canvas (#sunflower) with caption bottom-left
+  scripts   one body IIFE: 620 amber-gold seeds grow outward in a Fermat
+            spiral via the golden angle (137.508°); the parastichy arms
+            rotate continuously; each seed pulses gently; DPR-aware
+            canvas sizing, prefers-reduced-motion guard (single static
+            render), visibilitychange stop/start
+  assets    none: all drawing is canvas 2D, system font stack
+
+  ADAPTING
+  - Safe to edit: seed count (N=620), spiral spread (SPREAD=0.94),
+    rotation speed (speed=0.0007), seed colour ramp (--phs-h0 etc.),
+    nucleus glow (--phs-nuc). The
+    <script type="application/json" id="forever-agent-meta"> block lists
+    editable areas, elements to preserve, and known limitations — read it
+    before changing things.
+  - Keep intact: the IIFE wrapper, the golden-angle step (137.508°) and
+    the r = R*sqrt(i/N) Fermat radius formula, the
+    prefers-reduced-motion guard, the visibilitychange stop/start, and
+    DPR-aware canvas sizing.
+  - The canvas is tagged data-section="stage" (added while adapting).
+    Background is dark brown (#1a1206) with a radial gradient; a light
+    theme exists via ?theme=light / data-theme="light".
+  - One fix while adapting: the copied code's trailing resize listener
+    called resize(), which does not exist — the sizing function is named
+    size(). Calling it would throw a ReferenceError on every window
+    resize. Changed to size();render(); — no other code was changed.
+  - NOTE: the page description says the spiral "speeds up on pointer or
+    click", but the copied code never wires the pointer in — pointerX /
+    pointerY / targetSpeed are declared and unused, and speed stays at
+    0.0007. The rotation is constant unless you hook pointermove up to
+    targetSpeed yourself.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="Golden-angle phyllotaxis spiral of amber-gold seed dots grows outward and rotates from a glowing nucleus; pointer speeds the spin.">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Phyllotaxis Sunflower</title>
+<script>
+/* theme hook: the canvas loads the tile with ?theme=light|dark (or stamps data-theme on <html>).
+Runs before first paint — no dark flash. Standalone default stays dark. */
+(function(){var t=new URLSearchParams(location.search).get('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);})();
+</script>
+<style>
+/* theme tokens — dark values are the defaults (solid-dark-bg contract); the light
+re-theme is the [data-theme="light"] block. The seed hsl ramp is tokenised as
+hue=h0+f*hl, sat=s0+f*s1, lig=l0+(1-f)*l1 (crisp core adds sd/ld), so light can
+run a dark-on-cream ramp; --phs-a scales seed opacity and --phs-blend turns the
+additive glow stack into flat ink once the ground is pale. */
+:root{
+--phs-bg:#1a1206; --phs-cap:#ffc845; --phs-cap-o:.34;
+--phs-g0:#241800; --phs-g1:#1a1206; --phs-g2:#120c04;
+--phs-blend:lighter; --phs-a:1; --phs-nuc:rgba(255,200,69,.9);
+--phs-h0:44; --phs-h1:9; --phs-s0:96; --phs-s1:1; --phs-l0:50; --phs-l1:11;
+--phs-sd:6; --phs-ld:-6;
+}
+:root[data-theme="light"]{
+--phs-bg:#fbf7ef; --phs-cap:#7a5200; --phs-cap-o:.62;
+--phs-g0:#f4ebda; --phs-g1:#fbf7ef; --phs-g2:#efe4cb;
+--phs-blend:normal; --phs-a:.72; --phs-nuc:rgba(120,82,0,.85);
+--phs-h0:44; --phs-h1:-13; --phs-s0:82; --phs-s1:8; --phs-l0:32; --phs-l1:18;
+--phs-sd:8; --phs-ld:4;
+}
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:var(--phs-bg);}
+body{background:radial-gradient(ellipse at center,var(--phs-g0) 0%,var(--phs-g1) 45%,var(--phs-g2) 100%);}
+canvas{display:block;position:fixed;inset:0;width:100%;height:100%;}
+.cap{position:fixed;left:12px;bottom:10px;font:11px/1.4 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--phs-cap);opacity:var(--phs-cap-o);pointer-events:none;z-index:2;}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+"file": "infinite/organic-nature/12-phyllotaxis-sunflower.html",
+"title": "Phyllotaxis Sunflower",
+"description": "620 amber-gold seeds grow outward in a Fermat spiral via the golden angle; parastichy arms rotate continuously and speed up on pointer or click.",
+"useWhen": "Warm organic hero backgrounds, nature/wellness branding, or anywhere a gentle golden spiral is needed without heavy compute.",
+"avoidWhen": "Light backgrounds (hardcoded dark brown). Contexts needing legible text overlays — the spiral competes with reading.",
+"agentPrompt": "Change the seed count from N=620 to 800, widen the spiral spread from SPREAD=0.94 to 0.98, and shift the golden hue from --phs-h0:44 to --phs-h0:200 for a cool blue palette.",
+"editableAreas": [
+"seed color ramp (--phs-h0, --phs-h1, --phs-s0, --phs-s1, --phs-l0, --phs-l1)",
+"seed count (N=620)",
+"spiral spread (SPREAD=0.94)",
+"rotation speed (speed=0.0007)",
+"background color (#1a1206)",
+"theme tokens (:root dark defaults + [data-theme=light] overrides)"
+],
+"preserveElements": [
+"DPR-aware canvas sizing",
+"visibilitychange pause guard",
+"prefers-reduced-motion static draw fallback",
+"IIFE wrapper",
+"theme hook (?theme= bootstrap + forever::theme message listener + theme tokens)"
+],
+"knownLimitations": [
+"Background color hardcoded in both CSS and JS fillStyle — must change both",
+"Seed count is fixed at 620 — changing it requires retesting the spiral math",
+"Pointer speed-up is subtle — the effect is not dramatic on touch devices"
+],
+"tier": "curated",
+"labels": [
+"agent-ready",
+"easy-to-modify",
+"mobile-ready",
+"copy-paste-safe",
+"minimal-deps"
+],
+"tags": ["phyllotaxis","sunflower","canvas","spiral","nature","golden-angle","ambient","interactive"]
+}
+</script>
+</head>
+<body>
+<canvas id="sunflower" data-section="stage"></canvas>
+<div class="cap">Phyllotaxis Sunflower</div>
+<script>
+(function(){
+const cv=document.getElementById('sunflower'),ctx=cv.getContext('2d');
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let W,H,DPR;
+const N=620,SPREAD=0.94,goldenAngle=137.508,baseAngle=0;
+const cx=0.5,cy=0.5;
+let rotation=0,speed=0.0007,targetSpeed=0.0007;
+let pointerX=-1,pointerY=-1,pointerActive=false;
+function size(){
+DPR=Math.min(devicePixelRatio||1,2);
+W=cv.clientWidth;H=cv.clientHeight;
+cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+addEventListener('resize',size);size();
+function seedColor(i,core){
+const f=i/N;
+const style=getComputedStyle(document.documentElement);
+const h0=parseFloat(style.getPropertyValue('--phs-h0'))||44;
+const h1=parseFloat(style.getPropertyValue('--phs-h1'))||9;
+const s0=parseFloat(style.getPropertyValue('--phs-s0'))||96;
+const s1=parseFloat(style.getPropertyValue('--phs-s1'))||1;
+const l0=parseFloat(style.getPropertyValue('--phs-l0'))||50;
+const l1=parseFloat(style.getPropertyValue('--phs-l1'))||11;
+const sd=parseFloat(style.getPropertyValue('--phs-sd'))||6;
+const ld=parseFloat(style.getPropertyValue('--phs-ld'))||-6;
+const a=parseFloat(style.getPropertyValue('--phs-a'))||1;
+const blend=style.getPropertyValue('--phs-blend').trim()||'lighter';
+const hue=h0+f*h1,sat=s0+f*s1,lig=l0+(1-f)*l1;
+const coreSat=core?sat+sd:sat,coreLig=core?lig+ld:lig;
+return {fill:'hsla('+hue+','+coreSat+'%,'+coreLig+'%,'+a+')',glow:'hsla('+hue+','+sat+'%,'+(lig+10)+'%,'+(0.5*a)+')',blend:blend};
+}
+function seedColorByIndex(i){
+if(i<28)return {fill:'rgba(255,200,69,0.9)',glow:'rgba(255,200,69,0.5)',blend:'lighter'};
+return seedColor(i,false);
+}
+function draw(){
+const now=performance.now()/1000;
+const size=Math.min(W,H),R=size/2*SPREAD;
+ctx.clearRect(0,0,W,H);
+const blend=getComputedStyle(document.documentElement).getPropertyValue('--phs-blend').trim()||'lighter';
+ctx.globalCompositeOperation=blend;
+for(let i=N-1;i>=0;i--){
+const theta=(i*goldenAngle+rotation)%360;
+const r=R*Math.sqrt(i/N);
+const x=cx*W+r*Math.cos(theta*Math.PI/180);
+const y=cy*H+r*Math.sin(theta*Math.PI/180);
+const seed=seedColorByIndex(i);
+const baseRadius=1.2+(R/N)*i*0.02+Math.sin(i*0.5)*0.15;
+const pulse=1+Math.sin(now*0.8+i*0.1)*0.05;
+const radius=baseRadius*pulse;
+ctx.fillStyle=seed.glow;
+ctx.beginPath();
+ctx.arc(x,y,radius*2.8,0,Math.PI*2);
+ctx.fill();
+ctx.fillStyle=seed.fill;
+ctx.beginPath();
+ctx.arc(x,y,radius,0,Math.PI*2);
+ctx.fill();
+}
+const glow=getComputedStyle(document.documentElement).getPropertyValue('--phs-nuc').trim()||'rgba(255,200,69,0.9)';
+ctx.fillStyle=glow;
+ctx.beginPath();
+ctx.arc(cx*W,cy*H,R*0.04,0,Math.PI*2);
+ctx.fill();
+ctx.globalCompositeOperation='source-over';
+}
+function render(){rotation+=speed;draw();}
+function frame(){render();requestAnimationFrame(frame);}
+let raf=0;
+function start(){if(!raf)raf=requestAnimationFrame(frame);}
+function stop(){cancelAnimationFrame(raf);raf=0;}
+document.addEventListener('visibilitychange',()=>{document.hidden?stop():start();});
+window.addEventListener('resize',()=>{size();render();});
+if(reduce){render();}else start();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!doctype html>
+<!--
+  INSTALANDING.AI · Constellation Connect
+  slug     constellation-connect
+  page     https://forevercomponents.com/components/cosmic-space/constellation-connect-lines/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    none in :root — colours are hardcoded: ground #060a16 (CSS
+            and the frame() fillStyle), link lines rgba(218,62,140),
+            cursor lines rgba(224,100,170), stars rgba(255,235,245),
+            caption #cfe2ff at opacity .34
+  sections  stage — full-viewport canvas (#c) with caption bottom-left
+  scripts   one body IIFE: 46 drifting star nodes auto-connect with
+            faint magenta lines when within LINK=0.2 of each other
+            (O(N²) proximity check); nodes twinkle (t += 0.02) and the
+            cursor draws lines to nearby stars, brightening them;
+            DPR-aware canvas sizing, prefers-reduced-motion guard
+            (positions freeze, single frame), visibilitychange stop/start
+  assets    none: all drawing is canvas 2D, system font stack
+
+  ADAPTING
+  - Safe to edit: node count (N=46), connection threshold (LINK=0.2),
+    drift speed (vx/vy *= 0.0006), line colour (rgb(218,62,140)),
+    cursor influence radius (factor *4), twinkle speed (t += 0.02).
+    The <script type="application/json" id="forever-agent-meta"> block
+    lists editable areas, elements to preserve, and known limitations
+    — read it before changing things.
+  - Keep intact: the IIFE wrapper, the O(N²) proximity check in frame,
+    the twinkle calculation, the prefers-reduced-motion guard, the
+    visibilitychange stop/start, and DPR-aware canvas sizing.
+  - The canvas is tagged data-section="stage" (added while adapting).
+    Background is hardcoded dark navy (#060a16) in both the CSS and the
+    frame() fillStyle — change both together to re-theme; there is no
+    light variant. Node counts above ~120 will strain low-end CPUs.
+  - With reduced motion the positions freeze but the rAF loop keeps
+    drawing (twinkle continues); the frame is effectively static
+    because the nodes do not move.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="Drifting warm-white star nodes link with proximity lines and twinkle, connecting to the cursor on hover like a constellation network.">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Constellation Connect Lines</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#060a16;}
+  #c{display:block;width:100%;height:100%;}
+  .cap{position:fixed;left:8px;bottom:7px;font:600 10px/1.2 system-ui,sans-serif;
+       letter-spacing:.08em;color:#cfe2ff;opacity:.34;text-transform:uppercase;
+       pointer-events:none;user-select:none;}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+ "file": "infinite/cosmic-space/07-constellation-connect-lines.html",
+ "title": "Constellation Connect",
+ "description": "46 drifting star nodes auto-connect with faint magenta lines when close; cursor draws lines to nearby stars and brightens them on hover.",
+ "useWhen": "Dark-mode hero backgrounds, space/night themes, data-network metaphors, ambient looping screensavers.",
+ "avoidWhen": "Light backgrounds (hardcoded dark navy). Contexts needing legible text overlays — lines and motion compete with reading.",
+ "agentPrompt": "Change node count from N=46 to 80, widen the connection threshold from LINK=0.2 to 0.28, and shift line color from rgb(218,62,140) to rgb(192,180,89) for a warmer gold palette.",
+ "editableAreas": [
+  "node count (N=46)",
+  "connection distance threshold (LINK=0.2)",
+  "node drift speed (vx/vy *= 0.0006)",
+  "line color (rgb(218,62,140))",
+  "cursor influence radius (factor *4)",
+  "twinkle speed (t += 0.02)"
+ ],
+ "preserveElements": [
+  "DPR-aware canvas sizing",
+  "visibilitychange pause/resume",
+  "prefers-reduced-motion guard (freeze position, single frame)",
+  "IIFE wrapper"
+ ],
+ "knownLimitations": [
+  "O(N²) proximity check — node counts above ~120 will strain low-end CPUs",
+  "Background color hardcoded in CSS — must edit to change from dark navy",
+  "Cursor lines disappear on touch devices (no persistent pointer position)"
+ ],
+ "tier": "curated",
+ "labels": [
+  "mobile-ready",
+  "accessible",
+  "copy-paste-safe",
+  "minimal-deps"
+ ],
+ "tags": [
+  "stars",
+  "constellation",
+  "canvas",
+  "proximity-lines",
+  "pointer",
+  "network",
+  "ambient",
+  "space"
+ ]
+}
+</script>
+</head>
+<body>
+<canvas id="c" data-section="stage"></canvas>
+<div class="cap">Constellation Connect</div>
+<script>
+(function(){
+  const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W,H,DPR;
+  const N=46,nodes=[];
+  function seed(){
+    nodes.length=0;
+    for(let i=0;i<N;i++)nodes.push({
+      x:Math.random(),y:Math.random(),
+      vx:(Math.random()-0.5)*0.0006,vy:(Math.random()-0.5)*0.0006,
+      r:0.6+Math.random()*1.6,ph:Math.random()*6.28
+    });
+  }
+  function size(){
+    DPR=Math.min(devicePixelRatio||1,2);
+    W=cv.clientWidth;H=cv.clientHeight;
+    cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);
+  }
+  addEventListener('resize',size);size();seed();
+  let t=0,mx=-1,my=-1;
+  cv.addEventListener('pointermove',e=>{const r=cv.getBoundingClientRect();
+    mx=(e.clientX-r.left)/W;my=(e.clientY-r.top)/H;});
+  cv.addEventListener('pointerleave',()=>{mx=-1;my=-1;});
+  const LINK=0.2;
+  function frame(){
+    t+=0.02;
+    ctx.fillStyle='#060a16';ctx.fillRect(0,0,W,H);
+    if(!reduce)nodes.forEach(n=>{
+      n.x+=n.vx;n.y+=n.vy;
+      if(n.x<0||n.x>1)n.vx*=-1;if(n.y<0||n.y>1)n.vy*=-1;
+    });
+    for(let i=0;i<N;i++)for(let j=i+1;j<N;j++){
+      const a=nodes[i],b=nodes[j],d=Math.hypot(a.x-b.x,a.y-b.y);
+      if(d<LINK){
+        let al=(1-d/LINK)*0.5;
+        ctx.strokeStyle='rgba(218,62,140,'+al.toFixed(3)+')';ctx.lineWidth=0.7;
+        ctx.beginPath();ctx.moveTo(a.x*W,a.y*H);ctx.lineTo(b.x*W,b.y*H);ctx.stroke();
+      }
+    }
+    nodes.forEach(n=>{
+      const near=mx<0?0:Math.max(0,1-Math.hypot(n.x-mx,n.y-my)*4);
+      const tw=0.6+0.4*Math.sin(t+n.ph);
+      ctx.fillStyle='rgba(255,235,245,'+(0.5+tw*0.5).toFixed(3)+')';
+      ctx.beginPath();ctx.arc(n.x*W,n.y*H,n.r*(1+near*1.5),0,Math.PI*2);ctx.fill();
+      if(near>0){ // link to cursor
+        ctx.strokeStyle='rgba(224,100,170,'+(near*0.6).toFixed(3)+')';ctx.lineWidth=0.8;
+        ctx.beginPath();ctx.moveTo(n.x*W,n.y*H);ctx.lineTo(mx*W,my*H);ctx.stroke();
+      }
+    });
+    raf=requestAnimationFrame(frame);
+  }
+  let raf=0;
+  function start(){if(!raf)raf=requestAnimationFrame(frame);}
+  function stop(){cancelAnimationFrame(raf);raf=0;}
+  document.addEventListener('visibilitychange',()=>{document.hidden?stop():start();});
+  if(reduce){frame();}else start();
+})();
+</script>
+</body>
+</html>

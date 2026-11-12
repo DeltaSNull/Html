@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<!--
+  INSTALANDING.AI · Truchet Tiles
+  slug     truchet-tiles
+  page     https://forevercomponents.com/components/generative-geometry/truchet-tiles/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    :root custom properties: --gg03-bg (dark violet ground #1a1224),
+            --gg03-cap / --gg03-cap-o (caption), --gg03-arc-s / --gg03-arc-l
+            (arc saturation/lightness, fed into the JS hsl()); a
+            [data-theme="light"] block repoints them for a pale ground
+  sections  stage — full-viewport canvas (#c) with caption bottom-left
+  scripts   one body IIFE: 8x8 grid of rainbow quarter-arc Truchet tiles;
+            each tile flips orientation on a slow sine wave, weaving
+            shifting interlocked curves; pointer position warms the hue
+            near the cursor; DPR-aware canvas sizing,
+            prefers-reduced-motion guard (static draw), visibilitychange
+            stop/start
+  assets    none: all drawing is canvas 2D, system monospace caption
+
+  ADAPTING
+  - Safe to edit: grid size (N=8), arc stroke width (tile*0.09), wave
+    speed (t += 0.00012*16.666), flip phase (r*0.7 + c*0.5), arc hue
+    range in drawArc, theme tokens in :root. The
+    <script type="application/json" id="forever-agent-meta"> block lists
+    editable areas, elements to preserve, and known limitations — read it
+    before changing things.
+  - Keep intact: the IIFE wrapper, the prefers-reduced-motion guard, the
+    visibilitychange stop/start, and DPR-aware canvas sizing.
+  - The canvas is tagged data-section="stage" (added while adapting).
+    Background is hardcoded dark violet (#1a1224) in CSS; a light theme
+    exists via ?theme=light / data-theme="light", which repoints the
+    tokens and the JS LIGHT/DARK saturation-lightness pair.
+  - NOTE: the page's AI guidance and the embedded agent-meta JSON describe
+    an older variant of this file (identifiers #truchet, drawTile,
+    --gg03-arc-1 / --gg03-arc-2, rows/cols, WAVE, c.sp). The copied file
+    actually uses canvas #c, drawArc, N=8, --gg03-arc-s / --gg03-arc-l,
+    and t += 0.00012*16.666 — trust the code, not those stale names.
+  - NOTE: the meta JSON claims a click flips a tile's base orientation,
+    but the copied file has no click handler — pointermove only warms the
+    hue near the cursor. The flip timing comes purely from the sine wave.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="8x8 grid of rainbow Truchet quarter-arc tiles that flip orientation in waves, weaving shifting interlocked curves.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Truchet Tiles</title>
+<script>
+/* theme hook: the canvas loads the tile with ?theme=light|dark (or stamps data-theme on <html>).
+Runs before first paint — no dark flash. Standalone default stays dark. */
+(function(){var t=new URLSearchParams(location.search).get('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);})();
+</script>
+<style>
+/* theme tokens — dark values are the defaults (solid-dark-bg contract);
+the light re-theme is the [data-theme="light"] block. The arc numbers feed the JS hsl(). */
+:root{
+--gg03-bg:#1a1224; --gg03-cap:#ffb3e6; --gg03-cap-o:.45;
+--gg03-arc-s:80; --gg03-arc-l:65;
+}
+:root[data-theme="light"]{
+--gg03-bg:#f6f1f7; --gg03-cap:#d1008c; --gg03-cap-o:.8;
+--gg03-arc-s:62; --gg03-arc-l:42;
+}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--gg03-bg)}
+#c{display:block;width:100%;height:100%}
+#cap{position:fixed;left:8px;bottom:7px;font:11px/1 ui-monospace,monospace;
+color:var(--gg03-cap);opacity:var(--gg03-cap-o);letter-spacing:.5px;pointer-events:none;user-select:none}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+"file": "infinite/generative-geometry/03-truchet-tiles.html",
+"title": "Truchet Tiles",
+"description": "8x8 grid of rainbow quarter-arc Truchet tiles that flip orientation in slow sine waves, weaving shifting interlocked curves across a dark background.",
+"useWhen": "Generative art backgrounds, creative portfolio heroes, or anywhere a hypnotic geometric pattern is needed without heavy compute.",
+"avoidWhen": "Light backgrounds (hardcoded dark violet). Contexts needing legible text overlays — the pattern competes with reading.",
+"agentPrompt": "Change the grid from 8x8 to 12x12, widen the arc stroke from tile*0.09 to tile*0.12, and shift the hue range from rainbow to a single blue family by replacing the hsl() hue calculation with a fixed 210.",
+"editableAreas": [
+"arc color range (--gg03-arc-1 and --gg03-arc-2)",
+"wave speed (WAVE=0.00012)",
+"stroke width (cell*0.16)",
+"flip speed per cell (c.sp range 0.4..1.2)",
+"background color (#1a1224)",
+"theme tokens (:root dark defaults + [data-theme=light] overrides)"
+],
+"preserveElements": [
+"DPR-aware canvas sizing",
+"visibilitychange pause guard",
+"prefers-reduced-motion static draw fallback",
+"IIFE wrapper",
+"theme hook (?theme= bootstrap + forever::theme message listener + theme tokens)"
+],
+"knownLimitations": [
+"Background color hardcoded in both CSS and JS fillStyle — must change both",
+"Grid is always square; non-square layouts require refactoring ox/oy math",
+"Click flips only base orientation (r), not the live flip — effect is subtle during wave motion"
+],
+"tier": "curated",
+"labels": [
+"agent-ready",
+"easy-to-modify",
+"mobile-ready",
+"copy-paste-safe",
+"minimal-deps"
+],
+"tags": ["truchet","tiles","canvas","pattern","geometric","math","ambient","interactive"]
+}
+</script>
+</head>
+<body>
+<canvas id="c" data-section="stage"></canvas>
+<div id="cap">truchet tiles</div>
+<script>
+(function(){
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let W,H,DPR;
+const N=8;
+let tile=0;
+function size(){
+DPR=Math.min(devicePixelRatio||1,2);
+W=cv.clientWidth;H=cv.clientHeight;
+cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);
+tile=Math.min(W,H)/N;
+}
+addEventListener('resize',size);size();
+const LIGHT={s:62,l:42},DARK={s:80,l:65};
+let t=0,mx=-1,my=-1;
+cv.addEventListener('pointermove',e=>{const r=cv.getBoundingClientRect();
+mx=(e.clientX-r.left)/W;my=(e.clientY-r.top)/H;});
+cv.addEventListener('pointerleave',()=>{mx=-1;my=-1;});
+function drawArc(x,y,rot){
+ctx.save();
+ctx.translate(x,y);
+ctx.rotate(rot);
+const d=Math.hypot(x/W-mx,y/H-my);
+const hue=((x+y)*0.7+(reduce?0:Math.sin(t*0.001+d*3)*40))%360;
+ctx.strokeStyle='hsl('+((hue+360)%360)+','+
+(document.documentElement.getAttribute('data-theme')==='light'?LIGHT.s:DARK.s)+'%,'+
+(document.documentElement.getAttribute('data-theme')==='light'?LIGHT.l:DARK.l)+'%)';
+ctx.lineWidth=tile*0.09;
+ctx.beginPath();
+ctx.arc(0,0,tile/2,0,Math.PI/2);
+ctx.stroke();
+ctx.beginPath();
+ctx.arc(tile,tile,tile/2,Math.PI,Math.PI*1.5);
+ctx.stroke();
+ctx.restore();
+}
+function frame(){
+t+=0.00012*16.666;
+ctx.clearRect(0,0,W,H);
+for(let r=0;r<N;r++){
+for(let c=0;c<N;c++){
+const flip=Math.sin(t*0.7+r*0.7+c*0.5)>0?0:Math.PI/2;
+drawArc(c*tile,r*tile,flip);
+}
+}
+raf=requestAnimationFrame(frame);
+}
+let raf=0;
+function start(){if(!raf)raf=requestAnimationFrame(frame);}
+function stop(){cancelAnimationFrame(raf);raf=0;}
+document.addEventListener('visibilitychange',()=>{document.hidden?stop():start();});
+if(reduce){t=0;frame();}else start();
+})();
+</script>
+</body>
+</html>

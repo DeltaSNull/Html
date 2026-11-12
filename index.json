@@ -5,7 +5,7 @@
   "version": "1.0",
   "counts": {
     "pages": 22,
-    "components": 78,
+    "components": 81,
     "dashboards": 1
   },
   "pages": [
@@ -5187,6 +5187,156 @@
         "preview": "components/ringed-planet-rotate/preview.jpg"
       },
       "page": "https://forevercomponents.com/components/cosmic-space/ringed-planet-rotate/"
+    },
+    {
+      "slug": "truchet-tiles",
+      "title": "Truchet Tiles",
+      "description": "8x8 grid of rainbow quarter-arc Truchet tiles flips orientation in slow sine waves, weaving shifting interlocked curves across a dark violet background",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "generative art backgrounds",
+        "creative portfolio heroes",
+        "math or design project visuals"
+      ],
+      "style": [
+        "dark",
+        "geometric",
+        "generative",
+        "rainbow",
+        "hypnotic",
+        "canvas",
+        "ambient",
+        "pointer"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas",
+          "truchet",
+          "sine-wave",
+          "pointer",
+          "reduced-motion"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Truchet Tiles — Forever Components",
+          "href": "https://forevercomponents.com/components/generative-geometry/truchet-tiles/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/truchet-tiles/index.html",
+        "prompt": "components/truchet-tiles/PROMPT.md",
+        "preview": "components/truchet-tiles/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/generative-geometry/truchet-tiles/"
+    },
+    {
+      "slug": "phyllotaxis-sunflower",
+      "title": "Phyllotaxis Sunflower",
+      "description": "620 amber-gold seeds grow outward in a Fermat spiral via the golden angle, rotating slowly from a glowing nucleus",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "warm organic hero backgrounds",
+        "nature or wellness branding",
+        "science-themed pages"
+      ],
+      "style": [
+        "dark",
+        "organic",
+        "golden",
+        "spiral",
+        "ambient",
+        "canvas",
+        "generative"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas",
+          "golden-angle",
+          "fermat-spiral",
+          "reduced-motion"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Phyllotaxis Sunflower — Forever Components",
+          "href": "https://forevercomponents.com/components/organic-nature/phyllotaxis-sunflower/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/phyllotaxis-sunflower/index.html",
+        "prompt": "components/phyllotaxis-sunflower/PROMPT.md",
+        "preview": "components/phyllotaxis-sunflower/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/organic-nature/phyllotaxis-sunflower/"
+    },
+    {
+      "slug": "constellation-connect",
+      "title": "Constellation Connect",
+      "description": "46 drifting star nodes auto-connect with faint magenta lines when close; the cursor draws lines to nearby stars and brightens them on hover",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "dark-mode hero backgrounds",
+        "space or night themes",
+        "data-network metaphors"
+      ],
+      "style": [
+        "dark",
+        "cosmic",
+        "network",
+        "ambient",
+        "canvas",
+        "pointer",
+        "generative"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas",
+          "proximity-lines",
+          "pointer",
+          "twinkle",
+          "reduced-motion"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Constellation Connect — Forever Components",
+          "href": "https://forevercomponents.com/components/cosmic-space/constellation-connect-lines/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/constellation-connect/index.html",
+        "prompt": "components/constellation-connect/PROMPT.md",
+        "preview": "components/constellation-connect/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/cosmic-space/constellation-connect-lines/"
     }
   ],
   "dashboards": [
