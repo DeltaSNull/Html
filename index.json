@@ -5,7 +5,7 @@
   "version": "1.0",
   "counts": {
     "pages": 22,
-    "components": 81,
+    "components": 84,
     "dashboards": 1
   },
   "pages": [
@@ -5337,6 +5337,163 @@
         "preview": "components/constellation-connect/preview.jpg"
       },
       "page": "https://forevercomponents.com/components/cosmic-space/constellation-connect-lines/"
+    },
+    {
+      "slug": "ascii-shimmer",
+      "title": "ASCII Shimmer",
+      "description": "Grid of ASCII ramp characters shimmers through interfering radial and plasma waves in green-teal hues; character density and wave center follow the pointer",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "retro/terminal-aesthetic hero backgrounds",
+        "hacker-themed UIs",
+        "ambient screensaver displays"
+      ],
+      "style": [
+        "dark",
+        "retro",
+        "glitch",
+        "ascii",
+        "plasma",
+        "generative",
+        "canvas",
+        "pointer",
+        "ambient"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas",
+          "ascii",
+          "plasma",
+          "pointer",
+          "reduced-motion"
+        ]
+      },
+      "credits": [
+        {
+          "label": "ASCII Shimmer — Forever Components",
+          "href": "https://forevercomponents.com/components/retro-glitch/ascii-shimmer/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/ascii-shimmer/index.html",
+        "prompt": "components/ascii-shimmer/PROMPT.md",
+        "preview": "components/ascii-shimmer/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/retro-glitch/ascii-shimmer/"
+    },
+    {
+      "slug": "game-of-life",
+      "title": "Game of Life",
+      "description": "Conway's Game of Life with glowing magenta cells aging through three color tiers; field reseeds automatically when population collapses",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "ambient backgrounds for tech/generative-art themes",
+        "screensavers",
+        "loading screens needing emergent organic motion"
+      ],
+      "style": [
+        "dark",
+        "cellular-automata",
+        "pixel",
+        "generative",
+        "loop",
+        "canvas",
+        "ambient",
+        "light-ready"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas",
+          "cellular-automata",
+          "pixel",
+          "grid",
+          "reduced-motion",
+          "light-ready"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Game of Life — Forever Components",
+          "href": "https://forevercomponents.com/components/fractals-automata/game-of-life/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/game-of-life/index.html",
+        "prompt": "components/game-of-life/PROMPT.md",
+        "preview": "components/game-of-life/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/fractals-automata/game-of-life/"
+    },
+    {
+      "slug": "stream-graph",
+      "title": "Streamgraph",
+      "description": "Six translucent stacked bands breathe around a central baseline via layered sines; a sweeping readout line tracks across with colored tick dots per band",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "dashboard hero sections",
+        "data visualization backgrounds",
+        "ambient charts illustrating trends without real data"
+      ],
+      "style": [
+        "dark",
+        "data-viz",
+        "stacked-area",
+        "generative",
+        "flow",
+        "chart",
+        "canvas",
+        "ambient",
+        "light-ready"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas",
+          "streamgraph",
+          "data-viz",
+          "stacked-area",
+          "reduced-motion",
+          "light-ready"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Streamgraph — Forever Components",
+          "href": "https://forevercomponents.com/components/charts-flow/stream-graph/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/stream-graph/index.html",
+        "prompt": "components/stream-graph/PROMPT.md",
+        "preview": "components/stream-graph/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/charts-flow/stream-graph/"
     }
   ],
   "dashboards": [

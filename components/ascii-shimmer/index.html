@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<!--
+  INSTALANDING.AI · ASCII Shimmer
+  slug     ascii-shimmer
+  page     https://forevercomponents.com/components/retro-glitch/ascii-shimmer/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    :root custom properties: --fc-bg (dark green-black ground #01120b),
+            --fc-text / --fc-accent (green-teal hues), --fc-cap / --fc-cap-o (caption)
+  sections  stage — full-viewport canvas (#fc-canvas) with caption bottom-left
+  scripts   one scoped const/let block (no IIFE): ASCII ramp characters shimmer
+            through interfering radial and plasma waves; character density and
+            wave centre follow the pointer; visibilitychange stop/start,
+            prefers-reduced-motion guard (t freeze, one static draw)
+  assets    none: all drawing is canvas 2D, system monospace caption
+
+  ADAPTING
+  - Safe to edit: character ramp (chars " .:-=+*#%@"), wave speed (t += 0.035),
+    hue range (140 + v*60), cell density divisor (30 / 46), wave frequency
+    coefficients (0.6, 0.35, 0.4). The
+    <script type="application/json" id="forever-agent-meta"> block lists
+    editable areas, elements to preserve, and known limitations — read it
+    before changing things.
+  - Keep intact: the visibilitychange pause / cancelAnimationFrame, the
+    prefers-reduced-motion guard, and DPR-independent canvas sizing with
+    the cell cap.
+  - The canvas is tagged data-section="stage" (added while adapting).
+    Background is hardcoded dark green-black (#01120b); no light theme.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="ASCII shimmer: plasma interference rendered with an ASCII character ramp; character density follows the pointer over a dark green field.">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ASCII shimmer</title>
+<style>
+:root{
+--fc-bg:#01120b; --fc-text:#eafff3; --fc-accent:#46f49e; --fc-cap:#fff; --fc-cap-o:.42;
+}
+html,body{margin:0;height:100%;background:var(--fc-bg)}
+#fc-wrap{position:fixed;inset:0;overflow:hidden;background:#01120b}
+#fc-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.cap{position:fixed;left:8px;bottom:7px;font:600 10px/1 ui-monospace,Menlo,monospace;
+color:var(--fc-cap);opacity:var(--fc-cap-o);letter-spacing:.08em;text-transform:uppercase;user-select:none}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;animation-iteration-count:1!important}}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+"file": "infinite/retro-glitch/01-ascii-shimmer.html",
+"title": "ASCII shimmer",
+"description": "Grid of ASCII ramp characters shimmers through interfering radial and plasma waves in green-teal hues; character density and wave center follow the pointer.",
+"useWhen": "Retro/terminal-aesthetic hero backgrounds, hacker-themed UIs, or ambient screensaver displays on dark backgrounds.",
+"avoidWhen": "Light-color UIs (background hardcoded dark green-black). Contexts requiring legible foreground text — the shimmer competes with readability.",
+"agentPrompt": "Change the character ramp from \" .:-=+*#%@\" to \" ░▒▓█\", shift the hue base from 140 to 220 for a blue palette, and slow the wave speed by changing t+=0.035 to t+=0.018.",
+"editableAreas": [
+"character ramp (chars variable)",
+"wave speed (t += 0.035)",
+"hue range (140 + v*60)",
+"cell density divisor (30 / 46)",
+"wave frequency coefficients (0.6, 0.35, 0.4)"
+],
+"preserveElements": [
+"visibilitychange pause / cancelAnimationFrame",
+"prefers-reduced-motion guard (t freeze)",
+"DPR-independent canvas sizing with cell cap",
+"IIFE-free but scoped const/let block"
+],
+"knownLimitations": [
+"No DPR scaling — canvas renders at CSS pixel resolution, looks soft on high-DPI displays",
+"Cell size cap logic (divisor 46) may leave noticeable gaps at very wide aspect ratios"
+],
+"tier": "curated",
+"labels": [
+"agent-ready",
+"easy-to-modify",
+"mobile-ready",
+"accessible",
+"copy-paste-safe",
+"minimal-deps",
+"dark-only"
+],
+"tags": [
+"ascii",
+"canvas",
+"retro",
+"glitch",
+"plasma",
+"pointer",
+"generative"
+]
+}
+</script>
+</head>
+<body>
+<div id="fc-wrap" role="img" aria-label="ASCII shimmer: a green-on-black field of ASCII characters rippling in waves around the pointer.">
+<canvas id="fc-canvas" data-section="stage"></canvas>
+</div>
+<div class="cap">ASCII shimmer</div>
+<script>
+const canvas=document.getElementById('fc-canvas');
+const ctx=canvas.getContext('2d');
+let w=0,h=0,cols=0,rows=0,cell=0,t=0,running=true,rafId=0;
+let px=0.5,py=0.4;
+const chars=" .:-=+*#%@";
+const REDUCED=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function resize(){
+w=canvas.clientWidth;h=canvas.clientHeight;
+canvas.width=w;canvas.height=h;
+cell=Math.max(8,Math.min(30,Math.min(w/46,h/30)));
+cols=Math.ceil(w/cell);rows=Math.ceil(h/cell);
+}
+function draw(){
+const bg=ctx.createLinearGradient(0,0,0,h);
+bg.addColorStop(0,'#01120b');bg.addColorStop(1,'#00150c');
+ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+ctx.textAlign='center';ctx.textBaseline='middle';
+ctx.font=cell+'px ui-monospace,Menlo,Consolas,monospace';
+for(let y=0;y<rows;y++){
+for(let x=0;x<cols;x++){
+const dx=(x+0.5)/cols-px,dy=(y+0.5)/rows-py;
+const dist=Math.sqrt(dx*dx+dy*dy);
+const v=Math.sin(dist*18-t*0.6)*0.5
++Math.sin((x/cols)*9+t*0.35)*0.3
++Math.sin((y/rows)*11-t*0.4)*0.2;
+const a=(v+1)/2;
+const idx=Math.min(chars.length-1,Math.floor(a*chars.length));
+ctx.fillStyle=`hsl(${140+v*60},70%,${30+a*45}%)`;
+ctx.fillText(chars[idx],(x+0.5)*cell,(y+0.5)*cell);
+}
+}
+}
+function loop(){
+draw();
+if(!REDUCED)t+=0.035;
+rafId=requestAnimationFrame(loop);
+}
+function start(){if(running)return;running=true;rafId=requestAnimationFrame(loop);}
+function stop(){running=false;if(rafId)cancelAnimationFrame(rafId);}
+window.addEventListener('resize',resize);
+document.addEventListener('pointermove',e=>{
+px=e.clientX/innerWidth;py=e.clientY/innerHeight;
+});
+document.addEventListener('visibilitychange',()=>{
+if(document.hidden)stop();else start();
+});
+resize();
+if(REDUCED){draw();}else{rafId=requestAnimationFrame(loop);}
+</script>
+</body>
+</html>

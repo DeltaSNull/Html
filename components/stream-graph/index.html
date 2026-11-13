@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<!--
+  INSTALANDING.AI · Streamgraph
+  slug     stream-graph
+  page     https://forevercomponents.com/components/charts-flow/stream-graph/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    :root custom properties: --ch05-bg (dark slate ground #0a0d12),
+            --ch05-accent, --ch05-sep / --ch05-sweep / --ch05-dim (band
+            separators, sweep line, tick rings), --ch05-cap / --ch05-cap-o
+            (caption); a [data-theme="light"] block repoints them for a pale
+            ground
+  sections  stage — full-viewport canvas (#ch05-c) with caption bottom-left
+  scripts   theme hook in <head> (?theme= / forever:theme postMessage);
+            one body IIFE: six translucent stacked bands breathe around a
+            central baseline via layered sines; a sweeping readout line
+            tracks across with coloured tick dots per band; preallocated
+            Float32Array buffers, visibilitychange stop/start,
+            prefers-reduced-motion static fallback
+  assets    none: all drawing is canvas 2D, system monospace caption
+
+  ADAPTING
+  - Safe to edit: band colours (COL), band count (N=6), column resolution
+    (M=46), breathing rates (FRQ), sweep speed (tt*0.13), wiggle amplitude,
+    theme tokens in :root. The
+    <script type="application/json" id="forever-agent-meta"> block lists
+    editable areas, elements to preserve, and known limitations — read it
+    before changing things.
+  - Keep intact: the preallocated Float32Array buffers (no per-frame
+    allocation), the IIFE wrapper, the visibilitychange pause/resume, the
+    prefers-reduced-motion static fallback, and the theme hook (?theme=
+    bootstrap + forever:theme listener + tokens).
+  - The canvas is tagged data-section="stage" (added while adapting).
+    Background is hardcoded in --ch05-bg; a light theme exists via
+    ?theme=light / data-theme="light".
+  - NOTE: the copied code's stacking loop used an undefined variable h2
+    and centred the stack on M*0.5 (23) although the band values sum to
+    ~3, so draw() would throw on the first frame. The loop now totals
+    each column first and centres the stack on tot/2 with a 0.25 scale,
+    so the six bands span ~75% of the plot height around the baseline.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="Streamgraph: six translucent stacked bands breathe around a central baseline; a sweeping readout line tracks across with colored tick dots per band.">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Streamgraph</title>
+<script>
+/* theme hook: the canvas loads the tile with ?theme=light|dark (or stamps data-theme on <html>).
+Runs before first paint — no dark flash. Standalone default stays dark. */
+(function(){var t=new URLSearchParams(location.search).get('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);})();
+</script>
+<style>
+/* theme tokens — dark = defaults (solid-dark-bg contract); light re-theme = the
+[data-theme="light"] block. --ch05-* are the colours the canvas draws with. */
+:root{
+--ch05-bg:#0a0d12; --ch05-accent:#e2e8f0; --ch05-cap:#fff; --ch05-cap-o:.42;
+--ch05-sep:rgba(10,13,18,0.85); --ch05-sweep:rgba(226,232,240,0.92); --ch05-dim:rgba(226,232,240,0.28);
+}
+:root[data-theme="light"]{
+--ch05-bg:#f7f9fc; --ch05-accent:#0f172a; --ch05-cap:#0f172a; --ch05-cap-o:.5;
+--ch05-sep:rgba(247,249,252,0.9); --ch05-sweep:rgba(15,23,42,0.9); --ch05-dim:rgba(15,23,42,0.3);
+}
+html,body{margin:0;height:100%;background:var(--ch05-bg)}
+#ch05-stage{position:fixed;inset:0;overflow:hidden;background:var(--ch05-bg)}
+#ch05-c{position:absolute;inset:0;width:100%;height:100%;display:block}
+.cap{position:fixed;left:8px;bottom:7px;font:600 10px/1 ui-monospace,Menlo,monospace;
+color:var(--ch05-cap);opacity:var(--ch05-cap-o);letter-spacing:.08em;text-transform:uppercase;user-select:none}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;animation-iteration-count:1!important}}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+"file": "infinite/charts-flow/03-streamgraph.html",
+"title": "Streamgraph",
+"description": "Six translucent stacked bands breathe around a central baseline via layered sines; a sweeping readout line tracks across with colored tick dots per band.",
+"useWhen": "Dashboard hero sections, data visualization backgrounds, ambient charts illustrating trends without real data.",
+"avoidWhen": "Contexts requiring real data binding or accurate axis labels — values are synthetic sine waves only.",
+"agentPrompt": "Change COL to warm sunset tones, increase N to 8 bands, slow the sweep by changing tt*0.13 to tt*0.07. Theme: dark tokens live in :root, the light variant in :root[data-theme=\"light\"]; ?theme=light or a {type:'forever:theme'} postMessage switches at runtime.",
+"editableAreas": [
+"band colors (COL array)",
+"band count (N=6)",
+"column resolution (M=46)",
+"breathing rates (FRQ array)",
+"sweep speed (tt*0.13)",
+"wiggle amplitude (gh*0.045)",
+"theme tokens (:root dark defaults + [data-theme=light] overrides)"
+],
+"preserveElements": [
+"preallocated Float32Array buffers (no per-frame allocation)",
+"IIFE wrapper",
+"visibilitychange pause/resume",
+"prefers-reduced-motion static fallback",
+"theme hook (?theme= bootstrap + forever:theme message listener + theme tokens)"
+],
+"knownLimitations": [
+"Data is synthetic sine waves only — no real data binding",
+"Sweep line disabled under prefers-reduced-motion",
+"Background color hardcoded in --ch05-bg CSS variable"
+],
+"tier": "curated",
+"labels": [
+"agent-ready",
+"easy-to-modify",
+"mobile-ready",
+"accessible",
+"copy-paste-safe",
+"minimal-deps",
+"light-ready"
+],
+"tags": [
+"streamgraph",
+"data-viz",
+"canvas",
+"stacked-area",
+"generative",
+"flow",
+"chart"
+]
+}
+</script>
+</head>
+<body>
+<div id="ch05-stage" role="img"
+aria-label="Streamgraph: six translucent stacked bands breathing around a central baseline, with a sweeping readout line tracking across.">
+<canvas id="ch05-c" data-section="stage"></canvas>
+</div>
+<div class="cap">Streamgraph</div>
+<script>
+(function(){
+"use strict";
+var stage=document.getElementById('ch05-stage'),
+cv=document.getElementById('ch05-c'),
+ctx=cv.getContext('2d'),
+reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+// ---- theme: every canvas colour comes from a CSS token ----
+var root=document.documentElement;
+function hexToRgb(h){ h=h.replace('#',''); return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]; }
+function rgbaFromVar(name, fallback){ var v=getComputedStyle(root).getPropertyValue(name).trim(); return v||fallback; }
+var SEP='rgba(10,13,18,0.85)', SWEEP='rgba(226,232,240,0.92)', DIM='rgba(226,232,240,0.28)', BG=[10,13,18];
+function syncTheme(){
+var cs=getComputedStyle(root);
+BG=hexToRgb(cs.getPropertyValue('--ch05-bg').trim());
+SEP=rgbaFromVar('--ch05-sep','rgba(10,13,18,0.85)');
+SWEEP=rgbaFromVar('--ch05-sweep','rgba(226,232,240,0.92)');
+DIM=rgbaFromVar('--ch05-dim','rgba(226,232,240,0.28)');
+if(reduce && W) frame(performance.now());
+}
+addEventListener('message',function(e){ var d=e.data;
+if(d&&d.type==='forever:theme'&&(d.theme==='light'||d.theme==='dark')){ root.setAttribute('data-theme',d.theme); syncTheme(); } });
+var COL=['#60a5fa','#34d399','#fbbf24','#f472b6','#a78bfa','#22d3ee'];
+var N=6, M=46;
+var FRQ=[0.25,0.34,0.28,0.4,0.3,0.38];
+var data=new Float32Array(N*M);
+var stackTop=new Float32Array(N*M), stackBot=new Float32Array(N*M);
+var W=0,H=0, tt=0, last=0;
+function compute(t){
+for(var j=0;j<N;j++){
+for(var i=0;i<M;i++){
+var x=i/(M-1), y=0.5+0.25*Math.sin(x*6.2831*FRQ[j]+t*0.09)
++0.08*Math.sin(x*12.5663*0.4+j+t*0.12);
+data[j*M+i]=y;
+}
+}
+}
+function draw(t){
+ctx.fillStyle='rgb('+BG[0]+','+BG[1]+','+BG[2]+')';
+ctx.fillRect(0,0,W,H);
+var gw=W*0.9, gh=H*0.8, gx=W*0.05, gy=H*0.1;
+for(var i=0;i<M;i++){
+var tot=0;
+for(var j=0;j<N;j++) tot+=data[j*M+i];
+var a=0;
+for(var j=0;j<N;j++){
+var top=0.5+(a-tot/2)*0.25;
+var bot=0.5+(a+data[j*M+i]-tot/2)*0.25;
+stackTop[j*M+i]=top;
+stackBot[j*M+i]=bot;
+a+=data[j*M+i];
+}
+}
+for(var j=0;j<N;j++){
+ctx.beginPath();
+ctx.moveTo(gx,gy+(0.5-stackTop[j*M])*gh);
+for(var i=0;i<M;i++){
+var x=gx+i/(M-1)*gw;
+var y=gy+(0.5-stackTop[j*M+i])*gh;
+ctx.lineTo(x,y);
+}
+for(var i=M-1;i>=0;i--){
+var x=gx+i/(M-1)*gw;
+var y=gy+(0.5-stackBot[j*M+i])*gh;
+ctx.lineTo(x,y);
+}
+ctx.closePath();
+ctx.fillStyle=COL[j]+'4d';
+ctx.fill();
+ctx.strokeStyle=SEP;
+ctx.lineWidth=1;
+ctx.stroke();
+}
+if(!reduce){
+var sx=gx+((t*0.13)%1)*gw;
+ctx.strokeStyle=SWEEP;
+ctx.lineWidth=1.5;
+ctx.beginPath(); ctx.moveTo(sx,gy); ctx.lineTo(sx,gy+gh); ctx.stroke();
+var colIdx=Math.min(M-1,Math.floor(((t*0.13)%1)*M));
+for(var j=0;j<N;j++){
+var mid=(stackTop[j*M+colIdx]+stackBot[j*M+colIdx])/2;
+ctx.fillStyle=COL[j];
+ctx.beginPath();
+ctx.arc(sx,gy+(0.5-mid)*gh,4.5,0,Math.PI*2);
+ctx.fill();
+ctx.strokeStyle=DIM;
+ctx.lineWidth=1;
+ctx.stroke();
+}
+}
+}
+
+function frame(time){
+var dt=time-last; last=time;
+tt+=dt/1000;
+var t=tt+0.75;
+compute(t);
+draw(t);
+}
+
+var raf=0, running=false;
+function start(){ if(running)return; running=true; last=performance.now(); raf=requestAnimationFrame(frame); }
+function stop(){ running=false; if(raf) cancelAnimationFrame(raf); raf=0; }
+
+function size(){
+W=stage.clientWidth; H=stage.clientHeight;
+cv.width=W; cv.height=H;
+ctx.setTransform(1,0,0,1,0,0);
+}
+
+function init(){
+syncTheme(); size();
+if(reduce){ compute(0.75); draw(0.75); return; }
+start();
+}
+
+var rt;
+window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(function(){
+size(); if(reduce){ compute(0.75); draw(0.75); }
+},120); });
+
+document.addEventListener('visibilitychange',function(){
+if(reduce)return;
+if(document.hidden) stop(); else start();
+});
+
+init();
+})();
+</script>
+</body>
+</html>

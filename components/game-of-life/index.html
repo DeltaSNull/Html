@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<!--
+  INSTALANDING.AI · Game of Life
+  slug     game-of-life
+  page     https://forevercomponents.com/components/fractals-automata/game-of-life/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    :root custom properties: --gol-bg / --gol-bg2 (dark navy ground),
+            --gol-accent (magenta), --gol-t0 / --gol-t1 / --gol-t2 (cell age
+            tiers), --gol-dead, --gol-sep, --gol-glow, --gol-cap / --gol-cap-o
+            (caption); a [data-theme="light"] block repoints them for a pale
+            ground
+  sections  stage — full-viewport canvas (#gol-c) with caption bottom-left
+  scripts   theme hook in <head> (?theme= / forever:theme postMessage);
+            one body IIFE: Conway's Game of Life on a 180x180 grid, low-res
+            ImageData stretched by drawImage; cells age through three colour
+            tiers; field reseeds when population collapses; visibilitychange
+            stop/start, prefers-reduced-motion static-frame fallback
+  assets    none: all drawing is canvas 2D, system monospace caption
+
+  ADAPTING
+  - Safe to edit: cell colour tiers (TIERS), step rate (STEP_MS=110),
+    initial seed density (0.30 in seed()), reseed threshold
+    (0.018 * grid size), reseed injection rate (0.16 per cell), grid size
+    cap (COLS/ROWS max 180), theme tokens in :root. The
+    <script type="application/json" id="forever-agent-meta"> block lists
+    editable areas, elements to preserve, and known limitations — read it
+    before changing things.
+  - Keep intact: the IIFE wrapper, the reduced-motion static-frame fallback,
+    the visibilitychange pause/resume, the low-res ImageData stretch pattern,
+    and the theme hook (?theme= bootstrap + forever:theme listener + tokens).
+  - The canvas is tagged data-section="stage" (added while adapting).
+    Background is hardcoded dark navy in both CSS and the BG array — update
+    both to retheme; a light theme exists via ?theme=light /
+    data-theme="light".
+  - NOTE: the copied code declared both a seed() function and an unused
+    `seed` Uint8Array in the same scope, so the array overwrote the
+    function and init()'s seed() call would throw. The unused array was
+    removed; seed() is the function again.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="Game of Life in glowing magenta: cells age through three color tiers and the field reseeds automatically when population collapses.">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Game of Life</title>
+<script>
+/* theme hook: the canvas loads the tile with ?theme=light|dark (or stamps data-theme on <html>).
+Runs before first paint — no dark flash. Standalone default stays dark. */
+(function(){var t=new URLSearchParams(location.search).get('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);})();
+</script>
+<style>
+/* theme tokens — dark = defaults (solid-dark-bg contract); light re-theme = the
+[data-theme="light"] block. --gol-* are the colours the canvas draws with. */
+:root{
+--gol-bg:#0a0714; --gol-bg2:#120a20; --gol-accent:#ff6ee7; --gol-cap:#fff; --gol-cap-o:.42;
+--gol-dead:#0a0714; --gol-t0:#ff6ee7; --gol-t1:#c44dff; --gol-t2:#6a8cff;
+--gol-sep:rgba(0,0,0,0.55); --gol-glow:rgba(255,110,231,0.18);
+}
+:root[data-theme="light"]{
+--gol-bg:#f4f0fa; --gol-bg2:#ffffff; --gol-accent:#a21caf; --gol-cap:#241433; --gol-cap-o:.5;
+--gol-dead:#f4f0fa; --gol-t0:#c026d3; --gol-t1:#7c3aed; --gol-t2:#2563eb;
+--gol-sep:rgba(255,255,255,0.6); --gol-glow:rgba(192,38,211,0.12);
+}
+html,body{margin:0;height:100%;background:var(--gol-bg)}
+#gol-stage{position:fixed;inset:0;overflow:hidden;background:
+radial-gradient(120% 90% at 50% 38%,var(--gol-bg2) 0%,var(--gol-bg) 70%)}
+#gol-c{position:absolute;inset:0;width:100%;height:100%;display:block}
+.cap{position:fixed;left:8px;bottom:7px;font:600 10px/1 ui-monospace,Menlo,monospace;
+color:var(--gol-cap);opacity:var(--gol-cap-o);letter-spacing:.08em;text-transform:uppercase;user-select:none}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;animation-iteration-count:1!important}}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+"file": "infinite/fractals-automata/03-game-of-life.html",
+"title": "Game of Life",
+"description": "Conway's Game of Life with glowing magenta cells aging through three color tiers; field reseeds automatically when population collapses.",
+"useWhen": "Ambient backgrounds for tech/generative-art themes, screensavers, or loading screens needing emergent organic motion.",
+"avoidWhen": "Contexts requiring legible text overlays or light-background UIs — background is hardcoded dark navy and cell flicker competes with content.",
+"agentPrompt": "Change palette to green-on-black: set BG=[5,10,5], TIERS=[[80,200,80],[120,255,120],[200,255,200]], and slow step rate to STEP_MS=180. Theme: dark tokens live in :root, the light variant in :root[data-theme=\"light\"]; ?theme=light or a {type:'forever:theme'} postMessage switches at runtime.",
+"editableAreas": [
+"cell color tiers (TIERS array)",
+"step rate (STEP_MS=110)",
+"initial seed density (0.30 in seed())",
+"reseed threshold (0.018 * grid size)",
+"reseed injection rate (0.16 per cell)",
+"grid size cap (COLS/ROWS max 180)",
+"theme tokens (:root dark defaults + [data-theme=light] overrides)"
+],
+"preserveElements": [
+"IIFE wrapper",
+"reduced-motion static-frame fallback",
+"visibilitychange pause/resume",
+"low-res ImageData stretch pattern (critical for perf)",
+"theme hook (?theme= bootstrap + forever:theme message listener + theme tokens)"
+],
+"knownLimitations": [
+"Age tracking resets on cell death — settled patterns rarely reach tier-2 color",
+"Background color hardcoded in both CSS and BG array — must update both to retheme",
+"No pointer interactivity; fully passive"
+],
+"tier": "curated",
+"labels": [
+"agent-ready",
+"easy-to-modify",
+"mobile-ready",
+"accessible",
+"copy-paste-safe",
+"minimal-deps",
+"light-ready"
+],
+"tags": [
+"cellular-automata",
+"game-of-life",
+"canvas",
+"pixel",
+"generative",
+"loop",
+"grid"
+]
+}
+</script>
+</head>
+<body>
+<div id="gol-stage" role="img"
+aria-label="Conway's Game of Life: glowing magenta cells evolving on a dark navy field, aging through pink, purple, and blue tiers.">
+<canvas id="gol-c" data-section="stage"></canvas>
+</div>
+<div class="cap">Game of Life</div>
+<script>
+(function(){
+"use strict";
+var stage=document.getElementById('gol-stage'),
+cv=document.getElementById('gol-c'),
+ctx=cv.getContext('2d'),
+reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+// palette — glowing magenta tiers, read from tokens in syncTheme
+var BG=[10,7,20],
+TIERS=[[255,110,231],[196,77,255],[106,140,255]],
+DEAD=[10,7,20], GLOW=[255,110,231];
+
+// ---- theme: every canvas colour comes from a CSS token ----
+var root=document.documentElement;
+function hexToRgb(h){ h=h.replace('#',''); return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]; }
+function syncTheme(){
+var cs=getComputedStyle(root);
+BG=hexToRgb(cs.getPropertyValue('--gol-bg').trim());
+DEAD=hexToRgb(cs.getPropertyValue('--gol-dead').trim());
+TIERS=[hexToRgb(cs.getPropertyValue('--gol-t0').trim()),
+hexToRgb(cs.getPropertyValue('--gol-t1').trim()),
+hexToRgb(cs.getPropertyValue('--gol-t2').trim())];
+GLOW=hexToRgb(cs.getPropertyValue('--gol-accent').trim());
+if(reduce && W) frame(performance.now());
+}
+addEventListener('message',function(e){ var d=e.data;
+if(d&&d.type==='forever:theme'&&(d.theme==='light'||d.theme==='dark')){ root.setAttribute('data-theme',d.theme); syncTheme(); } });
+var COLS=180, ROWS=180, COLS_=0, ROWS_=0;
+var W=0,H=0,STEP_MS=110,last=0;
+var cur=new Uint8Array(COLS*ROWS), nxt=new Uint8Array(COLS*ROWS),
+age=new Uint8Array(COLS*ROWS);
+var img=ctx.createImageData(COLS,ROWS), px=img.data;
+var off=document.createElement('canvas'), octx=off.getContext('2d');
+off.width=COLS; off.height=ROWS;
+
+// --- seeding ---
+function seed(){
+for(var i=0;i<COLS*ROWS;i++){
+cur[i]=Math.random()<0.30?1:0;
+age[i]=0;
+}
+}
+function reseed(){
+for(var i=0;i<COLS*ROWS;i++){
+if(Math.random()<0.16){cur[i]=1;age[i]=0;}
+}
+}
+function countAlive(){
+var n=0; for(var i=0;i<COLS*ROWS;i++) n+=cur[i]; return n;
+}
+
+// --- Game of Life step (8-neighbour rules, toroidal wrap) ---
+function step(){
+for(var y=0;y<ROWS;y++){
+for(var x=0;x<COLS;x++){
+var i=y*COLS+x,
+up=((y-1+ROWS)%ROWS)*COLS,
+dn=((y+1)%ROWS)*COLS,
+lf=(x-1+COLS)%COLS,
+rt=(x+1)%COLS,
+n=cur[up+lf]+cur[up+x]+cur[up+rt]
++cur[y*COLS+lf]+cur[y*COLS+rt]
++cur[dn+lf]+cur[dn+x]+cur[dn+rt];
+if(cur[i]){
+nxt[i]=n===2||n===3?1:0;
+age[i]=nxt[i]?age[i]+1:0;
+} else {
+nxt[i]=n===3?1:0;
+age[i]=nxt[i]?0:0;
+}
+}
+}
+var t=cur;cur=nxt;nxt=t;
+}
+
+// --- render: low-res ImageData stretched by drawImage ---
+function render(){
+var n=0;
+for(var i=0;i<COLS*ROWS;i++){
+if(cur[i]){
+n++;
+var c=age[i]>=24?TIERS[2]:age[i]>=8?TIERS[1]:TIERS[0];
+px[i*4]=c[0];px[i*4+1]=c[1];px[i*4+2]=c[2];px[i*4+3]=255;
+} else {
+px[i*4]=BG[0];px[i*4+1]=BG[1];px[i*4+2]=BG[2];px[i*4+3]=255;
+}
+}
+octx.putImageData(img,0,0);
+ctx.imageSmoothingEnabled=false;
+ctx.drawImage(off,0,0,W,H);
+if(n<0.018*COLS*ROWS) reseed();
+}
+
+function frame(time){
+var dt=time-last; last=time;
+if(!reduce && dt<STEP_MS) return;
+step();
+render();
+}
+
+var raf=0, running=false;
+function start(){ if(running)return; running=true; last=performance.now(); raf=requestAnimationFrame(frame); }
+function stop(){ running=false; if(raf) cancelAnimationFrame(raf); raf=0; }
+
+function size(){
+W=stage.clientWidth; H=stage.clientHeight;
+cv.width=W; cv.height=H;
+ctx.setTransform(1,0,0,1,0,0);
+}
+
+function init(){
+syncTheme(); size(); seed();
+if(reduce){ step(); render(); return; }
+start();
+}
+
+var rt;
+window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(function(){
+size(); if(reduce){ render(); }
+},120); });
+
+document.addEventListener('visibilitychange',function(){
+if(reduce)return;
+if(document.hidden) stop(); else start();
+});
+
+init();
+})();
+</script>
+</body>
+</html>
