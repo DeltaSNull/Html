@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Forever Components Gallery</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,650&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+      button, [role="button"], select, summary, input:not([type="checkbox"], [type="radio"]) { min-height: 2.25rem; }
+      :root {
+        color-scheme: light dark;
+        --bg: #f6f3ec;
+        --bg-raise: #fffdf8;
+        --ink: #1c1a15;
+        --ink-soft: #57503f;
+        --ink-faint: #8a8271;
+        --line: #ddd5c3;
+        --line-strong: #c9bfa4;
+        --accent: #9a5b12;
+        --accent-ink: #7c4708;
+        --chip-bg: #ece6d6;
+        --chip-on: #1c1a15;
+        --chip-on-ink: #f6f3ec;
+        --band-base: #23201a;
+        --focus: #b06f14;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #12100d;
+          --bg-raise: #1a1712;
+          --ink: #ece5d3;
+          --ink-soft: #b3a98f;
+          --ink-faint: #7d7460;
+          --line: #2e2a21;
+          --line-strong: #453e30;
+          --accent: #e2a33c;
+          --accent-ink: #eab54f;
+          --chip-bg: #242019;
+          --chip-on: #e2a33c;
+          --chip-on-ink: #171410;
+          --band-base: #0b0a08;
+          --focus: #e2a33c;
+        }
+      }
+      * { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+      }
+      a { color: var(--accent-ink); }
+      a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+        outline: 2px solid var(--focus); outline-offset: 2px;
+      }
+      .wrap { max-width: 1240px; margin: 0 auto; padding: 0 20px 72px; }
+
+      /* ---------- header ---------- */
+      header { padding: 44px 0 8px; }
+      .kicker {
+        font-family: "IBM Plex Mono", ui-monospace, monospace;
+        font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+        color: var(--accent-ink); margin: 0 0 10px;
+      }
+      h1 {
+        font-family: "Newsreader", Georgia, serif;
+        font-weight: 650; font-size: clamp(34px, 6vw, 58px);
+        line-height: 1.04; letter-spacing: -0.01em; margin: 0 0 14px;
+        max-width: 16ch;
+      }
+      .lede { color: var(--ink-soft); max-width: 62ch; margin: 0 0 18px; font-size: 17px; }
+      .meta-row {
+        display: flex; flex-wrap: wrap; gap: 8px 22px; align-items: baseline;
+        font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12.5px;
+        color: var(--ink-faint); border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line); padding: 10px 0;
+      }
+      .meta-row strong { color: var(--ink); font-weight: 500; }
+      .meta-row a { text-decoration: underline; text-underline-offset: 3px; padding: 6px 0; display: inline-block; }
+
+      /* ---------- controls ---------- */
+      .controls {
+        position: sticky; top: 0; z-index: 20;
+        background: var(--bg);
+        padding: 16px 0 12px;
+        border-bottom: 1px solid var(--line);
+      }
+      .controls-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+      .search { flex: 1 1 260px; display: flex; align-items: center; gap: 8px;
+        background: var(--bg-raise); border: 1px solid var(--line-strong); border-radius: 8px; padding: 0 12px; }
+      .search svg { flex: none; color: var(--ink-faint); }
+      .search input {
+        flex: 1; min-width: 0; border: 0; background: transparent; color: var(--ink);
+        font: inherit; font-size: 15px; padding: 9px 0; min-height: 2.25rem;
+      }
+      .search input:focus { outline: none; }
+      .search:focus-within { outline: 2px solid var(--focus); outline-offset: 2px; }
+      .search input::placeholder { color: var(--ink-faint); }
+      select {
+        font: inherit; font-size: 14.5px; color: var(--ink);
+        background: var(--bg-raise); border: 1px solid var(--line-strong);
+        border-radius: 8px; padding: 8px 10px; min-height: 2.25rem;
+        min-width: 0; max-width: 100%;
+      }
+      .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+      .chip {
+        font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12.5px;
+        background: var(--chip-bg); color: var(--ink-soft);
+        border: 1px solid transparent; border-radius: 999px;
+        padding: 8px 14px; cursor: pointer; min-height: 2.25rem;
+      }
+      .chip:hover { color: var(--ink); border-color: var(--line-strong); }
+      .chip[aria-pressed="true"] { background: var(--chip-on); color: var(--chip-on-ink); }
+      .count-line {
+        font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12.5px;
+        color: var(--ink-faint); margin: 14px 0 0;
+      }
+      .count-line strong { color: var(--ink); font-weight: 500; }
+
+      /* ---------- grid & cards ---------- */
+      .grid {
+        display: grid; gap: 18px; margin-top: 22px;
+        grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr));
+      }
+      .card {
+        background: var(--bg-raise); border: 1px solid var(--line);
+        border-radius: 10px; overflow: hidden; display: flex; flex-direction: column;
+      }
+      .band { height: 54px; background: var(--band-base); position: relative; overflow: hidden; flex: none; }
+      .band i { position: absolute; border-radius: 50%; filter: blur(14px); opacity: .85; display: block; }
+      .band .num {
+        position: absolute; right: 12px; bottom: 7px;
+        font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11.5px;
+        color: rgba(255,255,255,.82); letter-spacing: .08em;
+      }
+      .card-body { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 9px; flex: 1; }
+      .card-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+      .card h2 {
+        font-family: "Newsreader", Georgia, serif; font-weight: 650;
+        font-size: 21px; line-height: 1.15; margin: 0; letter-spacing: -0.005em;
+      }
+      .batch {
+        font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px;
+        letter-spacing: .1em; text-transform: uppercase; color: var(--accent-ink);
+        white-space: nowrap; flex: none;
+      }
+      .desc { color: var(--ink-soft); font-size: 14.5px; margin: 0; }
+      .bestfor { font-size: 13.5px; margin: 0; color: var(--ink-soft); }
+      .bestfor span {
+        font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 10.5px;
+        letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint);
+        display: block; margin-bottom: 2px;
+      }
+      .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+      .tag {
+        font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px;
+        border: 1px solid var(--line); border-radius: 999px; padding: 3px 9px; color: var(--ink-faint);
+      }
+      .card-links { display: flex; gap: 10px; margin-top: auto; padding-top: 12px; }
+      .btn-live, .btn-src {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-size: 14px; font-weight: 600; text-decoration: none;
+        border-radius: 8px; padding: 9px 14px; min-height: 2.5rem;
+      }
+      .btn-live { background: var(--chip-on); color: var(--chip-on-ink); }
+      .btn-live:hover { opacity: .88; }
+      .btn-src { border: 1px solid var(--line-strong); color: var(--ink); background: transparent; }
+      .btn-src:hover { border-color: var(--ink-faint); }
+      .empty {
+        border: 1px dashed var(--line-strong); border-radius: 10px;
+        padding: 40px 24px; text-align: center; color: var(--ink-soft); margin-top: 22px;
+      }
+      .empty button {
+        margin-top: 12px; font: inherit; font-size: 14px; cursor: pointer;
+        background: var(--chip-bg); color: var(--ink); border: 1px solid var(--line-strong);
+        border-radius: 8px; padding: 9px 16px; min-height: 2.5rem;
+      }
+
+      footer { margin-top: 56px; border-top: 1px solid var(--line); padding-top: 18px;
+        color: var(--ink-faint); font-size: 13.5px; max-width: 78ch; }
+      footer p { margin: 0 0 8px; }
+      @media (max-width: 560px) {
+        header { padding-top: 30px; }
+        .controls-row select { flex: 1 1 100%; width: 100%; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <p class="kicker">DeltaSNull / Html — components/</p>
+        <h1>Forever Components Gallery</h1>
+        <p class="lede">Every component in the collection as it stands in <strong>main</strong> — 81 single-file animated pieces, batches 1–27. Open any one live, or go straight to its source in the repo.</p>
+        <div class="meta-row">
+          <span><strong>81</strong> components</span>
+          <span><strong>27</strong> batches of three</span>
+          <span>Snapshot of main · <strong>Nov 12, 2026</strong></span>
+          <span><a href="https://github.com/DeltaSNull/Html" target="_blank" rel="noopener">Repository ↗</a></span>
+          <span><a href="https://github.com/DeltaSNull/Html/blob/main/index.json" target="_blank" rel="noopener">Registry (index.json) ↗</a></span>
+        </div>
+      </header>
+
+      <div class="controls" role="region" aria-label="Filter the collection">
+        <div class="controls-row">
+          <label class="search">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.8-3.8"/></svg>
+            <input id="q" type="search" placeholder="Search titles, descriptions, tags, uses…" aria-label="Search components" autocomplete="off" />
+          </label>
+          <label class="sr-batch" style="display:contents">
+            <select id="batchSel" aria-label="Filter by batch">
+              <option value="all">All batches</option>
+            </select>
+          </label>
+          <label style="display:contents">
+            <select id="sortSel" aria-label="Sort components">
+              <option value="order">Collection order</option>
+              <option value="az">Title A–Z</option>
+              <option value="za">Title Z–A</option>
+            </select>
+          </label>
+        </div>
+        <div class="chips" id="chips" role="group" aria-label="Filter by technique"></div>
+        <p class="count-line" id="countLine" aria-live="polite"></p>
+      </div>
+
+      <main>
+        <div class="grid" id="grid"></div>
+        <div class="empty" id="empty" hidden>
+          <p style="margin:0">Nothing in the collection matches that combination.</p>
+          <button type="button" id="resetBtn">Clear search &amp; filters</button>
+        </div>
+      </main>
+
+      <footer>
+        <p>Built from the repo&rsquo;s own registry, <code>index.json</code> in DeltaSNull/Html @ main, read on Nov 12, 2026 (counts: 81 components). Each &ldquo;Live preview&rdquo; renders that component&rsquo;s actual <code>index.html</code> from main; &ldquo;Source&rdquo; opens the same file on GitHub. Batches follow collection order — three components per batch, in the order they were added.</p>
+        <p>Adapted from Forever Components; attribution is kept in each component&rsquo;s own header and README in the repo. License: MIT.</p>
+      </footer>
+    </div>
+
+    <script>
+      var COMPONENTS = [{"n": 1, "batch": 1, "slug": "aurora-borealis", "title": "Aurora Borealis", "desc": "Three blurred, screen-blended gradient ribbons drift and skew over near-black, like northern lights in blush, cream, and rose", "bestFor": ["dark-mode hero backgrounds", "creative portfolio pages", "ambient section backdrops"], "style": ["dark", "gradient", "ambient", "glow", "atmospheric", "css-animation"], "features": ["css-animation", "screen-blend", "reduced-motion"], "fonts": ["Space Grotesk"], "facets": ["CSS animation", "Ambient"]}, {"n": 2, "batch": 1, "slug": "boids-flocking", "title": "Boids Flocking", "desc": "Up to 60 lime-green triangular boids flock with alignment, cohesion, and separation, fleeing the cursor on a dark canvas", "bestFor": ["ambient hero backgrounds", "generative art demos", "organic crowd motion"], "style": ["dark", "canvas", "particles", "simulation", "pointer-interactive"], "features": ["canvas-2d", "pointer-events", "reduced-motion", "light-theme-tokens"], "fonts": [], "facets": ["Canvas", "Interactive", "Particles"]}, {"n": 3, "batch": 1, "slug": "vapor-condense", "title": "Vapor Condense", "desc": "300 teal particles drift as a glowing haze, then condense into the crisp word VAPOR via cosine easing, then dissolve back", "bestFor": ["dark-mode hero headlines", "brand reveals", "loading sequences"], "style": ["dark", "kinetic-type", "particles", "canvas", "generative"], "features": ["canvas-2d", "keyboard-activation", "reduced-motion", "light-theme-tokens"], "fonts": [], "facets": ["Canvas", "Generative", "Particles"]}, {"n": 4, "batch": 2, "slug": "magnetic-button", "title": "Magnetic Button", "desc": "Dark pill button drifts in an idle orbital float; cursor proximity pulls it magnetically with a label inner-parallax and emerald-to-copper glow on hover", "bestFor": ["cta buttons on dark hero sections", "landing pages where tactile interactivity signals quality"], "style": ["dark", "button", "magnetic", "hover-glow", "pointer-interactive"], "features": ["pointer-events", "raf-animation", "reduced-motion", "light-ready"], "fonts": ["Space Grotesk"], "facets": ["Interactive"]}, {"n": 5, "batch": 2, "slug": "perlin-flow-field", "title": "Perlin Flow-Field", "desc": "100 peach-gold particles stream along a value-noise flow field on dark charcoal, deflecting around the cursor with motion-trail fade", "bestFor": ["dark-mode hero backgrounds", "generative art demos", "ambient looping canvases"], "style": ["dark", "canvas", "particles", "generative", "noise", "pointer-interactive"], "features": ["canvas-2d", "pointer-events", "reduced-motion", "light-ready"], "fonts": [], "facets": ["Canvas", "Interactive", "Generative", "Particles"]}, {"n": 6, "batch": 2, "slug": "black-hole-accretion-swirl", "title": "Black-hole Accretion Swirl", "desc": "110 heat-colored particles spiral inward across a tilted accretion disk toward a glowing event horizon; pointer movement boosts swirl speed", "bestFor": ["dark-mode hero backgrounds", "space / sci-fi themes", "ambient loading screens"], "style": ["dark", "canvas", "particles", "spiral", "space", "pointer-interactive"], "features": ["canvas-2d", "pointer-events", "reduced-motion"], "fonts": [], "facets": ["Canvas", "Interactive", "Space", "Particles"]}, {"n": 7, "batch": 3, "slug": "scramble-decode", "title": "Scramble Decode", "desc": "Gold monospace text resolves from scrambling glyphs left-to-right with a tracking caret, holds with micro-flickers, then re-scrambles through a 6-phrase loop", "bestFor": ["terminal-style hero text reveals", "loading screens", "hacker-aesthetic landing sections"], "style": ["dark", "typography", "glitch", "canvas", "loop", "monospace"], "features": ["canvas-2d", "reduced-motion", "light-ready"], "fonts": [], "facets": ["Canvas"]}, {"n": 8, "batch": 3, "slug": "slime-mold-network", "title": "Slime Mold Network", "desc": "Up to 6000 agents simulate Physarum slime-mold behavior, self-organizing into glowing purple radial veins on a dark canvas; the cursor attracts nearby agents", "bestFor": ["dark-mode hero backgrounds", "generative art demos", "science or biology themed sections"], "style": ["dark", "canvas", "particles", "simulation", "generative", "organic", "pointer-interactive"], "features": ["canvas-2d", "pointer-events", "reduced-motion", "light-ready"], "fonts": [], "facets": ["Canvas", "Interactive", "Generative", "Particles"]}, {"n": 9, "batch": 3, "slug": "plasma-sine-field", "title": "Plasma Sine Field", "desc": "Demoscene plasma of five interfering sine waves rendered low-res and upscaled for a molten blur; the palette cycles through cyan, magenta, and violet", "bestFor": ["retro hero backgrounds", "dark creative portfolios", "ambient screensaver loops"], "style": ["dark", "canvas", "plasma", "retro", "generative", "color-cycling", "pointer-interactive"], "features": ["canvas-2d", "pointer-events", "reduced-motion"], "fonts": [], "facets": ["Canvas", "Interactive", "Generative", "Retro"]}, {"n": 10, "batch": 4, "slug": "radial-spectrum", "title": "Radial Spectrum", "desc": "96 cyan radial bars radiate from a bass-driven pulsing core around a slowly rotating ring; synthetic signal by default, live mic input on click", "bestFor": ["music/audio hero backgrounds", "podcast or live-audio UIs", "ambient screensavers"], "style": ["dark", "canvas", "audio", "radial", "visualizer", "cyan glow"], "features": ["canvas-2d", "raf-loop", "web-audio", "reduced-motion"], "fonts": [], "facets": ["Canvas"]}, {"n": 11, "batch": 4, "slug": "candlestick-ticker", "title": "Candlestick Ticker", "desc": "22 green/red candlesticks scroll left continuously on procedurally generated OHLC data, with a dashed last-price line and a live price label", "bestFor": ["finance dashboards", "trading UI mockups", "ambient data-viz backgrounds for fintech"], "style": ["dark", "canvas", "data-viz", "finance", "scrolling"], "features": ["canvas-2d", "raf-loop", "reduced-motion"], "fonts": [], "facets": ["Canvas", "Data-viz"]}, {"n": 12, "batch": 4, "slug": "tilt-parallax", "title": "3D Tilt Parallax", "desc": "Dark card tilts in 3D toward the cursor while badge, orb and text layers float at distinct Z-depths; radial shine tracks the pointer", "bestFor": ["product cards", "profile cards", "hero feature panels"], "style": ["dark", "3d", "card", "pointer", "shine", "depth"], "features": ["css-3d", "pointer-parallax", "theme-switch", "reduced-motion", "light-ready"], "fonts": ["Space Grotesk", "Inter"], "facets": ["Interactive"]}, {"n": 13, "batch": 5, "slug": "phantom-polytope", "title": "Phantom Polytope", "desc": "Glowing sage-green 4D tesseract wireframe rotating through itself on canvas; edges glow hotter by 4D depth, pointer input boosts the spin", "bestFor": ["dark-theme hero backgrounds", "math/generative-art showcases", "sci-fi or cosmic sections"], "style": ["dark", "canvas", "4d", "wireframe", "tesseract", "generative", "glow"], "features": ["canvas-2d", "raf-loop", "pointer-events", "reduced-motion"], "fonts": [], "facets": ["Canvas", "Interactive", "Generative"]}, {"n": 14, "batch": 5, "slug": "swipe-card-stack", "title": "Swipe Card Stack", "desc": "Tinder-style draggable card stack — drag the top card left/right to reveal NOPE/LIKE stamps; fling-away animates it off-screen and cycles to the next card", "bestFor": ["onboarding flows", "product showcases", "swipe-to-decide UI patterns"], "style": ["dark", "cards", "drag", "gesture", "microinteraction", "touch"], "features": ["pointer-events", "touch", "keyboard", "reduced-motion"], "fonts": [], "facets": ["Interactive"]}, {"n": 15, "batch": 5, "slug": "liquid-toggle", "title": "Liquid Toggle", "desc": "Teal gooey SVG toggle whose knob slides with trailing liquid droplets while the track fades between off and on colors", "bestFor": ["settings pages", "dark-mode switches", "tactile boolean UI controls"], "style": ["dark", "svg", "gooey", "toggle", "ui-control", "tactile"], "features": ["svg-filter", "keyboard", "aria", "reduced-motion"], "fonts": [], "facets": ["SVG"]}, {"n": 16, "batch": 6, "slug": "dungeon-raycaster", "title": "Dungeon Raycaster", "desc": "Wolfenstein-style 8-bit dungeon crawler: raycast 3D view beside a live minimap, with turn/step controls", "bestFor": ["retro game UI", "playful interactive demos", "8-bit themed pages"], "style": ["dark", "8-bit", "pixel", "retro", "gaming", "canvas"], "features": ["canvas-2d", "raycaster", "reduced-motion", "container-queries"], "fonts": ["Press Start 2P"], "facets": ["Canvas", "Retro"]}, {"n": 17, "batch": 6, "slug": "spiral-galaxy-rotate", "title": "Spiral Galaxy Rotate", "desc": "115 stars form a two-armed spiral galaxy rotating around a violet core; pointer move boosts spin", "bestFor": ["dark-mode hero backgrounds", "space or sci-fi themes", "ambient screensaver loops"], "style": ["dark", "space", "canvas", "ambient", "stars", "rotation"], "features": ["canvas-2d", "reduced-motion", "pointer-interaction"], "fonts": [], "facets": ["Canvas", "Space", "Ambient"]}, {"n": 18, "batch": 6, "slug": "x-ray-blueprint-loupe", "title": "X-Ray Blueprint Loupe", "desc": "Sealed chip card where a pointer-tracked loupe reveals a live copper-bus blueprint; tap toggles lens size", "bestFor": ["hardware product pages", "interactive cards", "tech showcases"], "style": ["dark", "card", "blueprint", "hardware", "interactive", "light-ready"], "features": ["canvas-2d", "clip-path", "pointer-interaction", "keyboard", "light-theme", "reduced-motion"], "fonts": ["system-ui", "ui-monospace"], "facets": ["Canvas", "Interactive"]}, {"n": 19, "batch": 7, "slug": "viscosity-swirl", "title": "Viscosity Swirl", "desc": "Circular espresso cup where 65 golden crema particles swirl like thick liquid; move the pointer to stir and agitate them", "bestFor": ["ambient section backdrops", "sensory/physics-themed demos", "dark-mode hero accents"], "style": ["dark", "particles", "canvas", "organic", "interactive", "physics"], "features": ["canvas-2d", "pointer-interaction", "reduced-motion"], "fonts": ["Caprasimo", "Work Sans"], "facets": ["Canvas", "Interactive", "Physics", "Particles"]}, {"n": 20, "batch": 7, "slug": "lissajous-scope", "title": "Lissajous Scope", "desc": "Cyan Lissajous figure drifts and rotates on a dark scope grid with phosphor trail decay and a glowing beam head; a Live button upgrades to real mic input", "bestFor": ["audio/music contexts", "ambient hero backgrounds", "creative portfolio pages needing a technical aesthetic"], "style": ["dark", "canvas", "generative", "phosphor", "audio", "interactive"], "features": ["canvas-2d", "pointer-interaction", "reduced-motion"], "fonts": ["ui-monospace"], "facets": ["Canvas", "Interactive", "Generative"]}, {"n": 21, "batch": 7, "slug": "reaction-diffusion", "title": "Reaction Diffusion", "desc": "Gray-Scott reaction-diffusion simulation morphing between coral, spots, and maze patterns on a 128x128 grid; teal-to-bone color ramp on near-black", "bestFor": ["ambient generative backgrounds", "science/nature themes", "creative portfolio hero sections needing organic texture"], "style": ["dark", "canvas", "generative", "simulation", "organic", "interactive", "light-ready"], "features": ["canvas-2d", "pointer-interaction", "light-theme", "reduced-motion"], "fonts": ["ui-monospace"], "facets": ["Canvas", "Interactive", "Generative"]}, {"n": 22, "batch": 8, "slug": "spring-physics-stack", "title": "Spring Physics Stack", "desc": "Priority queue you reorder by dragging: the lifted row tilts with pointer velocity and neighbours spring into place.", "bestFor": ["task/queue UIs", "sortable lists", "drag-and-drop demos needing springy physics feel"], "style": ["dark", "lime-accent", "interactive", "physics", "drag-and-drop", "accessible"], "features": ["drag-and-drop", "pointer-interaction", "reduced-motion", "light-theme"], "fonts": ["system-ui", "ui-monospace"], "facets": ["Interactive", "Physics"]}, {"n": 23, "batch": 8, "slug": "genie-dock", "title": "Genie Dock", "desc": "A window minimises into its dock slot with a genie squeeze — it pinches to a funnel, pours down into the slot, and a thumbnail pops in — then plays back in reverse to restore; it loops as preview until first deliberate input, or press the amber button and the slot to drive it.", "bestFor": ["window managers", "multi-document editors", "product tours showing where a minimised thing went"], "style": ["dark", "css-animation", "clip-path", "interactive", "mobile-ready"], "features": ["css-animation", "clip-path", "pointer-interaction", "reduced-motion", "light-theme"], "fonts": ["system-ui"], "facets": ["CSS animation", "Interactive"]}, {"n": 24, "batch": 8, "slug": "mercury-tilt-toggle", "title": "Mercury Tilt Toggle", "desc": "Glass ampoule tilt switch: a mercury bead rolls under simulated gravity, squashes on impact and bridges the contact pins.", "bestFor": ["toggle/switch demos", "physics-play UIs", "playful settings panels"], "style": ["dark", "lime-accent", "physics", "interactive", "accessible", "minimal"], "features": ["physics", "pointer-interaction", "keyboard-accessible", "reduced-motion", "light-theme"], "fonts": ["ui-monospace"], "facets": ["Interactive", "Physics"]}, {"n": 25, "batch": 9, "slug": "seed-dispersal-loader", "title": "Seed Dispersal Loader", "desc": "A round tooth-textured plate on pressed-fibre ground where up to twenty-eight seeds lift off a small seed head and drift out of frame on three-hair pappus tails, fading as they reach the rim and respawning at the centre.", "bestFor": ["loading states", "full-screen waits", "ecological / garden / field-science products"], "style": ["dark", "canvas", "biophilic", "organic", "ambient", "minimal"], "features": ["canvas", "seeded-rng", "reduced-motion", "light-theme", "aria-live", "theme-hook"], "fonts": ["Noto Sans (falls back to system sans)"], "facets": ["Canvas", "Ambient"]}, {"n": 26, "batch": 9, "slug": "chord-diagram", "title": "Chord Diagram", "desc": "Eight ring nodes with curved ribbons that swell and shrink as weights rebalance every ~3s. Additive blending creates glowing color overlaps.", "bestFor": ["ambient data-viz backgrounds", "network relationship storytelling", "dashboards needing a living connections motif"], "style": ["dark", "canvas", "data-viz", "additive-blend", "generative", "ambient"], "features": ["canvas", "seeded-rng", "reduced-motion", "light-theme", "theme-hook"], "fonts": ["ui-monospace"], "facets": ["Canvas", "Generative", "Data-viz", "Ambient"]}, {"n": 27, "batch": 9, "slug": "weight-morph-wave", "title": "Weight Morph Wave", "desc": "Each letter of a word pulses font-weight and vertical scale in a staggered sine wave, shifting hue from cyan to blue.", "bestFor": ["hero text", "brand name displays", "ambient kinetic typography"], "style": ["dark", "typography", "kinetic-type", "sine-wave", "ambient"], "features": ["rAF-animation", "reflow-safe", "reduced-motion", "light-theme", "theme-hook"], "fonts": ["Helvetica Neue / Arial (system stack)"], "facets": ["Ambient"]}, {"n": 28, "batch": 10, "slug": "glitch-split", "title": "Glitch Split", "desc": "Bold word renders with red/cyan RGB channel-split; periodic bursts trigger horizontal slice displacement and scanline glints over a dark background", "bestFor": ["cyberpunk/hacker hero sections", "error states", "game UIs", "dramatic dark-theme display"], "style": ["dark", "glitch", "rgb-split", "chromatic-aberration", "scanlines", "loop"], "features": ["canvas-2d", "additive-blend", "reduced-motion"], "fonts": [], "facets": ["Canvas"]}, {"n": 29, "batch": 10, "slug": "light-caustics-lens", "title": "Light Caustics Lens", "desc": "Card that tilts toward the pointer while soft lime and neutral caustic light shifts behind it", "bestFor": ["interactive feature cards", "product highlight panels", "pointer-playful landing sections"], "style": ["dark", "card", "caustics", "tilt", "light", "lens"], "features": ["canvas-2d", "pointer-tilt", "light-theme", "reduced-motion"], "fonts": [], "facets": ["Canvas"]}, {"n": 30, "batch": 10, "slug": "starfield-warp", "title": "Starfield Warp", "desc": "Stars streak outward from center as cyan/purple/blue light trails simulating hyperspace warp; auto-spawning keeps density constant on any viewport", "bestFor": ["dark-mode hero backgrounds", "sci-fi or space themes", "loading screens", "immersive ambient backdrops"], "style": ["dark", "stars", "warp", "hyperspace", "streaks", "ambient"], "features": ["canvas-2d", "motion-blur", "reduced-motion"], "fonts": ["Space Grotesk"], "facets": ["Canvas", "Ambient"]}, {"n": 31, "batch": 11, "slug": "gravitational-lens-ring", "title": "Gravitational Lens Ring", "desc": "Starlight bends tangentially around a dark mass; lensed galaxy arcs converge into a glowing magenta Einstein ring", "bestFor": ["dark-mode hero backgrounds", "science/space themes", "ambient screensavers"], "style": ["dark", "space", "canvas", "ambient", "physics", "generative"], "features": ["canvas-2d", "pointer-interaction", "reduced-motion"], "fonts": ["ui-monospace"], "facets": ["Canvas", "Generative", "Physics", "Space", "Ambient"]}, {"n": 32, "batch": 11, "slug": "hyperspace-warp", "title": "Hyperspace Warp", "desc": "110 star streaks radiate outward from a glowing center in a hyperspace tunnel; press and hold to accelerate 2.6x", "bestFor": ["dark-mode hero backgrounds", "sci-fi/space UIs", "loading screens"], "style": ["dark", "space", "canvas", "warp", "stars", "animation-heavy"], "features": ["canvas-2d", "pointer-interaction", "keyboard", "reduced-motion"], "fonts": [], "facets": ["Canvas", "Space"]}, {"n": 33, "batch": 11, "slug": "mandelbrot-zoom", "title": "Mandelbrot Zoom", "desc": "Escape-time Mandelbrot set slowly zooms into a filigree boundary seam, in smooth red-to-gold bands on near-black", "bestFor": ["dark-mode hero backgrounds", "math/science pages", "ambient screensaver displays"], "style": ["dark", "fractal", "canvas", "generative", "ambient", "math", "light-ready"], "features": ["canvas-2d", "reduced-motion", "light-theme"], "fonts": ["ui-monospace"], "facets": ["Canvas", "Generative", "Fractal", "Ambient"]}, {"n": 34, "batch": 12, "slug": "n-body-waltz", "title": "N-Body Waltz", "desc": "Five glowing gravitational bodies orbit and sling each other in deep space, trailing colored comet tails; pointer perturbs the dance, click reseeds", "bestFor": ["dark-mode hero backgrounds", "space/science themes", "generative art displays"], "style": ["dark", "space", "canvas", "physics", "generative", "ambient"], "features": ["canvas-2d", "pointer-interaction", "reduced-motion", "theme-switch"], "fonts": ["ui-monospace"], "facets": ["Canvas", "Generative", "Physics", "Space", "Ambient"]}, {"n": 35, "batch": 12, "slug": "charged-plasma-lattice", "title": "Charged Plasma Lattice", "desc": "Charged particles attract and repel via Coulomb forces; teal bonds crystallize between opposite charges as temperature pulses between order and chaos", "bestFor": ["dark-mode hero backgrounds", "science/tech themes", "ambient visualizations"], "style": ["dark", "space", "canvas", "physics", "generative", "ambient"], "features": ["canvas-2d", "pointer-interaction", "reduced-motion", "theme-switch"], "fonts": ["ui-monospace"], "facets": ["Canvas", "Generative", "Physics", "Space", "Ambient"]}, {"n": 36, "batch": 12, "slug": "drifting-nebula", "title": "Drifting Nebula", "desc": "26 soft radial blobs in pink, violet, and blue drift with additive blending over 70 twinkling stars; cursor gently pulls the nebula clouds", "bestFor": ["dark-mode hero backgrounds", "space/sci-fi themes", "ambient looping screensavers"], "style": ["dark", "space", "canvas", "ambient", "generative"], "features": ["canvas-2d", "pointer-interaction", "reduced-motion"], "fonts": ["system-ui"], "facets": ["Canvas", "Generative", "Space", "Ambient"]}, {"n": 37, "batch": 13, "slug": "crt-phosphor-degauss", "title": "CRT Phosphor Degauss", "desc": "An 8-bit arcade monitor panel with a green-phosphor CRT screen; pressing DEGAUSS warps the glowing vector ship with magnetic distortion", "bestFor": ["retro gaming themes", "arcade-style controls", "8-bit hero accents"], "style": ["dark", "retro", "arcade", "glitch", "pixel", "canvas"], "features": ["canvas-2d", "click-interaction", "reduced-motion"], "fonts": ["Press Start 2P"], "facets": ["Canvas", "Retro"]}, {"n": 38, "batch": 13, "slug": "glyph-corruption-cascade", "title": "Glyph Corruption Cascade", "desc": "Green monospace glyph grid with a descending wavefront corrupting ASCII into flickering box-drawing mojibake; cursor nudges the corruption band", "bestFor": ["dark-mode hero backgrounds", "hacker/terminal themes", "cyberpunk UI accents"], "style": ["dark", "glitch", "terminal", "monospace", "canvas", "retro"], "features": ["canvas-2d", "pointer-interaction", "reduced-motion"], "fonts": ["ui-monospace"], "facets": ["Canvas", "Retro"]}, {"n": 39, "batch": 13, "slug": "lenia", "title": "Lenia", "desc": "Lenia smooth-life automaton: glowing teal-to-cyan blobs drift and pulse on a dark field via a typed-array convolution sim scaled up with CSS", "bestFor": ["ambient hero backgrounds", "science and generative-art themes", "dark-mode showcases"], "style": ["dark", "generative", "organic", "canvas", "simulation", "ambient"], "features": ["canvas-2d", "cellular-automata", "reduced-motion", "theme-switch"], "fonts": ["ui-monospace"], "facets": ["Canvas", "Generative", "Ambient"]}, {"n": 40, "batch": 14, "slug": "iron-filings-field", "title": "Iron Filings Field", "desc": "A grid of short rods aligns to a roaming dipole magnetic field like iron filings; rods tint red/gold by nearest pole and react to pointer", "bestFor": ["science-themed hero backgrounds", "physics visualizations", "ambient dark-mode displays"], "style": ["dark", "canvas", "generative", "particles", "physics", "ambient"], "features": ["canvas-2d", "pointer-reactive", "reduced-motion", "theme-switch"], "fonts": ["ui-monospace"], "facets": ["Canvas", "Generative", "Physics", "Particles", "Ambient"]}, {"n": 41, "batch": 14, "slug": "lissajous-phase-lock", "title": "Lissajous Phase Lock", "desc": "Oscilloscope Lissajous trace cycling frequency ratios until it phase-locks; pointer sets sweep speed, click or Enter changes ratio", "bestFor": ["loading states", "oscilloscope and signal-themed displays", "retro-tech showcases"], "style": ["dark", "canvas", "oscilloscope", "waveform", "loader"], "features": ["canvas-2d", "pointer-reactive", "reduced-motion", "theme-switch"], "fonts": ["ui-monospace"], "facets": ["Canvas"]}, {"n": 42, "batch": 14, "slug": "morphing-blob", "title": "Morphing Blob", "desc": "Aurora-gradient blob slowly morphs border-radius and rotates, with an inset dark ghost layer counter-rotating", "bestFor": ["loading screens", "splash states", "dark-mode hero backgrounds"], "style": ["dark", "gradient", "organic", "ambient", "css-animation"], "features": ["css-animation", "reduced-motion", "theme-switch"], "fonts": ["ui-monospace"], "facets": ["CSS animation", "Ambient"]}, {"n": 43, "batch": 15, "slug": "ferrofluid-snap-switch", "title": "Ferrofluid Snap Switch", "desc": "A magnetic switch: a ferrofluid drop stretches toward the cursor, merges with its anchors and snaps across on release", "bestFor": ["toggle and switch controls", "playful settings UIs", "physics-themed demos"], "style": ["dark", "svg-filter", "magnetic", "spring", "interactive", "light-ready"], "features": ["svg-filter", "spring-physics", "pointer-reactive", "reduced-motion", "theme-switch"], "fonts": ["ui-monospace"], "facets": ["SVG", "Interactive"]}, {"n": 44, "batch": 15, "slug": "log-stream", "title": "Log Stream", "desc": "Simulates a live server log tail — new entries slide in every 650ms with color-coded INFO/WARN/ERROR/DEBUG levels and real-time timestamps", "bestFor": ["developer dashboards", "terminal-aesthetic hero sections", "ops-themed loading screens", "ambient backgrounds"], "style": ["dark", "terminal", "monospace", "ambient", "typewriter"], "features": ["ambient-animation", "reduced-motion", "mobile-ready"], "fonts": ["ui-monospace"], "facets": ["Ambient"]}, {"n": 45, "batch": 15, "slug": "typewriter-loop", "title": "Typewriter Loop", "desc": "Monospace terminal line types and deletes phrases in a loop with randomized keystroke timing; a glowing green block caret blinks throughout", "bestFor": ["developer-oriented hero text", "CLI-themed landing pages", "dark-background ambient motion"], "style": ["dark", "terminal", "monospace", "typography", "text-animation"], "features": ["text-animation", "reduced-motion", "mobile-ready"], "fonts": ["ui-monospace"], "facets": []}, {"n": 46, "batch": 16, "slug": "strange-attractor-swarm", "title": "Strange Attractor Swarm", "desc": "560 hot-pink particles trace the slowly rotating Aizawa strange attractor in 3D, glowing where fast", "bestFor": ["dark-mode hero backgrounds", "generative art displays", "math/science visualizations"], "style": ["dark", "particles", "canvas", "physics", "generative", "magenta", "3d-projection", "light-ready"], "features": ["canvas-2d", "pointer-interaction", "click", "reduced-motion", "light-theme"], "fonts": ["ui-monospace"], "facets": ["Canvas", "Generative", "Physics", "Particles"]}, {"n": 47, "batch": 16, "slug": "liquid-pour-sph", "title": "Liquid Pour SPH", "desc": "200 SPH fluid particles pour into a basin, slosh, and drain on a slow cycle with an additive-blend cyan glow", "bestFor": ["ambient hero backgrounds", "loading screens", "interactive art installations"], "style": ["dark", "fluid", "particles", "canvas", "physics", "metaball", "generative", "light-ready"], "features": ["canvas-2d", "pointer-interaction", "click", "reduced-motion", "light-theme"], "fonts": ["ui-monospace"], "facets": ["Canvas", "Generative", "Physics", "Particles"]}, {"n": 48, "batch": 16, "slug": "solar-flare-pulse", "title": "Solar Flare Pulse", "desc": "Fiery orange sun with a pulsing radial corona, 60 radiating flare spikes, and 5 arcing prominences; clicking triggers a brighter solar burst", "bestFor": ["dark-mode hero backgrounds", "space/sci-fi themes", "loading screens"], "style": ["dark", "solar", "canvas", "space", "fire", "corona", "particles", "click"], "features": ["canvas-2d", "click", "reduced-motion"], "fonts": [], "facets": ["Canvas", "Space", "Particles"]}, {"n": 49, "batch": 17, "slug": "orbiting-planet-system", "title": "Orbiting Planet System", "desc": "Four glowing planets orbit a radiant sun on tilted elliptical rings with depth-sorted rendering; the system drifts subtly toward the pointer", "bestFor": ["dark-mode hero sections", "space/sci-fi themed backgrounds", "ambient screensaver panels"], "style": ["dark", "space", "canvas", "generative", "ambient", "glow", "depth-sort"], "features": ["canvas-2d", "pointer-drift", "reduced-motion", "visibility-pause"], "fonts": ["system-ui"], "facets": ["Canvas", "Generative", "Space", "Ambient"]}, {"n": 50, "batch": 17, "slug": "tidal-spaghettification", "title": "Tidal Spaghettification", "desc": "170 particles arc past a gravity well, stretching into a white-hot filament at perihelion; pointer and click boost the tidal spread", "bestFor": ["dark space or sci-fi hero backgrounds", "physics visualizations", "ambient loading screens"], "style": ["dark", "space", "canvas", "particles", "physics", "filament", "generative"], "features": ["canvas-2d", "particles", "additive-blend", "pointer", "click", "reduced-motion", "visibility-pause"], "fonts": ["system-ui"], "facets": ["Canvas", "Generative", "Physics", "Space", "Particles"]}, {"n": 51, "batch": 17, "slug": "voronoi-shatter", "title": "Voronoi Shatter", "desc": "14 drifting sites partition the canvas into cool-blue Voronoi mosaic cells; moving the pointer nudges the nearest site toward the cursor", "bestFor": ["dark-theme hero backgrounds", "generative art showcases", "geometric texture layers"], "style": ["dark", "voronoi", "canvas", "generative", "geometry", "mosaic", "light-ready"], "features": ["canvas-2d", "voronoi", "pointer", "light-theme", "reduced-motion", "visibility-pause"], "fonts": ["ui-monospace"], "facets": ["Canvas", "Generative"]}, {"n": 52, "batch": 18, "slug": "kaleidoscope", "title": "Kaleidoscope", "desc": "10-fold mirrored kaleidoscope of rotating polygon blobs on a deep plum background; tap/click spins the pattern and regenerates blobs", "bestFor": ["dark-mode hero backgrounds", "screensavers", "generative art showcases", "ambient loops"], "style": ["dark", "generative", "canvas", "symmetric", "ambient", "interactive"], "features": ["canvas-2d", "click-to-spin", "theme-hook", "reduced-motion", "visibility-pause"], "fonts": ["system-ui"], "facets": ["Canvas", "Interactive", "Generative", "Ambient"]}, {"n": 53, "batch": 18, "slug": "digital-rain", "title": "Digital Rain", "desc": "Cyan katakana and hex glyphs fall in columns down a dark canvas, leaving fading trails; occasional bright white leading chars evoke the Matrix effect", "bestFor": ["dark-mode hero backgrounds", "hacker/cyberpunk themes", "loading screens", "tech brand splash pages"], "style": ["dark", "retro", "cyberpunk", "canvas", "ambient", "motion-heavy"], "features": ["canvas-2d", "theme-hook", "reduced-motion", "visibility-pause"], "fonts": ["Space Grotesk"], "facets": ["Canvas", "Retro", "Ambient"]}, {"n": 54, "batch": 18, "slug": "vhs-tracking-distortion", "title": "VHS Tracking Distortion", "desc": "VHS test-pattern color bars with 46-slice horizontal jitter, random tear events, a rolling tracking bar, and chroma-split REC text on a dark vermillion background", "bestFor": ["retro/lo-fi hero backgrounds", "VHS-aesthetic landing pages", "glitch art screensavers", "80s/90s nostalgia themes"], "style": ["dark", "retro", "glitch", "vhs", "canvas", "motion-heavy"], "features": ["canvas-2d", "self-drawImage-scanlines", "reduced-motion", "visibility-pause"], "fonts": ["system-ui"], "facets": ["Canvas", "Retro"]}, {"n": 55, "batch": 19, "slug": "holographic-iridescent", "title": "Holographic Iridescent", "desc": "A 3D-tilting trading card with a warm iridescent sheen and conic foil chip that shift with pointer position; drifts idly until first deliberate input", "bestFor": ["product cards", "trading card showcases", "premium UI hero elements"], "style": ["dark", "card", "3d", "tilt", "holographic", "foil", "glow"], "features": ["pointer-tilt", "idle-drift", "keyboard-access", "theme-switch", "reduced-motion"], "fonts": ["Space Grotesk", "Inter"], "facets": []}, {"n": 56, "batch": 19, "slug": "dna-helix", "title": "DNA Helix", "desc": "Two columns of 10 glowing dots swing left-right in opposite phases, tracing a rotating DNA double helix, with quirky cycling status messages below", "bestFor": ["loading screens", "biotech/developer-tool UIs", "playful wait states"], "style": ["dark", "loader", "helix", "dots", "glow", "cycling-text"], "features": ["css-animation", "status-messages", "reduced-motion", "theme-switch"], "fonts": [], "facets": ["CSS animation"]}, {"n": 57, "batch": 19, "slug": "sankey-flow", "title": "Sankey Flow", "desc": "Three-stage Sankey diagram on dark canvas: bezier ribbons grow stage-by-stage from origins to hubs to outcomes, pulsing softly in opacity to show flow volume", "bestFor": ["data-viz dashboards", "flow/funnel diagrams", "traffic-split visualizations"], "style": ["dark", "chart", "canvas", "generative", "ribbon", "data-viz"], "features": ["canvas-render", "dpr-aware", "reduced-motion", "theme-switch"], "fonts": [], "facets": ["Canvas", "Generative", "Data-viz"]}, {"n": 58, "batch": 20, "slug": "sandfall-hourglass", "title": "Sandfall Hourglass", "desc": "Amber cellular-automaton sand grains topple through an hourglass cavity, piling realistically at the base; auto-flips when the bulb drains, click reverses gravity", "bestFor": ["meditative loading screens", "time-based visualizations", "physics playgrounds"], "style": ["dark", "canvas", "physics", "cellular-automaton", "particles", "generative", "ambient"], "features": ["canvas-render", "cellular-automaton", "click-reverse-gravity", "theme-switch", "reduced-motion", "mobile-ready"], "fonts": [], "facets": ["Canvas", "Generative", "Physics", "Particles", "Ambient"]}, {"n": 59, "batch": 20, "slug": "double-pendulum-ghost", "title": "Double Pendulum Ghost", "desc": "An emerald double pendulum swings chaotically, its glowing bob tracing a slowly fading color-shifting ribbon ghost; pointer nudges it, click re-kicks", "bestFor": ["dark-mode hero backgrounds", "screensavers", "science/math-themed portfolios"], "style": ["dark", "canvas", "physics", "chaos", "glow", "generative", "trail"], "features": ["canvas-render", "chaotic-physics", "theme-switch", "reduced-motion", "mobile-ready"], "fonts": [], "facets": ["Canvas", "Generative", "Physics"]}, {"n": 60, "batch": 20, "slug": "stacked-peeking-cards", "title": "Stacked Peeking Cards", "desc": "Three layered gradient cards auto-cycle and fan out with a springy rotation on hover; cards spread left and right, then restack when the cursor leaves", "bestFor": ["card collection previews", "playlist/deck UI", "portfolio thumbnails in compact space"], "style": ["dark", "cards", "stack", "fan", "hover", "spring", "gradient", "ui-component"], "features": ["hover-fan", "auto-cycle", "keyboard-toggle", "theme-switch", "reduced-motion"], "fonts": ["Space Grotesk", "Inter (Google Fonts)"], "facets": []}, {"n": 61, "batch": 21, "slug": "firework-burst", "title": "Firework Burst", "desc": "Colorful glowing sparks burst radially, fall under gravity, and fade against a near-black sky; clicks launch new bursts and auto-launches stop after first input", "bestFor": ["dark-theme hero backgrounds", "celebration screens", "festive ambient motion"], "style": ["dark", "particles", "canvas", "celebration", "burst", "ambient", "interactive"], "features": ["canvas-2d", "pointer-interaction", "click", "reduced-motion", "mobile-ready"], "fonts": [], "facets": ["Canvas", "Interactive", "Particles", "Ambient"]}, {"n": 62, "batch": 21, "slug": "metaball-fluid", "title": "Metaball Fluid", "desc": "Seven hot-pink gooey metaball blobs drift and merge via a high-contrast canvas threshold; the cursor adds an attracting blob that pulls them toward the pointer", "bestFor": ["dark playful hero sections", "loading screens", "soft organic ambient backgrounds"], "style": ["dark", "gooey", "organic", "fluid", "blob", "canvas", "ambient"], "features": ["canvas-2d", "pointer-interaction", "theme-switch", "light-theme", "reduced-motion", "mobile-ready"], "fonts": [], "facets": ["Canvas", "Ambient"]}, {"n": 63, "batch": 21, "slug": "comet-streak-loop", "title": "Comet Streak Loop", "desc": "Cyan and violet comets with glowing heads and gradient tails streak diagonally across a twinkling dark starfield; click spawns an extra comet (up to 5)", "bestFor": ["dark hero backgrounds", "space or sci-fi themes", "ambient loop screensavers"], "style": ["dark", "space", "canvas", "streak", "ambient", "loop", "background"], "features": ["canvas-2d", "pointer-interaction", "click", "reduced-motion", "mobile-ready"], "fonts": [], "facets": ["Canvas", "Space", "Ambient"]}, {"n": 64, "batch": 22, "slug": "sierpinski-zoom", "title": "Sierpinski Zoom", "desc": "A Sierpinski triangle fractal endlessly zooms into itself with rainbow-cycling hues in a seamless self-similar loop; tap to burst the zoom speed", "bestFor": ["dark ambient backgrounds", "math or generative-art showcases", "screensaver-style displays needing perpetual motion"], "style": ["dark", "fractal", "canvas", "zoom", "generative", "rainbow", "recursive"], "features": ["canvas-2d", "recursive-fractal", "click", "reduced-motion", "theme-hook", "mobile-ready"], "fonts": [], "facets": ["Canvas", "Generative", "Fractal"]}, {"n": 65, "batch": 22, "slug": "apollonian-gasket", "title": "Apollonian Gasket", "desc": "Recursive Apollonian circle packing with infinite slow zoom; circles shift from gold to blue by depth, with vignette and pointer/click nudge", "bestFor": ["math or science landing pages", "generative art backdrops", "contemplative infinite-zoom fractal backgrounds"], "style": ["dark", "fractal", "canvas", "geometry", "circle-packing", "zoom", "generative"], "features": ["canvas-2d", "descartes-packing", "pointer-interaction", "click", "reduced-motion", "theme-hook", "mobile-ready"], "fonts": [], "facets": ["Canvas", "Generative", "Fractal"]}, {"n": 66, "batch": 22, "slug": "hilbert-weave", "title": "Hilbert Weave", "desc": "A Hilbert space-filling curve draws itself as a glowing teal-to-violet ribbon with a leading spark, cycling through orders 2–5 and looping continuously", "bestFor": ["generative art backgrounds", "math or algorithm showcase sections", "dark-themed hero panels needing ambient geometric motion"], "style": ["dark", "fractal", "canvas", "space-filling", "generative", "ribbon", "teal"], "features": ["canvas-2d", "hilbert-curve", "pointer-interaction", "click", "reduced-motion", "theme-hook", "mobile-ready"], "fonts": [], "facets": ["Canvas", "Generative", "Fractal"]}, {"n": 67, "batch": 23, "slug": "flickering-fire", "title": "Flickering Fire", "desc": "Additive-blended ember particles rise from a glowing orange base, flickering like a real flame; cursor pans left/right to fan the fire sideways", "bestFor": ["dark hero backgrounds", "seasonal or campfire scenes", "atmospheric gaming or campaign pages"], "style": ["dark", "fire", "canvas", "particles", "additive-blend", "organic", "ambient", "pointer"], "features": ["canvas-2d", "particle-system", "pointer-interaction", "reduced-motion", "theme-hook", "mobile-ready"], "fonts": [], "facets": ["Canvas", "Interactive", "Particles", "Ambient"]}, {"n": 68, "batch": 23, "slug": "lightning-bolt", "title": "Lightning Bolt", "desc": "Jagged lightning bolts with branching forks strike randomly down a dark storm-sky canvas; screen flashes rust-white on each strike, tap to trigger instantly", "bestFor": ["dark hero backgrounds", "storm or energy themes", "dramatic loading screens or idle screensavers"], "style": ["dark", "lightning", "canvas", "storm", "generative", "branches", "flash", "nature"], "features": ["canvas-2d", "generative-bolt", "click", "reduced-motion", "mobile-ready"], "fonts": [], "facets": ["Canvas", "Generative"]}, {"n": 69, "batch": 23, "slug": "julia-morph", "title": "Julia Morph", "desc": "Julia set fractal whose complex constant traces a slow Lissajous loop, morphing green filaments between connected and dendritic forms over ~70 seconds", "bestFor": ["dark hero backgrounds", "generative art displays", "screensavers or slow ambient complexity without user interaction"], "style": ["dark", "fractal", "canvas", "julia-set", "generative", "pixel-loop", "morphing", "ambient"], "features": ["canvas-2d", "escape-time-fractal", "reduced-motion", "theme-hook", "mobile-ready"], "fonts": [], "facets": ["Canvas", "Generative", "Fractal", "Ambient"]}, {"n": 70, "batch": 24, "slug": "copper-bars", "title": "Copper Bars", "desc": "Six glossy multicolor raster bars bob sinusoidally over a twinkling starfield with specular sheen and scanline overlay", "bestFor": ["retro/demoscene hero sections", "80s aesthetic backgrounds", "loading screens needing ambient colour motion"], "style": ["dark", "retro", "demoscene", "canvas", "ambient", "scanlines"], "features": ["canvas", "pointer-interaction", "reduced-motion"], "fonts": [], "facets": ["Canvas", "Retro", "Ambient"]}, {"n": 71, "batch": 24, "slug": "rotozoom-texture", "title": "Rotozoom Texture", "desc": "Chunky-pixel violet-and-cyan checker texture rotates and breathes in a continuous demoscene rotozoom; cursor drifts the plane, click boosts zoom", "bestFor": ["retro/demoscene hero backgrounds", "glitch-aesthetic loading screens", "generative art displays needing hypnotic ambient motion"], "style": ["dark", "retro", "demoscene", "pixel", "generative", "canvas"], "features": ["canvas", "pointer-interaction", "reduced-motion"], "fonts": [], "facets": ["Canvas", "Generative", "Retro"]}, {"n": 72, "batch": 24, "slug": "bubble-pack", "title": "Bubble Pack", "desc": "64 mint/teal/amber/coral circles settle under gravity with collision physics; size encodes value, with hover tooltips and theme-aware colors", "bestFor": ["dashboard highlights", "portfolio or market overviews", "relative-value summaries"], "style": ["dark", "data-viz", "canvas", "ambient"], "features": ["canvas", "tooltip", "gravity-physics", "theme-aware", "reduced-motion"], "fonts": [], "facets": ["Canvas", "Data-viz", "Ambient"]}, {"n": 73, "batch": 25, "slug": "smoke-vortex-street", "title": "Smoke Vortex Street", "desc": "Drifting smoke particles curl through an alternating vortex street, glowing as you stir them with your pointer; click for a burst", "bestFor": ["ambient hero backgrounds", "meditation or nature-themed pages", "atmospheric intros"], "style": ["dark", "smoke", "vortex", "particles", "physics", "fluid", "interactive", "ambient"], "features": ["canvas", "interactive", "vortex-field", "theme-aware", "reduced-motion"], "fonts": [], "facets": ["Interactive", "Physics", "Particles", "Ambient"]}, {"n": 74, "batch": 25, "slug": "water-ripple", "title": "Water Ripple", "desc": "Concentric ripples expand and fade across a deep teal pond; move your pointer to stir ripples, click to drop a stone", "bestFor": ["calm hero backgrounds", "spa or wellness pages", "nature-themed intros"], "style": ["dark", "water", "ripple", "pond", "interactive", "calm", "organic", "nature"], "features": ["canvas", "interactive", "ripples", "theme-aware", "reduced-motion"], "fonts": [], "facets": ["Interactive"]}, {"n": 75, "batch": 25, "slug": "perspective-tunnel", "title": "Perspective Tunnel", "desc": "18 neon rings recede through a CSS 3D perspective tunnel, cycling rainbow hues and rotating as they rush toward the viewer; pointer X steers the spin rate", "bestFor": ["dark-mode hero backgrounds", "sci-fi or cyberpunk themes", "immersive loading screens or intros"], "style": ["dark", "tunnel", "3d", "css-3d", "perspective", "neon", "rainbow", "loop"], "features": ["css-3d", "interactive", "perspective", "theme-aware", "reduced-motion"], "fonts": [], "facets": []}, {"n": 76, "batch": 26, "slug": "gravity-dot-rain", "title": "Gravity Dot Rain", "desc": "Multicolored dots fall under gravity with motion trails, bounce off the floor, and scatter away from the cursor on a dark navy canvas", "bestFor": ["dark-mode hero backgrounds", "loading screens", "ambient screensaver effects"], "style": ["dark", "particles", "gravity", "rain", "canvas", "physics", "interactive", "ambient"], "features": ["canvas", "interactive", "gravity-physics", "theme-aware", "reduced-motion"], "fonts": [], "facets": ["Canvas", "Interactive", "Physics", "Particles", "Ambient"]}, {"n": 77, "batch": 26, "slug": "confetti-cannon", "title": "Confetti Cannon", "desc": "Ochre festival-paper confetti fires from the bottom corners, tumbling and flipping as it falls; click for a burst at the cursor", "bestFor": ["celebration moments", "success screens", "gamification rewards", "party or event landing pages"], "style": ["dark", "confetti", "celebration", "particles", "canvas", "physics", "interactive", "burst"], "features": ["canvas", "interactive", "confetti-physics", "theme-aware", "reduced-motion"], "fonts": [], "facets": ["Canvas", "Interactive", "Physics", "Particles"]}, {"n": 78, "batch": 26, "slug": "ringed-planet-rotate", "title": "Ringed Planet Rotate", "desc": "Amber gas giant with tilted Saturn-like rings slowly rotates over a twinkling starfield; pointermove adjusts ring tilt and light angle dynamically", "bestFor": ["space or sci-fi hero backgrounds", "ambient screensavers", "dark-mode landing sections needing slow cosmic motion"], "style": ["dark", "planet", "space", "rings", "canvas", "ambient", "pointer", "generative"], "features": ["canvas", "interactive", "planet-render", "reduced-motion"], "fonts": [], "facets": ["Canvas", "Interactive", "Generative", "Space", "Ambient"]}, {"n": 79, "batch": 27, "slug": "truchet-tiles", "title": "Truchet Tiles", "desc": "8x8 grid of rainbow quarter-arc Truchet tiles flips orientation in slow sine waves, weaving shifting interlocked curves across a dark violet background", "bestFor": ["generative art backgrounds", "creative portfolio heroes", "math or design project visuals"], "style": ["dark", "geometric", "generative", "rainbow", "hypnotic", "canvas", "ambient", "pointer"], "features": ["canvas", "truchet", "sine-wave", "pointer", "reduced-motion"], "fonts": [], "facets": ["Canvas", "Interactive", "Generative", "Ambient"]}, {"n": 80, "batch": 27, "slug": "phyllotaxis-sunflower", "title": "Phyllotaxis Sunflower", "desc": "620 amber-gold seeds grow outward in a Fermat spiral via the golden angle, rotating slowly from a glowing nucleus", "bestFor": ["warm organic hero backgrounds", "nature or wellness branding", "science-themed pages"], "style": ["dark", "organic", "golden", "spiral", "ambient", "canvas", "generative"], "features": ["canvas", "golden-angle", "fermat-spiral", "reduced-motion"], "fonts": [], "facets": ["Canvas", "Generative", "Ambient"]}, {"n": 81, "batch": 27, "slug": "constellation-connect", "title": "Constellation Connect", "desc": "46 drifting star nodes auto-connect with faint magenta lines when close; the cursor draws lines to nearby stars and brightens them on hover", "bestFor": ["dark-mode hero backgrounds", "space or night themes", "data-network metaphors"], "style": ["dark", "cosmic", "network", "ambient", "canvas", "pointer", "generative"], "features": ["canvas", "proximity-lines", "pointer", "twinkle", "reduced-motion"], "fonts": [], "facets": ["Canvas", "Interactive", "Generative", "Ambient"]}];
+      var GH = "https://github.com/DeltaSNull/Html/blob/main/components/";
+      var LIVE = "https://htmlpreview.github.io/?https://github.com/DeltaSNull/Html/blob/main/components/";
+
+      var state = { q: "", batch: "all", facet: "All", sort: "order" };
+
+      function hueFor(slug) {
+        var h = 0;
+        for (var i = 0; i < slug.length; i++) h = (h * 31 + slug.charCodeAt(i)) % 360;
+        return h;
+      }
+      function esc(s) {
+        return String(s).replace(/[&<>"']/g, function (ch) {
+          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch];
+        });
+      }
+
+      var grid = document.getElementById("grid");
+      var emptyEl = document.getElementById("empty");
+      var countLine = document.getElementById("countLine");
+
+      function cardHTML(c) {
+        var h = hueFor(c.slug);
+        var h2 = (h + 70) % 360;
+        var tags = c.style.slice(0, 5).map(function (t) {
+          return '<span class="tag">' + esc(t) + "</span>";
+        }).join("");
+        return (
+          '<article class="card">' +
+            '<div class="band" aria-hidden="true">' +
+              '<i style="width:120px;height:120px;left:-30px;top:-64px;background:hsl(' + h + ' 85% 62%)"></i>' +
+              '<i style="width:90px;height:90px;left:34%;top:-46px;background:hsl(' + h2 + ' 80% 58%)"></i>' +
+              '<i style="width:70px;height:70px;right:6%;top:-30px;background:hsl(' + ((h + 160) % 360) + ' 75% 60%)"></i>' +
+              '<span class="num">No. ' + String(c.n).padStart(2, "0") + " / 81</span>" +
+            "</div>" +
+            '<div class="card-body">' +
+              '<div class="card-top"><h2>' + esc(c.title) + '</h2><span class="batch">Batch ' + c.batch + "</span></div>" +
+              '<p class="desc">' + esc(c.desc) + "</p>" +
+              '<p class="bestfor"><span>Best for</span>' + esc(c.bestFor.join(" · ")) + "</p>" +
+              '<div class="tags">' + tags + "</div>" +
+              '<div class="card-links">' +
+                '<a class="btn-live" href="' + LIVE + c.slug + '/index.html" target="_blank" rel="noopener">Live preview <span aria-hidden="true">↗</span></a>' +
+                '<a class="btn-src" href="' + GH + c.slug + '/index.html" target="_blank" rel="noopener">Source</a>' +
+              "</div>" +
+            "</div>" +
+          "</article>"
+        );
+      }
+
+      function matches(c) {
+        if (state.batch !== "all" && c.batch !== Number(state.batch)) return false;
+        if (state.facet !== "All" && c.facets.indexOf(state.facet) === -1) return false;
+        if (state.q) {
+          var hay = (c.title + " " + c.slug + " " + c.desc + " " + c.bestFor.join(" ") + " " + c.style.join(" ") + " " + c.facets.join(" ")).toLowerCase();
+          var terms = state.q.toLowerCase().split(/\s+/).filter(Boolean);
+          for (var i = 0; i < terms.length; i++) if (hay.indexOf(terms[i]) === -1) return false;
+        }
+        return true;
+      }
+
+      function render() {
+        var list = COMPONENTS.filter(matches);
+        if (state.sort === "az") list = list.slice().sort(function (a, b) { return a.title.localeCompare(b.title); });
+        if (state.sort === "za") list = list.slice().sort(function (a, b) { return b.title.localeCompare(a.title); });
+        grid.innerHTML = list.map(cardHTML).join("");
+        emptyEl.hidden = list.length > 0;
+        grid.hidden = list.length === 0;
+        countLine.innerHTML = "Showing <strong>" + list.length + "</strong> of <strong>81</strong> components" +
+          (state.facet !== "All" ? " · technique: " + esc(state.facet) : "") +
+          (state.batch !== "all" ? " · batch " + state.batch : "");
+      }
+
+      /* batch options */
+      var batchSel = document.getElementById("batchSel");
+      for (var b = 1; b <= 27; b++) {
+        var names = COMPONENTS.filter(function (c) { return c.batch === b; }).map(function (c) { return c.title; }).join(", ");
+        var opt = document.createElement("option");
+        opt.value = String(b);
+        opt.textContent = "Batch " + b + " — " + names;
+        batchSel.appendChild(opt);
+      }
+
+      /* facet chips */
+      var FACETS = ["All", "Canvas", "CSS animation", "SVG", "Interactive", "Generative", "Physics", "Particles", "Fractal", "Space", "Retro", "Ambient", "Data-viz"];
+      var chipsEl = document.getElementById("chips");
+      FACETS.forEach(function (f) {
+        var n = f === "All" ? COMPONENTS.length : COMPONENTS.filter(function (c) { return c.facets.indexOf(f) !== -1; }).length;
+        if (f !== "All" && n === 0) return;
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "chip";
+        btn.textContent = f + " (" + n + ")";
+        btn.setAttribute("aria-pressed", f === "All" ? "true" : "false");
+        btn.addEventListener("click", function () {
+          state.facet = f;
+          chipsEl.querySelectorAll(".chip").forEach(function (el) {
+            el.setAttribute("aria-pressed", el === btn ? "true" : "false");
+          });
+          render();
+        });
+        chipsEl.appendChild(btn);
+      });
+
+      document.getElementById("q").addEventListener("input", function (e) { state.q = e.target.value; render(); });
+      batchSel.addEventListener("change", function (e) { state.batch = e.target.value; render(); });
+      document.getElementById("sortSel").addEventListener("change", function (e) { state.sort = e.target.value; render(); });
+      document.getElementById("resetBtn").addEventListener("click", function () {
+        state = { q: "", batch: "all", facet: "All", sort: state.sort };
+        document.getElementById("q").value = "";
+        batchSel.value = "all";
+        chipsEl.querySelectorAll(".chip").forEach(function (el, i) { el.setAttribute("aria-pressed", i === 0 ? "true" : "false"); });
+        render();
+      });
+
+      render();
+    </script>
+  </body>
+</html>
