@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<!--
+  INSTALANDING.AI · Split-Flap Board
+  slug     split-flap-board
+  page     https://forevercomponents.com/components/kinetic-type/split-flap-board/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    :root custom properties: --c03-bg (charcoal ground), --c03-flap-bg
+            (tile face), --c03-ink (amber letters), --c03-border / --c03-shadow /
+            --c03-divider (tile edge, shadow, split line), --c03-cap / --c03-cap-o
+            (caption); a [data-theme="light"] block repoints them for a pale
+            paper ground
+  sections  stage — full-viewport flex board (.board) of six .flap tiles;
+            caption bottom-right
+  scripts   theme hook in <head> (?theme= / forever:theme postMessage);
+            one body IIFE: builds N=6 flap tiles, steps each letter through
+            the alphabet toward the next word in seq (DEPART, ARRIVE, ONTIME,
+            BOARDS), re-triggering the rotateX flip on changed tiles;
+            visibilitychange pause/start, prefers-reduced-motion guard
+  assets    none: pure CSS flip animation, system monospace type
+
+  ADAPTING
+  - Safe to edit: word sequence (seq array), number of tiles (N=6), amber
+    color (#f4c430 / --c03-ink), flip speed (animation: flip .09s), hold
+    duration between words (hold=40), theme tokens in :root. The
+    <script type="application/json" id="forever-agent-meta"> block lists
+    editable areas, elements to preserve, and known limitations — read it
+    before changing things.
+  - Keep intact: the IIFE wrapper, the prefers-reduced-motion guard (reduce
+    var), the visibilitychange pause/start, the spin-class reflow trick
+    (void offsetWidth), and the theme hook (?theme= bootstrap +
+    forever:theme listener + tokens).
+  - The board is tagged data-section="stage" (added while adapting).
+    Background is --c03-bg; a light theme exists via ?theme=light /
+    data-theme="light".
+  - NOTE: the site serves rotating variants of this component; this file is
+    the version its code view showed on 2026-11-14. The copied code had
+    three defects, fixed minimally here: (1) draw() used undeclared
+    variables phase and last — both are now declared (var phase=0,last=0);
+    (2) the animation loop never called tick(), so the board froze after
+    one step — draw() now calls tick() each frame instead of pinning the
+    tiles to seq[0]; (3) the spin class was re-triggered on every tile
+    every frame, restarting the .09s flip before it could play — it now
+    fires only on tiles whose letter actually changed.
+  - Words longer than N=6 characters are silently truncated; change N to
+    match the longest word in seq.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="Amber split-flap airport board with six tiles flipping through letters to spell DEPART, ARRIVE, ONTIME, BOARDS on dark charcoal.">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Split-Flap Board</title>
+<script>
+/* theme hook: the canvas loads the tile with ?theme=light|dark (or stamps data-theme on <html>).
+   Runs before first paint — no dark flash. Standalone default stays dark. */
+(function(){var t=new URLSearchParams(location.search).get('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);})();
+</script>
+<style>
+ /* theme tokens — dark values are the defaults (solid-dark-bg contract);
+    the light re-theme is the [data-theme="light"] block.
+    --c03-* amber tokens define the tile face, the flip card face, and the divider line. */
+ :root{
+   --c03-bg:#161616; --c03-flap-bg:#0a0a0a; --c03-ink:#f4c430;
+   --c03-border:#2a2a2a; --c03-shadow:rgba(0,0,0,.5); --c03-divider:rgba(0,0,0,.7);
+   --c03-cap:#f4c430; --c03-cap-o:.3;
+ }
+ :root[data-theme="light"]{
+   --c03-bg:#f2ede2; --c03-flap-bg:#fffdf6; --c03-ink:#7a5c00;
+   --c03-border:#d8cbb0; --c03-shadow:rgba(60,40,0,.18); --c03-divider:rgba(120,90,0,.25);
+   --c03-cap:#7a5c00; --c03-cap-o:.55;
+ }
+ html,body{margin:0;height:100%;overflow:hidden;background:var(--c03-bg)}
+ .board{height:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:20px;box-sizing:border-box}
+ .flap{position:relative;width:clamp(44px,9vw,64px);aspect-ratio:5/7;background:var(--c03-flap-bg);
+   border:1px solid var(--c03-border);border-radius:6px;overflow:hidden;box-shadow:0 4px 8px var(--c03-shadow)}
+ .flap::after{content:"";position:absolute;left:0;right:0;top:50%;height:2px;background:var(--c03-divider);transform:translateY(-50%)}
+ .flap .ch{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+   font:700 clamp(28px,6vw,52px)/1 ui-monospace,Menlo,monospace;color:var(--c03-ink)}
+ .flap.spin .ch{animation:flip .09s linear}
+ @keyframes flip{0%{transform:rotateX(0)}50%{transform:rotateX(-85deg)}51%{transform:rotateX(85deg)}100%{transform:rotateX(0)}}
+ .cap{position:fixed;right:8px;bottom:6px;font-size:10px;letter-spacing:.08em;color:var(--c03-cap);opacity:var(--c03-cap-o);text-transform:uppercase;font-family:ui-monospace,Menlo,monospace}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+ "file": "infinite/kinetic-type/03-split-flap-board.html",
+ "title": "Split-Flap Board",
+ "description": "Six amber tiles cycle through letters to spell airport-style words (DEPART, ARRIVE, ONTIME, BOARDS) on a dark charcoal background with a rotateX flip animation.",
+ "useWhen": "Hero sections with a travel, transit, or retro-tech theme. Countdown or status displays that need tactile mechanical character.",
+ "avoidWhen": "Long words or sentences — board is fixed at 6 characters. Light-background layouts where the hardcoded dark charcoal body conflicts.",
+ "agentPrompt": "Change seq to [\"HELLO\",\"WORLD\",\"READY\",\"GOXYZ\"] and set the amber color from #f4c430 to electric blue #00bfff to give it a sci-fi feel. Theme: dark tokens live in :root, the light variant in :root[data-theme=\"light\"]; ?theme=light or a {type:'forever:theme'} postMessage switches at runtime.",
+ "editableAreas": [
+  "word sequence (seq array)",
+  "number of tiles (N=6)",
+  "amber color (#f4c430)",
+  "flip speed (animation: flip .09s)",
+  "hold duration between words (hold=40)",
+  "theme tokens (:root dark defaults + [data-theme=light] overrides)"
+ ],
+ "preserveElements": [
+  "IIFE wrapper",
+  "prefers-reduced-motion guard (reduce var)",
+  "visibilitychange pause/start",
+  "spin class reflow trick (void offsetWidth)",
+  "theme hook (?theme= bootstrap + forever:theme message listener + theme tokens)"
+ ],
+ "knownLimitations": [
+  "Words longer than 6 characters are silently truncated — change N to match the longest word",
+  "Flip advances through full alphabet sequentially, so letters far apart take longer to settle"
+ ],
+ "tier": "curated",
+ "labels": [
+  "agent-ready",
+  "easy-to-modify",
+  "mobile-ready",
+  "accessible",
+  "copy-paste-safe",
+  "minimal-deps",
+  "light-ready"
+ ],
+ "tags": [
+  "split-flap",
+  "departure-board",
+  "typography",
+  "flip",
+  "amber",
+  "loop",
+  "airport"
+ ]
+}
+</script>
+<meta name="forever-preview-lifecycle" content="demo-v1">
+</head>
+<body>
+<div class="board" id="board" data-section="stage"></div>
+<div class="cap">departures</div>
+<script>
+(function(){
+ var board=document.getElementById('board');
+ var reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+ var preview=window.__foreverPreview;
+ var demoEnabled=preview?preview.demoEnabled!==false:true;
+ function shouldFrame(){return demoEnabled&&!reduce;}
+ function paintNow(){cancelAnimationFrame(rafId);rafId=0;draw(performance.now());}
+ function takeOver(){demoEnabled=false;paintNow();}
+ window.addEventListener('forever:interactive',takeOver);
+ document.addEventListener('pointerdown',takeOver,{capture:true});
+ document.addEventListener('click',takeOver,{capture:true});
+ document.addEventListener('keydown',function(e){if(e.key!=='Tab'&&e.key!=='Escape'&&!/^(Shift|Control|Alt|Meta)$/.test(e.key)&&!e.metaKey&&!e.ctrlKey&&!e.altKey)takeOver();},{capture:true});
+ var root=document.documentElement;var ready=false;
+ var seq=['DEPART','ARRIVE','ONTIME','BOARDS'],N=6,hold=40;
+ var pool=' ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+ // flip the current letter toward the target one step at a time
+ function stepTo(cur,target){return cur===target?cur:pool[(pool.indexOf(cur)+1)%pool.length];}
+ function idx(i){return (seq[cur]+'      ').charAt(i);}
+ var flaps=[];
+ for(var i=0;i<N;i++){var f=document.createElement('div');f.className='flap';f.innerHTML='<span class="ch"></span>';board.appendChild(f);flaps.push({el:f,ch:f.querySelector('.ch'),cur:' '});}
+ var cur=0; // word index; each cycle advances to the next word
+ function setTarget(w){
+  for(var i=0;i<N;i++){flaps[i].ch.textContent=w[i]||' ';}
+ }
+ function tick(){
+  for(var i=0;i<N;i++){var f=flaps[i],t=idx(i);
+   if(f.cur!==t){f.cur=stepTo(f.cur,t);f.ch.textContent=f.cur;f.el.classList.remove('spin');void f.el.offsetWidth;f.el.classList.add('spin');}
+  }
+  if(flaps.every(function(f){return f.cur===idx(flaps.indexOf(f));})){
+   hold--;if(hold===0){cur=(cur+1)%seq.length;hold=40;}
+  }
+  if(shouldFrame())raf();else rafId=0;
+ }
+ function syncTheme(){            // re-read the palette; every flap colour is derived from it
+  var cs=getComputedStyle(root);
+  document.querySelectorAll('.flap .ch').forEach(function(el){el.style.color=cs.getPropertyValue('--c03-ink').trim();});
+  flaps.forEach(function(f){f.ch.textContent=f.cur===' '?' ':f.cur;});
+ }
+ addEventListener('message',function(e){
+  var d=e.data;
+  if(d&&d.type==='forever:theme'&&(d.theme==='light'||d.theme==='dark')){
+    root.setAttribute('data-theme',d.theme);syncTheme();if(ready)paintNow();
+  }
+ });
+ function draw(t){
+  rafId=0;
+  if(document.hidden){last=t;return}
+  last=t;
+  if(demoEnabled&&!reduce)phase+=0.05;
+  tick();
+  if(shouldFrame())raf();else rafId=0;
+ }
+ var rafId=0,phase=0,last=0;function raf(){if(!rafId&&shouldFrame())rafId=requestAnimationFrame(draw)}
+ function start(){raf()}
+ document.addEventListener('visibilitychange',function(){if(!document.hidden)shouldFrame()?raf():paintNow();});
+ syncTheme();ready=true;if(reduce){setTarget(seq[0]);}else{tick();if(shouldFrame())raf();else draw(performance.now());}
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<!--
+  INSTALANDING.AI · Heatmap Ripple
+  slug     heatmap-ripple
+  page     https://forevercomponents.com/components/micro-dataviz/heatmap-ripple/
+  license  MIT for this adaptation. The component itself is by Forever Components;
+           their terms apply to it — see "Built on" in README.md and keep that attribution.
+
+  MAP
+  tokens    :root custom properties: --c07-bg (dark plum ground), --c07-cap /
+            --c07-cap-o (caption), --c07-ramp (5 magma colour-ramp stops as
+            "r g b" triples, cold -> hot); a [data-theme="light"] block
+            repoints them for a pale ground with a pink ramp
+  sections  stage — full-viewport canvas (#c07-canvas); caption bottom-right
+  scripts   theme hook in <head> (?theme= / forever:theme postMessage);
+            one body IIFE: 12x6 grid of rounded cells coloured via the magma
+            ramp, with a sine-wave ripple emanating from a point that orbits
+            and follows the cursor; DPR-aware sizing, visibilitychange pause,
+            prefers-reduced-motion static fallback
+  assets    none: all drawing is canvas 2D, system monospace caption
+
+  ADAPTING
+  - Safe to edit: grid dimensions (COLS=12, ROWS=6), magma colour stops
+    (stops array / --c07-ramp), ripple speed (phase += 0.05), orbit amplitude
+    (0.32, 0.3), ripple frequency (d*9), theme tokens in :root. The
+    <script type="application/json" id="forever-agent-meta"> block lists
+    editable areas, elements to preserve, and known limitations — read it
+    before changing things.
+  - Keep intact: the IIFE wrapper, the prefers-reduced-motion guard (reduce
+    flag stops phase advance and orbit), the visibilitychange pause, the
+    DPR-aware canvas sizing, and the theme hook (?theme= bootstrap +
+    forever:theme listener + tokens).
+  - The canvas is tagged data-section="stage" (added while adapting).
+    Background is --c07-bg; a light theme exists via ?theme=light /
+    data-theme="light".
+  - The ripple is purely decorative — values are procedural, not driven by
+    real data; do not present it as a real heatmap.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="12x6 grid of rounded cells in a magma color ramp rippling from a moving source, follows the cursor for the wave origin.">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Heatmap Ripple</title>
+<script>
+/* theme hook: the canvas loads the tile with ?theme=light|dark (or stamps data-theme on <html>).
+   Runs before first paint — no dark flash. Standalone default stays dark. */
+(function(){var t=new URLSearchParams(location.search).get('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);})();
+</script>
+<style>
+ /* theme tokens — dark values are the defaults (solid-dark-bg contract);
+    the light re-theme is the [data-theme="light"] block.
+    --c07-ramp holds the 5 colour-ramp stops as "r g b" triples, cold -> hot. */
+ :root{
+   --c07-bg:#120a18; --c07-cap:#ff7ac6; --c07-cap-o:.45;
+   --c07-ramp:20 12 40, 120 30 110, 230 60 110, 255 150 80, 255 230 150;
+ }
+ :root[data-theme="light"]{
+   --c07-bg:#f6f1f7; --c07-cap:#d6007a; --c07-cap-o:.7;
+   --c07-ramp:250 246 250, 245 223 240, 237 187 217, 222 139 181, 196 80 138;
+ }
+ html,body{margin:0;height:100%;overflow:hidden;background:var(--c07-bg);
+   font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+ .c07-canvas{display:block;width:100%;height:100%}
+ .cap{position:fixed;right:8px;bottom:6px;font-size:10px;letter-spacing:.08em;
+   color:var(--c07-cap);opacity:var(--c07-cap-o);text-transform:uppercase}
+</style>
+<script type="application/json" id="forever-agent-meta">
+{
+ "file": "infinite/micro-dataviz/07-heatmap-ripple.html",
+ "title": "Heatmap Ripple",
+ "description": "12x6 grid of rounded cells colored via a magma ramp, with a sine-wave ripple emanating from a point that orbits and follows the cursor.",
+ "useWhen": "Data dashboard accents, ambient background panels, or any context needing a living heatmap visualization with pointer interactivity.",
+ "avoidWhen": "Contexts requiring actual data binding — values are procedural, not driven by real datasets. Avoid on low-contrast light backgrounds (dark canvas hardcoded).",
+ "agentPrompt": "Change COLS to 16 and ROWS to 8 to increase grid density, then shift the magma ramp's hottest stop from [255,230,150] to [255,255,255] for a white-hot peak. Theme: dark tokens live in :root, the light variant in :root[data-theme=\"light\"]; ?theme=light or a {type:'forever:theme'} postMessage switches at runtime.",
+ "editableAreas": [
+  "grid dimensions (COLS=12, ROWS=6)",
+  "magma color stops (stops array)",
+  "ripple speed (phase += 0.05)",
+  "orbit amplitude (0.32, 0.3)",
+  "ripple frequency (d*9)",
+  "theme tokens (:root dark defaults + [data-theme=light] overrides)"
+ ],
+ "preserveElements": [
+  "IIFE wrapper",
+  "prefers-reduced-motion guard (reduce flag stops phase advance and orbit)",
+  "visibilitychange pause",
+  "DPR-aware canvas sizing",
+  "theme hook (?theme= bootstrap + forever:theme message listener + theme tokens)",
+  "First deliberate input freezes procedural chart drift after its input paint; hover alone keeps idle demonstration running.",
+  "demo-v1 preview lifecycle: initialize demoEnabled from window.__foreverPreview and stop attract work on the window forever:interactive event; retain manual feedback, settling, cleanup and explicit sessions"
+ ],
+ "knownLimitations": [
+  "Light re-theme via the [data-theme=light] token block; catalog bg/accent describe the dark default",
+  "Ripple is purely decorative, not data-driven",
+  "State remains local to each mounted instance; format/theme remount preserves takeover, not component values."
+ ],
+ "tier": "curated",
+ "labels": [
+  "agent-ready",
+  "easy-to-modify",
+  "mobile-ready",
+  "accessible",
+  "copy-paste-safe",
+  "minimal-deps",
+  "light-ready"
+ ],
+ "tags": [
+  "heatmap",
+  "grid",
+  "ripple",
+  "canvas",
+  "data-viz",
+  "color-ramp",
+  "pointer"
+ ]
+}
+</script>
+<meta name="forever-preview-lifecycle" content="demo-v1">
+</head>
+<body>
+<canvas id="c07-canvas" class="c07-canvas" data-section="stage"></canvas>
+<div class="cap">heatmap</div>
+<script>
+(function(){
+ const cv=document.getElementById('c07-canvas'),ctx=cv.getContext('2d');
+ const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+ const preview=window.__foreverPreview;
+ let demoEnabled=preview?preview.demoEnabled!==false:true;
+ function shouldFrame(){return demoEnabled&&!reduce;}
+ function paintNow(){cancelAnimationFrame(rafId);rafId=0;draw(performance.now());}
+ function takeOver(){demoEnabled=false;paintNow();}
+ window.addEventListener('forever:interactive',takeOver);
+ document.addEventListener('pointerdown',takeOver,{capture:true});
+ document.addEventListener('click',takeOver,{capture:true});
+ document.addEventListener('keydown',e=>{if(e.key!=='Tab'&&e.key!=='Escape'&&!/^(Shift|Control|Alt|Meta)$/.test(e.key)&&!e.metaKey&&!e.ctrlKey&&!e.altKey)takeOver();},{capture:true});
+ const root=document.documentElement;let ready=false;
+ let W,H,DPR;
+ const COLS=12, ROWS=6; let phase=0;
+ // magma-ish ramp — stops come from --c07-ramp so both themes drive the same code
+ let stops=[[20,12,40],[120,30,110],[230,60,110],[255,150,80],[255,230,150]];
+ function syncTheme(){            // re-read the ramp; every cell colour is derived from it
+  stops=getComputedStyle(root).getPropertyValue('--c07-ramp').trim()
+    .split(',').map(s=>s.trim().split(/\s+/).map(Number));
+ }
+ addEventListener('message',function(e){
+  const d=e.data;
+  if(d&&d.type==='forever:theme'&&(d.theme==='light'||d.theme==='dark')){
+    root.setAttribute('data-theme',d.theme);syncTheme();if(ready)paintNow();
+  }
+ });
+ function ramp(v){
+  v=Math.max(0,Math.min(1,v));
+  const f=v*(stops.length-1),i=Math.floor(f),fr=f-i;
+  const a=stops[i],b=stops[Math.min(stops.length-1,i+1)];
+  return 'rgb('+Math.round(a[0]+(b[0]-a[0])*fr)+','+Math.round(a[1]+(b[1]-a[1])*fr)+','+Math.round(a[2]+(b[2]-a[2])*fr)+')';
+ }
+ function resize(){DPR=Math.min(2,devicePixelRatio||1);W=cv.clientWidth;H=cv.clientHeight;
+  cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);if(ready)paintNow();}
+ let last=0; let cx=0.5,cy=0.5;
+ function draw(t){
+  rafId=0;
+  if(document.hidden){last=t;return}
+  last=t;if(demoEnabled&&!reduce)phase+=0.05;
+  ctx.clearRect(0,0,W,H);
+  const pad=W*0.07, gw=(W-2*pad)/COLS, gh=(H-2*pad)/ROWS, gap=Math.min(gw,gh)*0.12;
+  // moving ripple source
+  const sx=cx+(reduce?0:0.32*Math.cos(phase*0.7)), sy=cy+(reduce?0:0.3*Math.sin(phase*0.9));
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+   const nx=(c+0.5)/COLS, ny=(r+0.5)/ROWS;
+   const d=Math.hypot(nx-sx,ny-sy);
+   let v=0.5+0.5*Math.sin(phase*1.6 - d*9);
+   v=v*Math.max(0,1-d*0.9);
+   ctx.fillStyle=ramp(v);
+   const x=pad+c*gw+gap/2, y=pad+r*gh+gap/2;
+   rr(x,y,gw-gap,gh-gap,Math.min(4,(gw-gap)/4));ctx.fill();
+  }
+  if(shouldFrame())raf();else rafId=0;
+ }
+ function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+ let rafId=0;function raf(){if(!rafId&&shouldFrame())rafId=requestAnimationFrame(draw)}
+ function start(){raf()}
+ addEventListener('resize',resize);
+ document.addEventListener('visibilitychange',()=>{cancelAnimationFrame(rafId);rafId=0;if(!document.hidden)shouldFrame()?raf():paintNow();});
+ cv.addEventListener('pointermove',e=>{const b=cv.getBoundingClientRect();cx=(e.clientX-b.left)/b.width;cy=(e.clientY-b.top)/b.height;if(!demoEnabled||reduce)paintNow();});
+ syncTheme();resize();ready=true;if(shouldFrame())raf();else draw(performance.now());
+})();
+</script>
+</body>
+</html>

@@ -5,7 +5,7 @@
   "version": "1.0",
   "counts": {
     "pages": 22,
-    "components": 84,
+    "components": 87,
     "dashboards": 1
   },
   "pages": [
@@ -5494,6 +5494,157 @@
         "preview": "components/stream-graph/preview.jpg"
       },
       "page": "https://forevercomponents.com/components/charts-flow/stream-graph/"
+    },
+    {
+      "slug": "l-system-fern",
+      "title": "L-System Fern",
+      "description": "A fractal fern draws itself branch by branch via an L-system grammar, coloring segments brown-to-gold by depth; it holds then restarts.",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "nature-themed hero backgrounds",
+        "generative art showcases",
+        "algorithmic illustration demos"
+      ],
+      "style": [
+        "dark",
+        "fractal",
+        "generative",
+        "canvas",
+        "nature",
+        "loop",
+        "light-ready"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas",
+          "l-system",
+          "fractal",
+          "turtle-graphics",
+          "reduced-motion",
+          "light-ready",
+          "loop"
+        ]
+      },
+      "credits": [
+        {
+          "label": "L-System Fern — Forever Components",
+          "href": "https://forevercomponents.com/components/fractals-automata/l-system-fern/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/l-system-fern/index.html",
+        "prompt": "components/l-system-fern/PROMPT.md",
+        "preview": "components/l-system-fern/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/fractals-automata/l-system-fern/"
+    },
+    {
+      "slug": "split-flap-board",
+      "title": "Split-Flap Board",
+      "description": "Six amber tiles cycle through letters to spell airport-style words (DEPART, ARRIVE, ONTIME, BOARDS) on a dark charcoal background with a rotateX flip animation.",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "hero sections with a travel, transit, or retro-tech theme",
+        "countdown or status displays that need tactile mechanical character"
+      ],
+      "style": [
+        "dark",
+        "kinetic-type",
+        "flip",
+        "amber",
+        "airport",
+        "retro",
+        "light-ready"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "css-animation",
+          "split-flap",
+          "flip",
+          "reduced-motion",
+          "light-ready"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Split-Flap Board — Forever Components",
+          "href": "https://forevercomponents.com/components/kinetic-type/split-flap-board/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/split-flap-board/index.html",
+        "prompt": "components/split-flap-board/PROMPT.md",
+        "preview": "components/split-flap-board/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/kinetic-type/split-flap-board/"
+    },
+    {
+      "slug": "heatmap-ripple",
+      "title": "Heatmap Ripple",
+      "description": "12x6 grid of rounded cells colored via a magma ramp, with a sine-wave ripple emanating from a point that orbits and follows the cursor.",
+      "category": "motion",
+      "theme": "dark",
+      "bestFor": [
+        "data dashboard accents",
+        "ambient background panels",
+        "living heatmap visualizations with pointer interactivity"
+      ],
+      "style": [
+        "dark",
+        "data-viz",
+        "heatmap",
+        "canvas",
+        "pointer",
+        "light-ready"
+      ],
+      "sections": [
+        "stage"
+      ],
+      "stack": {
+        "format": "single-file-html",
+        "buildStep": false,
+        "libraries": [],
+        "fonts": [],
+        "features": [
+          "canvas",
+          "heatmap",
+          "ripple",
+          "pointer",
+          "reduced-motion",
+          "light-ready"
+        ]
+      },
+      "credits": [
+        {
+          "label": "Heatmap Ripple — Forever Components",
+          "href": "https://forevercomponents.com/components/micro-dataviz/heatmap-ripple/",
+          "note": "The component this demo is adapted from."
+        }
+      ],
+      "files": {
+        "html": "components/heatmap-ripple/index.html",
+        "prompt": "components/heatmap-ripple/PROMPT.md",
+        "preview": "components/heatmap-ripple/preview.jpg"
+      },
+      "page": "https://forevercomponents.com/components/micro-dataviz/heatmap-ripple/"
     }
   ],
   "dashboards": [
